@@ -1,0 +1,41 @@
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+
+import { colors, font, spacing } from '@/theme';
+import { AppButton } from './AppButton';
+
+export type ScreenStateProps =
+  | { kind: 'loading'; message?: string }
+  | { kind: 'error'; message: string; onRetry: () => void }
+  | { kind: 'empty'; message: string };
+
+/** Os três estados obrigatórios de toda tela: carregando, erro e vazio. */
+export function ScreenState(props: ScreenStateProps) {
+  return (
+    <View style={styles.box}>
+      {props.kind === 'loading' && (
+        <>
+          <ActivityIndicator size="large" color={colors.primary} accessible={false} />
+          {/* liveRegion: o TalkBack lê a mensagem quando ela aparece. */}
+          <Text style={[font.body, styles.text]} accessibilityLiveRegion="polite">
+            {props.message ?? 'Carregando a previsão…'}
+          </Text>
+        </>
+      )}
+      {props.kind === 'error' && (
+        <>
+          <Text style={[font.body, styles.error]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
+            {props.message}
+          </Text>
+          <AppButton label="Tentar de novo" variant="primary" onPress={props.onRetry} />
+        </>
+      )}
+      {props.kind === 'empty' && <Text style={[font.body, styles.text]}>{props.message}</Text>}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  box: { padding: spacing.lg, gap: spacing.md, alignItems: 'center' },
+  text: { color: colors.text, textAlign: 'center' },
+  error: { color: colors.danger, textAlign: 'center' },
+});
