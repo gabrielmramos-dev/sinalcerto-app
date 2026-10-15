@@ -1,6 +1,9 @@
 # PLAN.md — SinalCerto
 
 > Conferido contra o documento de requisitos (docs/requisitos/) em 2026-10-15.
+> Andamento: M0 aprovado · M1 entregue em 2026-10-15 (aguardando OK) · estado de cada requisito
+> em STATUS.md.
+> PENDENTE: quem programa, prazo de entrega, celular de teste.
 > Detalhes do M0: docs/M0-design.md. Decisões: docs/DECISOES.md.
 
 ## Priorização de requisitos

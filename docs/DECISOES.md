@@ -75,6 +75,37 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
 - **Motivo:** não há conta nem dado pessoal; a ajuda repetiria a aba Detalhes.
 - **Limitações:** nenhuma.
 
+## D11 — Ícones de qualidade desenhados com react-native-svg (2026-10-15)
+- **Decisão:** 3 formas próprias (círculo ✓, triângulo !, octógono ✕) em `StatusIcon`.
+- **Descartada:** `@expo/vector-icons` (marcado para descontinuação no SDK 57) e outras fontes de
+  ícones.
+- **Motivo:** são só 3 ícones; o react-native-svg já vem no Expo Go. Forma diferente por
+  categoria ajuda quem não distingue cores (RNF03).
+- **Limitações:** as abas ficaram só com texto, sem ícone.
+
+## D12 — Lint de acessibilidade com eslint-plugin-react-native-a11y (2026-10-15)
+- **Decisão:** todas as 14 regras ligadas.
+- **Descartada:** não ter lint de a11y.
+- **Motivo:** pega controle sem nome, papel ou estado já no editor (RNF02).
+- **Limitações:** o plugin declara suporte só até o ESLint 8; o `overrides` do package.json faz
+  ele usar o ESLint 9 do Expo. A regra `has-accessibility-hint` foi desligada só no
+  `StatusBadge`: é texto estático, e uma dica de toque enganaria o leitor de tela.
+
+## D13 — Fuso de Brasília com deslocamento fixo de -3h (2026-10-15)
+- **Decisão:** `formatBrasilia` subtrai 3 horas do UTC.
+- **Descartada:** `Intl.DateTimeFormat` com `timeZone: 'America/Sao_Paulo'`.
+- **Motivo:** o Brasil não tem horário de verão desde 2019. Assim o resultado não depende do
+  suporte a fuso do motor JavaScript do celular, e o teste é determinístico.
+- **Limitações:** se o horário de verão voltar, é preciso trocar a função.
+
+## D14 — Mock de atividades em formato compacto (2026-10-15)
+- **Decisão:** para as 1.440 respostas de atividade, salvar só `suitable`, `code` e `message`; o
+  `forecast` é remontado a partir da timeline.
+- **Descartada:** salvar as 1.440 respostas inteiras (≈1 MB, quase tudo repetido).
+- **Motivo:** o script confere, nas 1.440, que o `forecast` é idêntico ao item da timeline, e
+  aborta se não for. O mock final tem ≈200 KB.
+- **Limitações:** só o model-a.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".
