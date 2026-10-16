@@ -12,10 +12,34 @@ export function formatBrasilia(isoUtc: string): string {
 
 const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
-/** "2026-08-20T23:00:00Z" -> "20 de agosto de 2026, 20:00". Mais fácil de ler e o leitor de tela fala direito. */
-export function formatBrasiliaLong(isoUtc: string): string {
+/**
+ * "2026-08-20T23:00:00Z" -> "20 de agosto de 2026, 20:00" (ou "20 de agosto, 20:00" sem o ano).
+ * Mais fácil de ler, e o leitor de tela fala direito.
+ */
+export function formatBrasiliaLong(isoUtc: string, withYear = true): string {
   const d = new Date(new Date(isoUtc).getTime() + BRASILIA_OFFSET_MS);
-  return `${d.getUTCDate()} de ${MONTHS[d.getUTCMonth()]} de ${d.getUTCFullYear()}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+  const year = withYear ? ` de ${d.getUTCFullYear()}` : '';
+  return `${d.getUTCDate()} de ${MONTHS[d.getUTCMonth()]}${year}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+/** Hora (0–23) no relógio de Brasília. */
+export function brasiliaHour(isoUtc: string): number {
+  return new Date(new Date(isoUtc).getTime() + BRASILIA_OFFSET_MS).getUTCHours();
+}
+
+/**
+ * D6 + D18: hora escolhida no seletor (relógio de Brasília) -> item da timeline com essa hora.
+ * Arredonda para a hora cheia mais próxima (15:20 -> 15:00; 15:30 -> 16:00).
+ * ponytail: funciona porque a timeline cobre 24 horas seguidas (cada hora do relógio aparece uma vez).
+ * Se a API trouxer vários dias, o seletor precisa escolher a data também.
+ */
+export function itemAtClock<T extends { predictionFor: string }>(
+  items: readonly T[],
+  hours: number,
+  minutes: number,
+): T | undefined {
+  const hour = (hours + (minutes >= 30 ? 1 : 0)) % 24;
+  return items.find((item) => brasiliaHour(item.predictionFor) === hour);
 }
 
 /** A previsão terminou há mais de 1 hora? (os dados atuais são todos de agosto de 2026) */

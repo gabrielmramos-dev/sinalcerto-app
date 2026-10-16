@@ -1,8 +1,27 @@
-import { formatBrasilia, formatBrasiliaLong, isPast, nearestItem } from './time';
+import timelines from './mock/timelines.json';
+import { formatBrasilia, formatBrasiliaLong, isPast, itemAtClock, nearestItem } from './time';
 
 it('formatBrasiliaLong escreve o mês por extenso', () => {
   expect(formatBrasiliaLong('2026-08-20T23:00:00Z')).toBe('20 de agosto de 2026, 20:00');
   expect(formatBrasiliaLong('2026-01-01T02:00:00Z')).toBe('31 de dezembro de 2025, 23:00');
+  expect(formatBrasiliaLong('2026-08-20T02:00:00Z', false)).toBe('19 de agosto, 23:00');
+});
+
+describe('itemAtClock (D6, D18)', () => {
+  const items = timelines['900001'].items;
+  it('arredonda para a hora cheia e devolve um item que existe na timeline', () => {
+    expect(itemAtClock(items, 15, 20)?.predictionFor).toBe('2026-08-20T18:00:00Z'); // 15:00 em Brasília
+    expect(itemAtClock(items, 15, 30)?.predictionFor).toBe('2026-08-20T19:00:00Z'); // 16:00
+  });
+  it('23:00 em Brasília é do dia 19 (os dados começam 19/08 21:00)', () => {
+    expect(itemAtClock(items, 23, 0)?.predictionFor).toBe('2026-08-20T02:00:00Z');
+  });
+  it('23:40 vira 00:00 do dia 20', () => {
+    expect(itemAtClock(items, 23, 40)?.predictionFor).toBe('2026-08-20T03:00:00Z');
+  });
+  it('toda hora do relógio acha um item', () => {
+    for (let h = 0; h < 24; h++) expect(itemAtClock(items, h, 0)).toBeDefined();
+  });
 });
 
 describe('isPast', () => {

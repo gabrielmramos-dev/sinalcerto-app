@@ -4,6 +4,8 @@ import { colors, font, minTouch, spacing } from '@/theme';
 
 interface Props {
   label: string;
+  /** Nome para o leitor de tela quando o rótulo visível se repete na tela. Deve começar pelo rótulo (WCAG 2.5.3). */
+  a11yLabel?: string;
   onPress: () => void;
   /** O que acontece ao tocar, quando não for óbvio pelo rótulo (lido pelo leitor de tela). */
   hint?: string;
@@ -13,14 +15,14 @@ interface Props {
   disabled?: boolean;
 }
 
-export function AppButton({ label, onPress, hint, variant = 'secondary', selected, disabled }: Props) {
+export function AppButton({ label, a11yLabel, onPress, hint, variant = 'secondary', selected, disabled }: Props) {
   const primary = variant === 'primary' || selected;
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={a11yLabel ?? label}
       accessibilityHint={hint}
       accessibilityState={{ disabled: !!disabled, selected }}
       style={({ pressed }) => [

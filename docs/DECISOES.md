@@ -124,6 +124,61 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   `src/__tests__/routes.test.ts` falha se isso voltar a acontecer.
 - **Limitações:** nenhuma.
 
+## D17 — Botões de período: Madrugada, Manhã, Tarde e Noite (2026-10-16)
+- **Decisão:** 4 botões, com cortes de relógio no horário de Brasília: Madrugada 00–05, Manhã
+  06–11, Tarde 12–17, Noite 18–23. Cada botão usa o item da timeline com o maior `qualityScore`
+  do período (empate: o mais cedo) e mostra a data completa no rótulo (ex.: "Noite: 19 de
+  agosto, 23:00").
+- **Descartada:** "horários sugeridos" com rolagem horizontal (protótipo); um limiar de
+  qualidade próprio do app.
+- **Motivo:** os cortes são convenção de relógio, não regra de qualidade. Achar o maior valor de
+  um campo que a API já calculou não reimplementa a classificação.
+- **Limitações:** como os dados vão de 19/08 21:00 a 20/08 20:00, a Noite junta duas datas
+  (19/08 21–23 e 20/08 18–20). A data no rótulo deixa isso claro.
+
+## D18 — Seletor só de hora, lida como horário de Brasília (2026-10-16)
+- **Decisão:** `@react-native-community/datetimepicker` 9.1.0 (incluído no Expo Go do SDK 57), só
+  no modo hora. Android: diálogo nativo. iPhone: seletor de rolagem na tela, com os botões "Usar
+  este horário" e "Cancelar". A hora é arredondada para a hora cheia e convertida no item da
+  timeline (`itemAtClock`, D6). Se houver arredondamento, a tela avisa.
+- **Descartada:** seletor de data e hora; seletor feito por nós.
+- **Motivo:** a timeline cobre 24 horas seguidas, então cada hora do relógio aparece uma vez só
+  e a hora sozinha já define o item. O seletor nativo já é acessível.
+- **Limitações:** se a API passar a ter vários dias, vai ser preciso escolher a data também. A
+  hora do relógio do aparelho é lida como horário de Brasília. Nos testes automatizados, o
+  seletor nativo é trocado por um substituto simples (ele trava no Jest); o seletor de verdade é
+  verificado à mão.
+
+## D19 — Timeout de 15 s nas consultas de atividade (2026-10-16)
+- **Decisão:** cada uma das 6 chamadas a POST /activity/check tem 15 s de limite. Passado o
+  limite, só aquele cartão mostra erro e "Tentar de novo".
+- **Descartada:** timeout longo (como o da primeira chamada) ou nenhum timeout.
+- **Motivo:** as atividades só são consultadas depois que a timeline carregou. Ou seja, o
+  servidor (plano gratuito do Render, que pode levar dezenas de segundos para acordar) já
+  respondeu. A partir daí as respostas levam menos de 1 s (medido: 0,3 a 0,7 s).
+- **Limitações:** o timeout generoso da primeira chamada (servidor acordando) fica para a
+  ApiSource, no M6.
+
+## D20 — Conselho mostrado uma vez quando é igual para as 6 atividades (2026-10-16)
+- **Decisão:** se todas as respostas que chegaram trazem o mesmo `recommendation.code`, a tela
+  mostra "Dica para este horário: ..." uma vez, acima dos cartões. Se algum dia vierem codes
+  diferentes, cada cartão mostra o seu.
+- **Descartada:** repetir o mesmo conselho nos 6 cartões (era o plano do M0).
+- **Motivo:** nos dados reais (240 horários = 10 probes x 24 horas), o code foi igual para as 6
+  atividades em 100% dos casos. Repetir a mesma frase 6 vezes aumenta a carga cognitiva e o
+  tempo de leitura no VoiceOver (RNF07). A API não garante isso, por isso o app volta a mostrar
+  o conselho por cartão quando houver diferença.
+- **Limitações:** a dica só aparece depois que as 6 consultas terminam.
+
+## D21 — Limite de 20 s por teste no Jest (2026-10-16)
+- **Decisão:** `testTimeout: 20000` no `package.json` (o padrão do Jest é 5 s). Só vale para os
+  testes automatizados, não para o app.
+- **Descartada:** manter 5 s; aumentar o limite só num teste.
+- **Motivo:** o primeiro teste de tela de cada arquivo carrega o expo-router, as telas e o mock, e
+  leva 6 a 7 s no Windows. Com 5 s ele falhava por tempo, não por erro de lógica, e derrubava os
+  testes seguintes do arquivo.
+- **Limitações:** um teste que travar de verdade demora 20 s para falhar, em vez de 5 s.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

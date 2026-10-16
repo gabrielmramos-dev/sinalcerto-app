@@ -7,13 +7,20 @@ const DEFAULT_PROBE_ID = 900001;
 interface AppState {
   probeId: number;
   setProbeId: (id: number) => void;
+  /** D6: sempre um predictionFor que existe na timeline, ou null antes da escolha. */
+  selectedTime: string | null;
+  setSelectedTime: (predictionFor: string | null) => void;
 }
 
 const Ctx = createContext<AppState | null>(null);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [probeId, setProbeId] = useState(DEFAULT_PROBE_ID);
-  return <Ctx.Provider value={{ probeId, setProbeId }}>{children}</Ctx.Provider>;
+  // Todas as probes têm as mesmas 24 horas, então o horário continua valendo ao trocar de local.
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  return (
+    <Ctx.Provider value={{ probeId, setProbeId, selectedTime, setSelectedTime }}>{children}</Ctx.Provider>
+  );
 }
 
 export function useAppState(): AppState {

@@ -1,5 +1,6 @@
 // Fonte única dos termos do app (D9). Toda tela pega os textos daqui.
 import type { Activity, Quality, RecommendationCode } from '@/api/types';
+import type { PeriodId } from '@/data/periods';
 
 export type Tone = 'good' | 'moderate' | 'unstable';
 
@@ -38,6 +39,13 @@ export const activity: Record<Activity, { name: string; examples: string }> = {
   FILE_UPLOAD: { name: 'Enviar arquivos', examples: 'fotos, documentos' },
   WEB_BROWSING: { name: 'Navegar na internet', examples: 'sites, notícias' },
   MESSAGING: { name: 'Mandar mensagens', examples: 'textos, áudios curtos' },
+};
+
+export const period: Record<PeriodId, string> = {
+  madrugada: 'Madrugada',
+  manha: 'Manhã',
+  tarde: 'Tarde',
+  noite: 'Noite',
 };
 
 export const metric = {
