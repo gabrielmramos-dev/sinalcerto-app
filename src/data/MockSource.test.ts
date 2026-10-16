@@ -1,3 +1,4 @@
+import { NoDataError } from './ForecastSource';
 import { createMockSource } from './MockSource';
 
 const source = createMockSource(0);
@@ -35,6 +36,6 @@ it('arredonda o horário como a API (15:30 -> 15:00)', async () => {
 });
 
 it('modelo sem dados no mock falha como o 404 da API', async () => {
-  await expect(source.getTimeline(900001, 'model-b')).rejects.toThrow('Sem dados');
-  await expect(source.getTimeline(123, 'model-a')).rejects.toThrow('Sem dados');
+  await expect(source.getTimeline(900001, 'model-b')).rejects.toBeInstanceOf(NoDataError);
+  await expect(source.getTimeline(123, 'model-a')).rejects.toBeInstanceOf(NoDataError);
 });

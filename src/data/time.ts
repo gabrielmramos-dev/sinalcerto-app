@@ -10,6 +10,19 @@ export function formatBrasilia(isoUtc: string): string {
   return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
+const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+/** "2026-08-20T23:00:00Z" -> "20 de agosto de 2026, 20:00". Mais fácil de ler e o leitor de tela fala direito. */
+export function formatBrasiliaLong(isoUtc: string): string {
+  const d = new Date(new Date(isoUtc).getTime() + BRASILIA_OFFSET_MS);
+  return `${d.getUTCDate()} de ${MONTHS[d.getUTCMonth()]} de ${d.getUTCFullYear()}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+/** A previsão terminou há mais de 1 hora? (os dados atuais são todos de agosto de 2026) */
+export function isPast(isoUtc: string, now: Date = new Date()): boolean {
+  return new Date(isoUtc).getTime() + 60 * 60 * 1000 < now.getTime();
+}
+
 /**
  * D6: o app só consulta horários que existem na timeline.
  * Devolve o item mais próximo do horário pedido (empate: o mais cedo), ou undefined se a lista estiver vazia.

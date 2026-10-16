@@ -1,6 +1,6 @@
 // Respostas reais da API salvas por scripts/save-mock.mjs (D1). Só o model-a.
 import type { ActivityCheck, LocationItem, ModelListItem, ProbeForecast, RecommendationCode, Timeline } from '@/api/types';
-import type { ForecastSource } from './ForecastSource';
+import { NoDataError, type ForecastSource } from './ForecastSource';
 import { nearestItem } from './time';
 
 import activitiesJson from './mock/activities.json';
@@ -19,8 +19,7 @@ const timelines = timelinesJson as unknown as Record<string, Timeline>;
 const MOCK_MODEL = 'model-a';
 
 function noData(what: string): never {
-  // Mesmo caso do 404 da API: modelo desconhecido ou sem dados.
-  throw new Error(`Sem dados no modo de teste: ${what}`);
+  throw new NoDataError(`Sem dados no modo de teste: ${what}`);
 }
 
 export function createMockSource(delayMs = 400): ForecastSource {

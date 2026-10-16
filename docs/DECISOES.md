@@ -106,6 +106,24 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   aborta se não for. O mock final tem ≈200 KB.
 - **Limitações:** só o model-a.
 
+## D15 — Prévia das próximas horas no Início vai para o M4 (2026-10-16)
+- **Decisão:** o Início do M2 não mostra a prévia das próximas horas; ela entra junto com a
+  timeline, no M4.
+- **Descartada:** fazer a prévia já no M2.
+- **Motivo:** a prévia depende da timeline (RQ02, M4). Além disso, a previsão mostrada no Início
+  é a última dos dados (20/08, 20:00), então ainda não haveria "próximas horas" para mostrar. Isso
+  só faz sentido quando o usuário puder escolher um horário (M3/M4).
+- **Limitações:** até o M4, o Início leva para a aba Detalhes pelo botão "Ver as próximas horas".
+
+## D16 — Testes ficam em src/__tests__, nunca em src/app (2026-10-16)
+- **Decisão:** testes de tela ficam em `src/__tests__/`; testes de módulo podem ficar ao lado do
+  arquivo (ex.: `src/theme/contrast.test.ts`), **fora de `src/app/`**.
+- **Descartada:** teste ao lado da tela em `src/app/`.
+- **Motivo:** o expo-router transforma todo arquivo de `src/app/` em rota e o coloca no bundle.
+  Um teste ali quebrou o app no iPhone (importava código que só existe no Node). O teste
+  `src/__tests__/routes.test.ts` falha se isso voltar a acontecer.
+- **Limitações:** nenhuma.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

@@ -7,6 +7,9 @@ import type {
   Timeline,
 } from '@/api/types';
 
+/** "Não há dados" (404 da API: modelo desconhecido ou sem previsão). A tela mostra o estado vazio, não erro. */
+export class NoDataError extends Error {}
+
 /** O que o app precisa de uma fonte de dados. MockSource (M1) e ApiSource (M6) seguem este contrato. */
 export interface ForecastSource {
   getModels(): Promise<ModelListItem[]>;

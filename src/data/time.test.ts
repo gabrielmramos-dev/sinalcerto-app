@@ -1,4 +1,15 @@
-import { formatBrasilia, nearestItem } from './time';
+import { formatBrasilia, formatBrasiliaLong, isPast, nearestItem } from './time';
+
+it('formatBrasiliaLong escreve o mês por extenso', () => {
+  expect(formatBrasiliaLong('2026-08-20T23:00:00Z')).toBe('20 de agosto de 2026, 20:00');
+  expect(formatBrasiliaLong('2026-01-01T02:00:00Z')).toBe('31 de dezembro de 2025, 23:00');
+});
+
+describe('isPast', () => {
+  const now = new Date('2026-08-20T15:30:00Z');
+  it('a hora atual ainda vale', () => expect(isPast('2026-08-20T15:00:00Z', now)).toBe(false));
+  it('mais de 1 hora atrás já passou', () => expect(isPast('2026-08-20T14:00:00Z', now)).toBe(true));
+});
 
 describe('formatBrasilia', () => {
   it('converte UTC para Brasília (-3h)', () => {
