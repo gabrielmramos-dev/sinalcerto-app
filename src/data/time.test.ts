@@ -1,5 +1,14 @@
 import timelines from './mock/timelines.json';
-import { formatBrasilia, formatBrasiliaLong, isPast, itemAtClock, nearestItem } from './time';
+import { brasiliaClock, formatBrasilia, formatBrasiliaLong, groupByDay, isPast, itemAtClock, nearestItem } from './time';
+
+it('groupByDay: um grupo por dia em Brasília (19/08 com 3 horas, 20/08 com 21)', () => {
+  const groups = groupByDay(timelines['900001'].items);
+  expect(groups.map((g) => [g.day, g.items.length])).toEqual([
+    ['19 de agosto', 3],
+    ['20 de agosto', 21],
+  ]);
+  expect(brasiliaClock(groups[0]!.items[0]!.predictionFor)).toBe('21:00');
+});
 
 it('formatBrasiliaLong escreve o mês por extenso', () => {
   expect(formatBrasiliaLong('2026-08-20T23:00:00Z')).toBe('20 de agosto de 2026, 20:00');

@@ -1,5 +1,19 @@
 import timelines from './mock/timelines.json';
-import { bestInPeriod } from './periods';
+import { bestInPeriod, itemsInPeriod } from './periods';
+
+it('itemsInPeriod: a Noite tem 6 horas em duas datas (19/08 21–23 e 20/08 18–20)', () => {
+  expect(itemsInPeriod(items, 'noite').map((i) => i.predictionFor)).toEqual([
+    '2026-08-20T00:00:00Z', // 19/08 21:00
+    '2026-08-20T01:00:00Z',
+    '2026-08-20T02:00:00Z', // 19/08 23:00
+    '2026-08-20T21:00:00Z', // 20/08 18:00
+    '2026-08-20T22:00:00Z',
+    '2026-08-20T23:00:00Z', // 20/08 20:00
+  ]);
+  expect(itemsInPeriod(items, 'madrugada')).toHaveLength(6);
+  expect(itemsInPeriod(items, 'manha')).toHaveLength(6);
+  expect(itemsInPeriod(items, 'tarde')).toHaveLength(6);
+});
 
 const items = timelines['900001'].items; // São Paulo, model-a (dados reais)
 

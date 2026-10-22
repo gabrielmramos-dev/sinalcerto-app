@@ -3,6 +3,8 @@ import { AccessibilityInfo } from 'react-native';
 
 import { forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
+import forecasts from '@/data/mock/forecasts.json';
+import type { ProbeForecast } from '@/api/types';
 
 // Usa as rotas de verdade de src/app (layout, abas e modal) com a MockSource.
 const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => {});
@@ -33,6 +35,27 @@ it('sem dados (404) mostra vazio com orientação, não erro', async () => {
   ).toBeOnTheScreen();
   expect(screen.queryByRole('alert')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Tentar de novo' })).toBeNull();
+  spy.mockRestore();
+});
+
+it('próximas horas com os dados reais: diz que os dados terminam aí (D22)', async () => {
+  await renderRouter('src/app', { initialUrl: '/' });
+  expect(
+    await screen.findByText('Não há previsões depois de 20 de agosto, 20:00: os dados disponíveis terminam aí.'),
+  ).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Ver todas as horas' })).toBeOnTheScreen();
+});
+
+it('próximas horas quando há horas depois do cartão: mostra até 3 (D22)', async () => {
+  const real = forecasts['900001'] as ProbeForecast; // resposta real salva (20/08 20:00)
+  const earlier = { ...real, prediction: { ...real.prediction, predictionFor: '2026-08-20T15:00:00Z' } };
+  const spy = jest.spyOn(forecastSource, 'getForecast').mockResolvedValueOnce(earlier);
+  await renderRouter('src/app', { initialUrl: '/' });
+
+  expect(await screen.findByLabelText('13:00 de 20 de agosto: Regular, nota 60 de 100')).toBeOnTheScreen();
+  expect(screen.getByLabelText('14:00 de 20 de agosto: Regular, nota 57 de 100')).toBeOnTheScreen();
+  expect(screen.getByLabelText('15:00 de 20 de agosto: Instável, nota 55 de 100')).toBeOnTheScreen();
+  expect(screen.queryByLabelText(/^16:00 de 20 de agosto/)).toBeNull();
   spy.mockRestore();
 });
 

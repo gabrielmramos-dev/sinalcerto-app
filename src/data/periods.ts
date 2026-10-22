@@ -10,6 +10,15 @@ export const PERIODS = [
 
 export type PeriodId = (typeof PERIODS)[number]['id'];
 
+/** Itens da timeline cuja hora (em Brasília) cai no período, na ordem recebida. */
+export function itemsInPeriod<T extends { predictionFor: string }>(items: readonly T[], periodId: PeriodId): T[] {
+  const period = PERIODS.find((p) => p.id === periodId)!;
+  return items.filter((item) => {
+    const hour = brasiliaHour(item.predictionFor);
+    return hour >= period.from && hour <= period.to;
+  });
+}
+
 /**
  * Hora do período com o maior qualityScore (valor calculado pela API). Empate: a mais cedo.
  * Não classifica nada: só acha o maior número.
@@ -18,11 +27,8 @@ export function bestInPeriod<T extends { predictionFor: string; qualityScore: nu
   items: readonly T[],
   periodId: PeriodId,
 ): T | undefined {
-  const period = PERIODS.find((p) => p.id === periodId)!;
   let best: T | undefined;
-  for (const item of items) {
-    const hour = brasiliaHour(item.predictionFor);
-    if (hour < period.from || hour > period.to) continue;
+  for (const item of itemsInPeriod(items, periodId)) {
     const better =
       !best ||
       item.qualityScore > best.qualityScore ||

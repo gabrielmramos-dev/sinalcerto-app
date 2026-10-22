@@ -146,8 +146,8 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   e a hora sozinha já define o item. O seletor nativo já é acessível.
 - **Limitações:** se a API passar a ter vários dias, vai ser preciso escolher a data também. A
   hora do relógio do aparelho é lida como horário de Brasília. Nos testes automatizados, o
-  seletor nativo é trocado por um substituto simples (ele trava no Jest); o seletor de verdade é
-  verificado à mão.
+  seletor nativo é trocado por um substituto simples (ele trava no Jest), definido em
+  `jest.setup.ts` para todos os testes; o seletor de verdade é verificado à mão.
 
 ## D19 — Timeout de 15 s nas consultas de atividade (2026-10-16)
 - **Decisão:** cada uma das 6 chamadas a POST /activity/check tem 15 s de limite. Passado o
@@ -178,6 +178,18 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   leva 6 a 7 s no Windows. Com 5 s ele falhava por tempo, não por erro de lógica, e derrubava os
   testes seguintes do arquivo.
 - **Limitações:** um teste que travar de verdade demora 20 s para falhar, em vez de 5 s.
+
+## D22 — Prévia "Próximas horas" no Início (2026-10-22)
+- **Decisão:** abaixo do cartão, a seção "Próximas horas" mostra até 3 horas da timeline depois da
+  hora do cartão. Com os dados atuais, o cartão já é a última hora (20/08 20:00), e a seção diz:
+  "Não há previsões depois de 20 de agosto, 20:00: os dados disponíveis terminam aí", com o botão
+  "Ver todas as horas" (aba Detalhes).
+- **Descartada:** mostrar a melhor hora de cada período (é outra informação, não uma prévia do
+  que vem depois); esconder a seção quando não há horas seguintes.
+- **Motivo:** honesto com os dados de hoje e sem retrabalho: quando a API tiver horas futuras, elas
+  aparecem sozinhas.
+- **Limitações:** com os dados atuais, a seção nunca mostra horas. O caso com horas é coberto só
+  por teste automatizado (previsão simulada às 15:00 UTC).
 
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app

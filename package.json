@@ -40,7 +40,10 @@
   "private": true,
   "jest": {
     "preset": "jest-expo",
-    "testTimeout": 20000
+    "testTimeout": 20000,
+    "setupFiles": [
+      "<rootDir>/jest.setup.ts"
+    ]
   },
   "overrides": {
     "eslint-plugin-react-native-a11y": {

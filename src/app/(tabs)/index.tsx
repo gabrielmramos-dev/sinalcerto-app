@@ -9,7 +9,7 @@ import { QualityBadge } from '@/components/StatusBadge';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
 import { regionLabel } from '@/data/regions';
-import { formatBrasiliaLong, isPast } from '@/data/time';
+import { brasiliaClock, brasiliaDay, formatBrasiliaLong, isPast } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
 import { disclaimer, quality, recommendation } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
@@ -49,6 +49,7 @@ export default function HomeScreen() {
           <ScreenState kind="error" message="Não foi possível carregar a previsão." onRetry={forecast.retry} />
         ))}
       {data && <ForecastCard forecast={data} />}
+      {data && <NextHours probeId={probeId} after={data.prediction.predictionFor} />}
 
       <Text style={[font.small, styles.muted]}>
         {disclaimer} A região é um ponto de referência da rede, não a sua localização exata.
@@ -60,8 +61,50 @@ export default function HomeScreen() {
         variant="primary"
         onPress={() => router.navigate('/atividades')}
       />
-      <AppButton label="Ver as próximas horas" hint="Abre a aba Detalhes" onPress={() => router.navigate('/detalhes')} />
+      <AppButton label="Ver todas as horas" hint="Abre a aba Detalhes" onPress={() => router.navigate('/detalhes')} />
     </ScrollView>
+  );
+}
+
+/**
+ * D22: até 3 horas da timeline depois da hora do cartão. Com os dados atuais o cartão já é a última
+ * hora, então a seção diz isso com honestidade; quando a API tiver horas futuras, elas aparecem sozinhas.
+ */
+function NextHours({ probeId, after }: { probeId: number; after: string }) {
+  const load = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
+  const timeline = useLoad(load);
+  const next =
+    timeline.status === 'ok'
+      ? timeline.data.items.filter((i) => Date.parse(i.predictionFor) > Date.parse(after)).slice(0, 3)
+      : [];
+
+  return (
+    <View style={styles.next}>
+      <Text style={[font.heading, styles.text]} accessibilityRole="header">
+        Próximas horas
+      </Text>
+      {timeline.status === 'loading' && <Text style={[font.body, styles.muted]}>Carregando as próximas horas…</Text>}
+      {timeline.status === 'error' && (
+        <Text style={[font.body, styles.text]}>Não foi possível carregar as próximas horas.</Text>
+      )}
+      {timeline.status === 'ok' && next.length === 0 && (
+        <Text style={[font.body, styles.text]}>
+          Não há previsões depois de {formatBrasiliaLong(after, false)}: os dados disponíveis terminam aí.
+        </Text>
+      )}
+      {next.map((item) => {
+        const label = `${brasiliaClock(item.predictionFor)} de ${brasiliaDay(item.predictionFor)}: ${quality[item.quality].label}, nota ${item.qualityScore} de 100`;
+        return (
+          // Linha estática (sem toque), lida como um item só.
+          // eslint-disable-next-line react-native-a11y/has-accessibility-hint
+          <View key={item.predictionFor} style={styles.nextRow} accessible accessibilityLabel={label}>
+            <Text style={[font.label, styles.text]}>{brasiliaClock(item.predictionFor)}</Text>
+            <QualityBadge value={item.quality} />
+            <Text style={[font.body, styles.text]}>nota {item.qualityScore}</Text>
+          </View>
+        );
+      })}
+    </View>
   );
 }
 
@@ -103,6 +146,8 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.sm,
   },
+  next: { gap: spacing.sm },
+  nextRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
   text: { color: colors.text },
   muted: { color: colors.textMuted },
 });

@@ -21,7 +21,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 /** RQ04: seletor nativo de hora + botões de período. Só devolve horários que existem na timeline (D6). */
 export function TimeChooser({ items, selected, onSelect }: Props) {
   const [chosenPeriod, setChosenPeriod] = useState<PeriodId | null>(null);
-  const [roundedFrom, setRoundedFrom] = useState<string | null>(null);
+  // O aviso guarda o horário a que se refere: se o horário mudar em outra aba (Detalhes), ele some.
+  const [rounded, setRounded] = useState<{ predictionFor: string; picked: string } | null>(null);
   const [iosDraft, setIosDraft] = useState<Date | null>(null);
 
   // O seletor mostra a hora do relógio; ela é lida como horário de Brasília, como todo o app (D18).
@@ -35,7 +36,11 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
     const item = itemAtClock(items, date.getHours(), date.getMinutes());
     if (!item) return;
     setChosenPeriod(null);
-    setRoundedFrom(date.getMinutes() === 0 ? null : `${pad(date.getHours())}:${pad(date.getMinutes())}`);
+    setRounded(
+      date.getMinutes() === 0
+        ? null
+        : { predictionFor: item.predictionFor, picked: `${pad(date.getHours())}:${pad(date.getMinutes())}` },
+    );
     onSelect(item.predictionFor);
   };
 
@@ -59,8 +64,8 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
           ? `Horário usado na previsão: ${formatBrasiliaLong(selected)} (horário de Brasília)`
           : 'Nenhum horário escolhido ainda.'}
       </Text>
-      {selected && roundedFrom && (
-        <Text style={[font.small, styles.muted]}>Você escolheu {roundedFrom}; a previsão é por hora.</Text>
+      {rounded && rounded.predictionFor === selected && (
+        <Text style={[font.small, styles.muted]}>Você escolheu {rounded.picked}; a previsão é por hora.</Text>
       )}
 
       {iosDraft ? (
@@ -102,7 +107,7 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
               selected={chosenPeriod === id && selected === best.predictionFor}
               onPress={() => {
                 setChosenPeriod(id);
-                setRoundedFrom(null);
+                setRounded(null);
                 // Fecha o seletor do iPhone: senão ele continuaria mostrando outro horário que não é o usado.
                 // Ao abrir de novo, ele começa no horário usado (pickerValue).
                 setIosDraft(null);

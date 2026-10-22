@@ -1,25 +1,12 @@
-import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { router } from 'expo-router';
+import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { AccessibilityInfo } from 'react-native';
 
 import { forecastSource } from '@/data';
 import activities from '@/data/mock/activities.json';
 import { clearActivityCache } from '@/hooks/useActivityChecks';
 
-// O seletor nativo trava no Jest (não há módulo nativo aqui). Trocamos por uma View com os mesmos
-// props (onChange, rótulo). O seletor de verdade é verificado à mão no iPhone (ver STATUS.md).
-jest.mock('@react-native-community/datetimepicker', () => {
-  // Dentro de jest.mock só dá para usar require (a fábrica roda antes dos imports do arquivo).
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { createElement } = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { View } = require('react-native');
-  return {
-    __esModule: true,
-    default: (props: object) => createElement(View, props),
-    DateTimePickerAndroid: { open: jest.fn() },
-  };
-});
-
+// O seletor nativo é trocado por um substituto em jest.setup.ts.
 const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => {});
 let check: jest.SpyInstance;
 
@@ -98,6 +85,23 @@ it('tocar num período com o seletor aberto fecha o seletor; ao reabrir, ele est
 
   await fireEvent.press(screen.getByRole('button', { name: 'Mudar horário' }));
   expect(screen.getByLabelText('Hora da atividade').props.value.getHours()).toBe(12);
+});
+
+it('aviso "Você escolheu 15:20" some quando o horário muda na aba Detalhes', async () => {
+  await open();
+  await fireEvent.press(screen.getByRole('button', { name: 'Mudar horário' }));
+  const picked = new Date();
+  picked.setHours(15, 20, 0, 0);
+  await fireEvent(screen.getByLabelText('Hora da atividade'), 'onChange', { type: 'set' }, picked);
+  await fireEvent.press(screen.getByRole('button', { name: 'Usar este horário' }));
+  expect(screen.getByText('Você escolheu 15:20; a previsão é por hora.')).toBeOnTheScreen();
+
+  await act(() => router.navigate('/detalhes'));
+  await fireEvent.press(await screen.findByLabelText('18:00 de 20 de agosto: Regular, nota 58 de 100'));
+  await act(() => router.navigate('/atividades'));
+
+  expect(screen.getByText('Horário usado na previsão: 20 de agosto de 2026, 18:00 (horário de Brasília)')).toBeOnTheScreen();
+  expect(screen.queryByText(/Você escolheu/)).toBeNull();
 });
 
 it('erro em uma atividade: só aquele cartão, com "Tentar de novo" identificado', async () => {

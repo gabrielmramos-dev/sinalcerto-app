@@ -22,6 +22,30 @@ export function formatBrasiliaLong(isoUtc: string, withYear = true): string {
   return `${d.getUTCDate()} de ${MONTHS[d.getUTCMonth()]}${year}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
+/** "2026-08-20T02:00:00Z" -> "19 de agosto" (dia em Brasília). */
+export function brasiliaDay(isoUtc: string): string {
+  const d = new Date(new Date(isoUtc).getTime() + BRASILIA_OFFSET_MS);
+  return `${d.getUTCDate()} de ${MONTHS[d.getUTCMonth()]}`;
+}
+
+/** "2026-08-20T02:00:00Z" -> "23:00" (relógio de Brasília). */
+export function brasiliaClock(isoUtc: string): string {
+  const d = new Date(new Date(isoUtc).getTime() + BRASILIA_OFFSET_MS);
+  return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+/** Agrupa itens seguidos pelo dia em Brasília, na ordem recebida (um cabeçalho a cada mudança de dia). */
+export function groupByDay<T extends { predictionFor: string }>(items: readonly T[]): { day: string; items: T[] }[] {
+  const groups: { day: string; items: T[] }[] = [];
+  for (const item of items) {
+    const day = brasiliaDay(item.predictionFor);
+    const last = groups[groups.length - 1];
+    if (last?.day === day) last.items.push(item);
+    else groups.push({ day, items: [item] });
+  }
+  return groups;
+}
+
 /** Hora (0–23) no relógio de Brasília. */
 export function brasiliaHour(isoUtc: string): number {
   return new Date(new Date(isoUtc).getTime() + BRASILIA_OFFSET_MS).getUTCHours();
