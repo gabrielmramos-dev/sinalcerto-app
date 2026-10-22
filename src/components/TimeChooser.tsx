@@ -103,6 +103,9 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
               onPress={() => {
                 setChosenPeriod(id);
                 setRoundedFrom(null);
+                // Fecha o seletor do iPhone: senão ele continuaria mostrando outro horário que não é o usado.
+                // Ao abrir de novo, ele começa no horário usado (pickerValue).
+                setIosDraft(null);
                 onSelect(best.predictionFor);
               }}
             />

@@ -84,6 +84,22 @@ it('seletor do iPhone: 15:20 vira 15:00 e a tela avisa (D6, D18)', async () => {
   expect(check.mock.calls[0]?.[0].dateTime).toBe('2026-08-20T18:00:00Z');
 });
 
+it('tocar num período com o seletor aberto fecha o seletor; ao reabrir, ele está no horário usado', async () => {
+  await open();
+  await fireEvent.press(screen.getByRole('button', { name: 'Mudar horário' }));
+  const draft = new Date();
+  draft.setHours(9, 0, 0, 0);
+  await fireEvent(screen.getByLabelText('Hora da atividade'), 'onChange', { type: 'set' }, draft);
+
+  await fireEvent.press(screen.getByRole('button', { name: 'Tarde: 20 de agosto, 12:00' }));
+  expect(screen.queryByLabelText('Hora da atividade')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Usar este horário' })).toBeNull();
+  expect(screen.getByText('Horário usado na previsão: 20 de agosto de 2026, 12:00 (horário de Brasília)')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByRole('button', { name: 'Mudar horário' }));
+  expect(screen.getByLabelText('Hora da atividade').props.value.getHours()).toBe(12);
+});
+
 it('erro em uma atividade: só aquele cartão, com "Tentar de novo" identificado', async () => {
   check.mockImplementationOnce(() => Promise.reject(new Error('fora do ar'))); // VIDEO_CALL
   await open();
