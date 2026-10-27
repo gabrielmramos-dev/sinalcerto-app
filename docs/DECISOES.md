@@ -191,6 +191,35 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
 - **Limitações:** com os dados atuais, a seção nunca mostra horas. O caso com horas é coberto só
   por teste automatizado (previsão simulada às 15:00 UTC).
 
+## D23 — Faixas de Redes como contexto educativo, sem reclassificar (2026-10-27)
+- **Decisão:** a seção "Como ler os números" (aba Detalhes) mostra, ao lado da latência e da
+  perda, a faixa dos materiais de Redes (profa. Denise). Latência: excelente < 20 ms, bom 20–50,
+  médio > 50–100, ruim > 100. Perda: estável 0–0,5%, risco > 0,5–2%, falha > 2%. Jitter: estável
+  < 20 ms, risco 20–50, falha > 50, só como texto, porque a API não prevê jitter. As faixas e os
+  limites ficam juntos no `glossary.ts` (`redesBands`), e `bandFor` (`data/metrics.ts`) acha a
+  faixa.
+- **Descartada:** usar as faixas para recalcular a categoria; colorir as faixas.
+- **Motivo:** RNF07 pede explicação contextual dos termos, e o documento de requisitos pede
+  alinhar os termos com Redes. A categoria (Boa/Regular/Instável) continua vindo da API: o app não
+  reimplementa regra. As faixas aparecem só em texto, para não virar uma segunda "cor de status".
+- **Limitações:** os materiais definem "< 20" e "21–50" (latência) e "0–0,5" e "0,5–2" (perda),
+  com buracos e sobreposições nas bordas. Escolhemos: 20 ms já é "bom"; 0,5% ainda é "estável";
+  50 e 100 ms e 2% ficam na faixa de baixo. A faixa de Redes e a categoria da API podem divergir
+  (ex.: SP às 20:00, perda 3,9% = "falha" em Redes, mas a API diz Regular). A tela mostra as duas
+  e diz de onde vem cada uma.
+
+## D24 — Valores da hora escolhida, nota explicada e confiança só quando a API manda (2026-10-27)
+- **Decisão:** a seção usa a hora escolhida (D6); sem escolha, a previsão mais próxima, a mesma do
+  Início, com um aviso. A nota é explicada como média calculada pela API, que pode ser maior numa
+  hora Regular do que numa Boa porque a categoria olha a pior medida; a categoria é a informação
+  principal (feedback do stakeholder na Sprint 5). A confiança do modelo aparece só quando
+  `/forecasts` traz `modelConfidence` para aquela mesma hora.
+- **Descartada:** esconder a nota; mostrar a confiança da previsão mais próxima em qualquer hora.
+- **Motivo:** a nota já aparece nas linhas da timeline e pode confundir sem explicação. A timeline
+  não traz confiança, e mostrar a de outra hora seria inventar dado.
+- **Limitações:** com os dados atuais, a confiança só aparece para 20/08 20:00. Os valores aparecem
+  no formato brasileiro ("73,2 ms") e são lidos por extenso ("73,2 milissegundos").
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

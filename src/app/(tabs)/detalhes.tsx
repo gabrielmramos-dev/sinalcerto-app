@@ -3,6 +3,7 @@ import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from 'react-nat
 
 import type { TimelineItem } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
+import { NumbersSection } from '@/components/NumbersSection';
 import { ScreenState } from '@/components/ScreenState';
 import { TimelineRow } from '@/components/TimelineRow';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
@@ -23,8 +24,20 @@ export default function DetailsScreen() {
   const load = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
   const timeline = useLoad(load);
 
+  // Só para a confiança do modelo, que a timeline não traz (D24). Se falhar, a seção só não mostra a confiança.
+  const loadForecast = useCallback(() => forecastSource.getForecast(probeId, DEFAULT_MODEL_ID), [probeId]);
+  const forecast = useLoad(loadForecast);
+
   const all = timeline.status === 'ok' ? timeline.data.items : [];
   const shown = filter === 'todas' ? all : itemsInPeriod(all, filter);
+
+  // "Como ler os números": a hora escolhida ou, sem escolha, a previsão mais próxima (a mesma do Início).
+  const nearest = forecast.status === 'ok' ? forecast.data.prediction : undefined;
+  const numbersItem =
+    all.find((i) => i.predictionFor === selectedTime) ??
+    all.find((i) => i.predictionFor === nearest?.predictionFor) ??
+    all[all.length - 1];
+  const confidence = nearest && numbersItem?.predictionFor === nearest.predictionFor ? nearest.modelConfidence : null;
 
   const chooseFilter = (next: Filter) => {
     setFilter(next);
@@ -95,6 +108,14 @@ export default function DetailsScreen() {
                 </View>
               ))}
             </>
+          )}
+
+          {numbersItem && (
+            <NumbersSection
+              item={numbersItem}
+              isNearest={!selectedTime || numbersItem.predictionFor !== selectedTime}
+              confidence={confidence}
+            />
           )}
         </>
       )}

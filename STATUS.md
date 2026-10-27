@@ -1,6 +1,6 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-22, M4 aprovado. Estados: **feito** (na tela e verificado) ·
+Atualizado: 2026-10-27, M4 aprovado; M5 implementado, aguardando o teste no iPhone (sem commit). Estados: **feito** (na tela e verificado) ·
 **parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
 Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
@@ -17,7 +17,7 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF04 | parcial | `theme/index.ts`, `theme/contrast.ts` | Teste automatizado: 18 pares da paleta | Conferir cada tela no M7 |
 | RNF05 | parcial | Sem `numberOfLines` e sem `lineHeight` fixo; botões e linhas da timeline quebram linha; telas com rolagem | **Texto no máximo no iPhone:** Início, Escolher local e Atividades (2026-10-16); Detalhes e a prévia do Início (2026-10-22), sem cortes nem sobreposições | Android; telas do M5 |
 | RNF06 | parcial | Só toques simples em botões; o seletor de rolagem do iOS tem "Usar este horário" e "Cancelar"; filtros sem rolagem horizontal | Leitura do código. Teste manual no iPhone: seletor ajustável pelo VoiceOver | Android; telas do M5 |
-| RNF07 | parcial | `i18n/glossary.ts` | Teste automatizado | Mostrar as métricas na tela (M5) |
+| RNF07 | parcial | `components/NumbersSection.tsx` (seção "Como ler os números" na aba Detalhes); textos e faixas de Redes em `i18n/glossary.ts`; `data/metrics.ts` (`bandFor`, D23); D24 | Teste automatizado (`data/metrics.test.ts`: bordas das faixas; `__tests__/detalhes.test.tsx`: latência e perda com valor, faixa de Redes e explicação, aviso de que RTT alto sozinho não é defeito, jitter sem valor com aviso, nota explicada, confiança só na hora em que a API manda, equivalência Boa/Regular/Instável = OK/Risco/Falha, categoria sem reclassificação) | Teste manual no iPhone (VoiceOver em ordem e texto no máximo) |
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
 
