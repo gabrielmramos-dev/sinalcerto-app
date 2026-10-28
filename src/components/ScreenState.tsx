@@ -1,5 +1,6 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { useSourceStatus } from '@/data/sourceStatus';
 import { ui } from '@/i18n/glossary';
 import { colors, font, spacing } from '@/theme';
 import { AppButton } from './AppButton';
@@ -11,6 +12,8 @@ export type ScreenStateProps =
 
 /** Os três estados obrigatórios de toda tela: carregando, erro e vazio. */
 export function ScreenState(props: ScreenStateProps) {
+  // D27: enquanto a primeira consulta não termina, avisa que pode demorar (servidor acordando).
+  const firstLoad = useSourceStatus().mode === 'unknown';
   return (
     <View style={styles.box}>
       {props.kind === 'loading' && (
@@ -18,7 +21,7 @@ export function ScreenState(props: ScreenStateProps) {
           <ActivityIndicator size="large" color={colors.primary} accessible={false} />
           {/* liveRegion: o TalkBack lê a mensagem quando ela aparece. */}
           <Text style={[font.body, styles.text]} accessibilityLiveRegion="polite">
-            {props.message ?? ui.common.loading}
+            {firstLoad ? ui.source.firstLoading : (props.message ?? ui.common.loading)}
           </Text>
         </>
       )}

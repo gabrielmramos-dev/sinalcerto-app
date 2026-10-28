@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ACTIVITIES, type Activity, type ActivityCheck } from '@/api/types';
 import { forecastSource } from '@/data';
+import { useSourceStatus } from '@/data/sourceStatus';
 
 // D19: 15 s por chamada. Vale porque as chamadas só saem depois que a timeline carregou,
 // ou seja, com o servidor já acordado (no plano gratuito, a primeira chamada pode levar dezenas de segundos).
@@ -34,7 +35,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 /** D5: as 6 atividades em paralelo, cada uma com seu estado, erro e "Tentar de novo". */
 export function useActivityChecks(params: CheckParams | null) {
   const { probeId, latitude, longitude, modelId, predictionFor } = params ?? {};
-  const base = params ? `${probeId}|${predictionFor}|${modelId}` : null;
+  // A versão muda com "Tentar de novo" (D27): a chave nova faz as 6 consultas saírem de novo.
+  const { version } = useSourceStatus();
+  const base = params ? `${probeId}|${predictionFor}|${modelId}|v${version}` : null;
   const [errors, setErrors] = useState<Record<string, true>>({});
   const [, setDone] = useState(0); // só para redesenhar quando uma resposta entra no cache
   // Horário que está na tela agora. Respostas de outro horário são descartadas (plano do M3).

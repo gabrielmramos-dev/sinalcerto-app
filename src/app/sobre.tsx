@@ -2,8 +2,11 @@ import { useCallback } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { QUALITIES } from '@/api/types';
+import { SourceBanner } from '@/components/SourceBanner';
 import { QualityBadge } from '@/components/StatusBadge';
-import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
+import { API_BASE_URL, DEFAULT_MODEL_ID, forecastSource } from '@/data';
+import { MOCK_SAVED_AT } from '@/data/MockSource';
+import { useSourceStatus } from '@/data/sourceStatus';
 import { formatBrasiliaLong } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
 import { about, quality, redesBands } from '@/i18n/glossary';
@@ -13,6 +16,7 @@ import { colors, font, spacing } from '@/theme';
 /** D26: bastidores da previsão. Única tela com linguagem técnica. */
 export default function AboutScreen() {
   const { probeId } = useAppState();
+  const status = useSourceStatus();
   // Modelo e período vêm da própria fonte de dados, para o texto nunca ficar desatualizado.
   const load = useCallback(
     () => Promise.all([forecastSource.getModels(), forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID)]),
@@ -27,9 +31,18 @@ export default function AboutScreen() {
   return (
     // Cabeçalho do Stack transparente no iOS 26+ (SDK 58): o conteúdo não passa por baixo dele.
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
+      <SourceBanner />
       <Text style={[font.body, styles.text]}>{about.intro}</Text>
 
       <Section title={about.sourceTitle} texts={[about.source]} />
+
+      <Section
+        title={about.sourcesTitle}
+        texts={[
+          about.sources(API_BASE_URL, formatBrasiliaLong(MOCK_SAVED_AT)),
+          about.sourceNow(about.sourceModes[status.mode] ?? status.mode),
+        ]}
+      />
 
       <Section
         title={about.modelTitle}

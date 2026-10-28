@@ -1,6 +1,7 @@
 // Fonte única dos textos do app (D9, D26). Toda tela pega os textos daqui.
 // D26: fora da tela "Sobre", nada de API, modelo, probe, dados salvos, faixas de Redes ou OK/Risco/Falha.
 import type { Activity, Quality, RecommendationCode } from '@/api/types';
+import { InvalidRequestError } from '@/data/ForecastSource';
 import type { PeriodId } from '@/data/periods';
 
 export type Tone = 'good' | 'moderate' | 'unstable';
@@ -224,9 +225,31 @@ export const ui = {
       `${clock} de ${day}: ${qualityLabel}, nota ${score} de 100`,
     rowScore: (score: number) => `nota ${score}`,
   },
+  /** D27: aviso da fonte, em linguagem de usuário (sem API, mock ou servidor). */
+  source: {
+    online: 'Previsão atualizada',
+    // "Guardada no app": a reserva é a cópia que vem com o app, não a última consulta do usuário.
+    offline: 'Sem conexão: mostrando a previsão guardada no app',
+    savedOnly: 'Mostrando a previsão guardada no app',
+    retry: 'Tentar de novo',
+    retryA11y: 'Tentar de novo: buscar a previsão atualizada',
+    retryHint: 'Tenta buscar a previsão atualizada',
+    firstLoading: 'Carregando a previsão. Na primeira vez, pode levar até 1 minuto.',
+  },
+  /** Respostas 400 e 422: mensagens simples (404 vira o estado vazio de cada tela). */
+  errors: {
+    badRequest: 'O horário escolhido não é válido. Escolha outro.',
+    invalid: 'Não foi possível consultar com essa escolha. Tente escolher de novo.',
+  },
   aboutLink: 'Sobre o SinalCerto',
   aboutLinkHint: 'Abre informações sobre de onde vem a previsão',
 };
+
+/** Mensagem simples para um erro de carregamento (400/422 têm texto próprio; o resto usa a da tela). */
+export function errorMessage(error: unknown, fallback: string): string {
+  if (error instanceof InvalidRequestError) return error.status === 400 ? ui.errors.badRequest : ui.errors.invalid;
+  return fallback;
+}
 
 /** D26: tela "Sobre o SinalCerto". Aqui a linguagem pode ser técnica. */
 export const about = {
@@ -267,6 +290,16 @@ export const about = {
   lossName: 'Perda de pacotes',
   jitterName: 'Jitter',
   jitterNote: 'A previsão da API não inclui jitter; a faixa fica aqui só como referência.',
+  sourcesTitle: 'Fontes de dados do app',
+  sources: (baseUrl: string, savedAt: string) =>
+    `Fonte principal: a Internet Quality API em ${baseUrl}. A primeira consulta espera até 60 segundos (o plano gratuito do Render pode estar "dormindo"); as seguintes, 15 segundos. Se a API não responder (sem rede, tempo esgotado ou erro 5xx), o app passa a usar a reserva: respostas reais da mesma API, gravadas em ${savedAt} (MockSource), e mostra "Sem conexão". Enquanto isso, não tenta a API a cada tela; só quando o usuário toca em "Tentar de novo". Respostas 404, 400 e 422 vêm da própria API e não usam a reserva. A variável EXPO_PUBLIC_DATA_SOURCE=mock força só a reserva (testes e emergência).`,
+  sourceNow: (mode: string) => `Agora: ${mode}.`,
+  sourceModes: {
+    unknown: 'consultando a API pela primeira vez',
+    online: 'usando a API',
+    offline: 'usando a reserva (a API não respondeu)',
+    'saved-only': 'usando só a reserva, forçada por EXPO_PUBLIC_DATA_SOURCE=mock',
+  } as Record<string, string>,
   scoreTitle: 'Nota e confiança',
   score:
     'A nota (qualityScore, de 0 a 100) é calculada pela API como uma média das métricas. A categoria usa a pior métrica, por isso nota e categoria podem divergir. A confiança (modelConfidence) vem do modelo e só é informada para a previsão mais próxima.',

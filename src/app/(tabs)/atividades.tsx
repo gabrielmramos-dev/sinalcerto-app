@@ -3,6 +3,7 @@ import { AccessibilityInfo, ScrollView, StyleSheet, Text } from 'react-native';
 
 import { ActivityCard } from '@/components/ActivityCard';
 import { ScreenState } from '@/components/ScreenState';
+import { SourceBanner } from '@/components/SourceBanner';
 import { TimeChooser } from '@/components/TimeChooser';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
@@ -10,7 +11,7 @@ import { regionName } from '@/data/regions';
 import { formatBrasiliaLong } from '@/data/time';
 import { useActivityChecks } from '@/hooks/useActivityChecks';
 import { useLoad } from '@/hooks/useLoad';
-import { disclaimer, recommendation, ui } from '@/i18n/glossary';
+import { disclaimer, errorMessage, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
@@ -56,6 +57,7 @@ export default function ActivitiesScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <SourceBanner />
       <Text style={[font.title, styles.text]} accessibilityRole="header">
         {t.title}
       </Text>
@@ -66,7 +68,7 @@ export default function ActivitiesScreen() {
         (data.error instanceof NoDataError ? (
           <ScreenState kind="empty" message={ui.common.noDataForRegion} />
         ) : (
-          <ScreenState kind="error" message={t.loadError} onRetry={data.retry} />
+          <ScreenState kind="error" message={errorMessage(data.error, t.loadError)} onRetry={data.retry} />
         ))}
 
       {ready && (

@@ -1,6 +1,6 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-28, M5 aprovado, no Expo SDK 58 (D25). Estados: **feito** (na tela e verificado) ·
+Atualizado: 2026-10-28, M6 aprovado (API real com reserva automática). Estados: **feito** (na tela e verificado) ·
 **parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
 Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
@@ -21,7 +21,23 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
 
-## Verificação desta entrega (M5.1, linguagem para leigos)
+## Verificação desta entrega (M6, API real com reserva automática, D27)
+- `ApiSource` contra a Internet Quality API, `FallbackSource` com reserva automática, aviso de
+  conexão nas 5 telas, mensagem de primeira carga lenta, mensagens de 400/422.
+- Teste automatizado: `ApiSource.test.ts`, `FallbackSource.test.ts`, `__tests__/aviso.test.tsx`,
+  guarda de vocabulário (com "servidor"). Teste contra a API real (`LIVE_API=1`): passou em
+  2026-10-28.
+- Teste manual no iPhone (2026-10-28): abertura com "Carregando a previsão…" e depois "Previsão
+  atualizada"; aviso em todas as telas; modo avião caindo para a reserva sem perder os dados;
+  VoiceOver anunciando a mudança uma vez só; volta da rede com "Tentar de novo"; tela Sobre
+  mostrando a fonte em uso; texto no máximo sem cortes.
+- Depois do teste, o texto do aviso mudou para "Sem conexão: mostrando a previsão guardada no app"
+  (e "Mostrando a previsão guardada no app" no modo só reserva). A mudança foi só de texto, coberta
+  pelos testes automatizados; ainda não foi vista no aparelho.
+- **Não testado:** Android; o caso "sem dados" (404) vindo da API real numa região conhecida (não
+  acontece com os dados atuais).
+
+## Verificação da entrega anterior (M5.1, linguagem para leigos)
 - Teste manual no iPhone (2026-10-28): "Região escolhida: São Paulo (SP)"; avisos novos no Início;
   link "Sobre o SinalCerto" discreto e anunciado como link; seção "O que esperar neste horário" com
   73 ms e 3,9% nos textos novos e sem jitter, "Redes" ou OK/Risco/Falha; valores de 15:00 corretos

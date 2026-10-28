@@ -6,6 +6,7 @@ import type { TimelineItem } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
 import { NumbersSection } from '@/components/NumbersSection';
 import { ScreenState } from '@/components/ScreenState';
+import { SourceBanner } from '@/components/SourceBanner';
 import { TimelineRow } from '@/components/TimelineRow';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
@@ -13,7 +14,7 @@ import { itemsInPeriod, PERIODS, type PeriodId } from '@/data/periods';
 import { regionName } from '@/data/regions';
 import { formatBrasiliaLong, groupByDay } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
-import { period as periodText, quality, ui } from '@/i18n/glossary';
+import { errorMessage, period as periodText, quality, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
@@ -58,6 +59,7 @@ export default function DetailsScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <SourceBanner />
       <Text style={[font.title, styles.text]} accessibilityRole="header">
         {t.title}
       </Text>
@@ -68,7 +70,7 @@ export default function DetailsScreen() {
         (timeline.error instanceof NoDataError ? (
           <ScreenState kind="empty" message={ui.common.noDataForRegion} />
         ) : (
-          <ScreenState kind="error" message={t.loadError} onRetry={timeline.retry} />
+          <ScreenState kind="error" message={errorMessage(timeline.error, t.loadError)} onRetry={timeline.retry} />
         ))}
 
       {timeline.status === 'ok' && (

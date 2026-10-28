@@ -5,13 +5,14 @@ import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from 'react-nat
 import type { ProbeForecast } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
 import { ScreenState } from '@/components/ScreenState';
+import { SourceBanner } from '@/components/SourceBanner';
 import { QualityBadge } from '@/components/StatusBadge';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
 import { regionName } from '@/data/regions';
 import { brasiliaClock, brasiliaDay, formatBrasiliaLong, isPast } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
-import { disclaimer, quality, recommendation, ui } from '@/i18n/glossary';
+import { disclaimer, errorMessage, quality, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
@@ -32,6 +33,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <SourceBanner />
       <View style={styles.location}>
         <Text style={[font.heading, styles.text]}>{region}</Text>
         <AppButton label={t.changeLocation} hint={t.changeLocationHint} onPress={() => router.push('/local')} />
@@ -42,7 +44,7 @@ export default function HomeScreen() {
         (forecast.error instanceof NoDataError ? (
           <ScreenState kind="empty" message={t.noDataForRegion} />
         ) : (
-          <ScreenState kind="error" message={t.loadError} onRetry={forecast.retry} />
+          <ScreenState kind="error" message={errorMessage(forecast.error, t.loadError)} onRetry={forecast.retry} />
         ))}
       {data && <ForecastCard forecast={data} />}
       {data && <NextHours probeId={probeId} after={data.prediction.predictionFor} />}

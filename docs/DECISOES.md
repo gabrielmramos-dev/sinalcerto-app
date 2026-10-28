@@ -278,6 +278,42 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
 - **Limitações:** "latência" e "perda de pacotes" continuam visíveis entre parênteses. O guarda de
   vocabulário cobre as telas nos estados testados, não todas as combinações possíveis.
 
+## D27 — API real como fonte padrão, com reserva automática (2026-10-28)
+- **Decisão:** a fonte padrão é a Internet Quality API (`ApiSource`, URL em
+  `EXPO_PUBLIC_API_BASE_URL`, padrão `https://internet-quality-api.onrender.com`). A
+  `FallbackSource` tenta a API; se ela não puder responder (sem rede, tempo esgotado ou 5xx), usa a
+  reserva (a `MockSource`, com respostas reais gravadas em 15/10/2026) e o app mostra "Sem conexão:
+  mostrando a previsão guardada no app", com "Tentar de novo". Enquanto estiver sem conexão, usa só a
+  reserva e não tenta a API a cada tela; só tenta de novo quando o usuário toca no botão.
+  `EXPO_PUBLIC_DATA_SOURCE=mock` força só a reserva (testes e emergência); nesse modo o aviso diz
+  "Mostrando a previsão guardada no app". O texto diz "guardada no app" (e não "última previsão
+  salva") porque a reserva é a cópia que vem com o app, não a última consulta do usuário (ajuste da
+  equipe em 2026-10-28). 404, 400 e 422 vêm da própria API e não usam a reserva: 404
+  continua sendo o estado vazio, e 400/422 têm mensagens simples no glossário.
+- **Tempo limite:** a primeira consulta espera até 60 s, com o texto "Carregando a previsão. Na
+  primeira vez, pode levar até 1 minuto." (o plano gratuito do Render "dorme"; medido hoje: 32 s para
+  acordar). Depois que a API respondeu uma vez, 15 s, o mesmo das atividades (D19).
+- **Aviso:** fica no topo das 5 telas, em linguagem de usuário (sem API, mock ou servidor). O
+  anúncio para o leitor de tela sai do `sourceStatus`, uma vez por mudança, mesmo com várias telas
+  abertas: anuncia ao cair para a reserva e ao voltar dela; a primeira resposta boa não é anunciada,
+  para não poluir a abertura do app. "Tentar de novo" muda uma versão, e todas as telas e as
+  consultas de atividade recarregam.
+- **Descartada:** tentar a API a cada chamada mesmo sem conexão (cada tela esperaria até 15 s);
+  cair para a reserva também em 404 (esconderia uma resposta real da API); a reserva só por
+  variável, sem troca automática.
+- **Motivo:** o app precisa funcionar contra a API real e continuar útil na Mostra se a rede ou o
+  servidor falharem.
+- **Testes:** `ApiSource.test.ts` (fetch falso: URL, POST, 404/400/422/5xx, sem rede, tempo
+  esgotado, tempo limite por chamada), `FallbackSource.test.ts` (API respondendo, fora do ar, sem
+  conexão sem esperar a API, "Tentar de novo" voltando e não voltando, 404 sem reserva),
+  `__tests__/aviso.test.tsx` (aviso nas 5 telas, mudança e anúncio, recarga, carregamento lento) e o
+  guarda de vocabulário com "servidor". `ApiSource.live.test.ts` roda contra a API real só com
+  `LIVE_API=1`; passou em 2026-10-28. No Jest, o `fetch` é um substituto do React Native, então esse
+  teste usa um `fetch` mínimo com o `https` do Node.
+- **Limitações:** o modo "sem conexão" só sai pelo botão (não detecta sozinho a volta da rede). A
+  reserva só tem o model-a. Uma resposta 404 da reserva (região sem dados) não acontece com os dados
+  atuais.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

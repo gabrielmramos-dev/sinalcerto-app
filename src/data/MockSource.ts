@@ -17,6 +17,8 @@ const forecasts = forecastsJson as unknown as Record<string, ProbeForecast>;
 const timelines = timelinesJson as unknown as Record<string, Timeline>;
 
 const MOCK_MODEL = 'model-a';
+/** Quando scripts/save-mock.mjs gravou as respostas (mostrado na tela Sobre). */
+export const MOCK_SAVED_AT: string = (activitiesJson as { savedAt: string }).savedAt;
 
 function noData(what: string): never {
   throw new NoDataError(`Sem dados no modo de teste: ${what}`);

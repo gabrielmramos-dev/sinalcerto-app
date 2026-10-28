@@ -37,6 +37,7 @@ export const contrastPairs: [ColorName, ColorName, number][] = [
   ['good', 'goodBg', 4.5],
   ['moderate', 'moderateBg', 4.5],
   ['unstable', 'unstableBg', 4.5],
+  ['text', 'moderateBg', 4.5], // aviso "Sem conexão" (D27)
   // Ícones de qualidade também aparecem direto sobre o cartão branco.
   ['good', 'surface', 3],
   ['moderate', 'surface', 3],

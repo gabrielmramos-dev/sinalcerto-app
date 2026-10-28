@@ -26,6 +26,16 @@ Se um dia a API rodar no seu computador: no celular físico, use o IP local da m
 | `npm run check` | typecheck + lint (com regras de acessibilidade) + testes. Rodar antes de cada entrega. |
 | `npm test` | testes (Jest) |
 | `node scripts/save-mock.mjs` | regrava o mock com respostas reais da API (≈1.500 chamadas) |
+| `LIVE_API=1 npx jest src/data/ApiSource.live` | testa a `ApiSource` contra a API no ar (opcional, precisa de rede) |
+
+## Fonte de dados
+
+Por padrão o app usa a API real e, se ela falhar, a reserva salva (`src/data/mock/`). Para usar só a
+reserva (Mostra sem internet, por exemplo), crie um `.env` com `EXPO_PUBLIC_DATA_SOURCE=mock` e rode
+`npx expo start -c`. Detalhes na D27.
+
+Se o celular não encontrar o Metro na porta 8081 (o McAfee do computador da equipe ocupa essa
+porta), use `npx expo start -c --port 8082`.
 
 ## Documentação
 
