@@ -143,6 +143,9 @@ export const numbersSection = {
 export const disclaimer =
   'É uma estimativa feita a partir de como a internet se comportou antes. Pode errar. O app não mede a sua conexão.';
 
+/** "1 hora boa", "8 horas boas". */
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
 /** Textos das telas e componentes (D26: antes ficavam espalhados no código das telas). */
 export const ui = {
   tabs: { home: 'Início', activities: 'Atividades', details: 'Detalhes' },
@@ -167,10 +170,17 @@ export const ui = {
     seeActivitiesHint: 'Abre a aba Atividades',
     seeAllHours: 'Ver todas as horas',
     seeAllHoursHint: 'Abre a aba Detalhes',
-    nextHoursTitle: 'Próximas horas',
-    nextHoursLoading: 'Carregando as próximas horas…',
-    nextHoursError: 'Não foi possível carregar as próximas horas.',
-    nextHoursNone: (when: string) => `Nossa previsão vai só até ${when}.`,
+    // D29 (MD/E2)
+    appName: 'SinalCerto',
+    rangeTitle: (range: string) => `Previsão de ${range}`,
+    bestTitle: 'Melhor momento do dia',
+    bestValue: (when: string, qualityLabel: string) => `${when}: ${qualityLabel}`,
+    avoid: (windows: string) => `Evite ${windows} (Instável).`,
+    avoidNone: 'Nenhuma hora instável na previsão.',
+    bestSpoken: (best: string, avoid: string) => `Melhor momento do dia: ${best}. ${avoid}`,
+    clockTitle: 'Como o sinal vai variar',
+    clockSummary: (range: string, good: number, moderate: number, unstable: number, best: string) =>
+      `${range}: ${plural(good, 'hora boa', 'horas boas')}, ${plural(moderate, 'regular', 'regulares')} e ${plural(unstable, 'instável', 'instáveis')}. Melhor momento: ${best}.`,
   },
   location: {
     title: 'Escolher local',

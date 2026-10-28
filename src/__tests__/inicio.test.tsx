@@ -3,8 +3,6 @@ import { AccessibilityInfo } from 'react-native';
 
 import { forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
-import forecasts from '@/data/mock/forecasts.json';
-import type { ProbeForecast } from '@/api/types';
 
 // Usa as rotas de verdade de src/app (layout, abas e modal) com a MockSource.
 const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => {});
@@ -15,7 +13,8 @@ it('mostra a previsão mais próxima com data real e anuncia (RQ01, RNF08)', asy
   await renderRouter('src/app', { initialUrl: '/' });
   expect(screen.getByText('Carregando a previsão…')).toBeOnTheScreen();
 
-  expect(await screen.findByText('Regular')).toBeOnTheScreen();
+  // "Regular" aparece no cartão e na legenda do relógio: espera pela frase do cartão.
+  expect(await screen.findByLabelText(/^Previsão mais próxima\. Qualidade prevista: Regular\./)).toBeOnTheScreen();
   expect(screen.getByText('Previsão para 20 de agosto de 2026, 20:00 (horário de Brasília)')).toBeOnTheScreen();
   // Os dados são de agosto: o app não finge que a previsão é de agora.
   expect(screen.getByText(/^Ainda não temos previsão para agora/)).toBeOnTheScreen();
@@ -23,6 +22,44 @@ it('mostra a previsão mais próxima com data real e anuncia (RQ01, RNF08)', asy
   expect(announce).toHaveBeenCalledWith(
     expect.stringMatching(/^Região escolhida: São Paulo \(SP\)\. Qualidade prevista: Regular\./),
   );
+});
+
+describe('E2: novo Início (D29)', () => {
+  const BEST = 'Melhor momento do dia: 19 de agosto, 23:00: Boa. Evite das 15h às 18h (Instável).';
+  const CLOCK = '19 e 20 de agosto: 8 horas boas, 13 regulares e 3 instáveis. Melhor momento: 19 de agosto, 23:00.';
+
+  it('nome do app como título em serifa, marcado como cabeçalho; título do relógio com a data real', async () => {
+    await renderRouter('src/app', { initialUrl: '/' });
+    expect(screen.getByRole('header', { name: 'SinalCerto' })).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Previsão de 19 e 20 de agosto' })).toBeOnTheScreen();
+  });
+
+  it('melhor momento e "Evite" calculados dos dados, lidos como uma frase', async () => {
+    await renderRouter('src/app', { initialUrl: '/' });
+    expect(await screen.findByLabelText(BEST)).toBeOnTheScreen();
+  });
+
+  it('relógio e barras não aparecem como imagem solta: o relógio é lido pelo resumo em texto', async () => {
+    await renderRouter('src/app', { initialUrl: '/' });
+    expect(await screen.findByLabelText(CLOCK)).toBeOnTheScreen();
+    expect(screen.queryAllByRole('image')).toHaveLength(0);
+  });
+
+  it('ordem de leitura: título, região, cartão (categoria, frase, data), melhor momento, relógio', async () => {
+    await renderRouter('src/app', { initialUrl: '/' });
+    await screen.findByLabelText(CLOCK);
+    const tree = JSON.stringify(screen.toJSON());
+    const order = [
+      '"SinalCerto"',
+      'Região escolhida: São Paulo (SP)',
+      'Previsão mais próxima. Qualidade prevista: Regular.',
+      BEST,
+      'Previsão de 19 e 20 de agosto',
+      CLOCK,
+    ].map((s) => tree.indexOf(s));
+    expect(order.every((pos) => pos >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
 });
 
 it('o cartão é lido como um item só, com a frase completa', async () => {
@@ -41,28 +78,16 @@ it('sem dados (404) mostra vazio com orientação, não erro', async () => {
   spy.mockRestore();
 });
 
-it('próximas horas com os dados reais: diz até quando vai a previsão (D22, D26)', async () => {
+it('sem a seção "Próximas horas": o cartão e o relógio já mostram até quando vai a previsão (D30)', async () => {
   await renderRouter('src/app', { initialUrl: '/' });
-  expect(await screen.findByText('Nossa previsão vai só até 20 de agosto, 20:00.')).toBeOnTheScreen();
+  await screen.findByLabelText(/^19 e 20 de agosto: 8 horas boas/);
+  expect(screen.queryByText('Próximas horas')).toBeNull();
   expect(screen.getByRole('button', { name: 'Ver todas as horas' })).toBeOnTheScreen();
-});
-
-it('próximas horas quando há horas depois do cartão: mostra até 3 (D22)', async () => {
-  const real = forecasts['900001'] as ProbeForecast; // resposta real salva (20/08 20:00)
-  const earlier = { ...real, prediction: { ...real.prediction, predictionFor: '2026-08-20T15:00:00Z' } };
-  const spy = jest.spyOn(forecastSource, 'getForecast').mockResolvedValueOnce(earlier);
-  await renderRouter('src/app', { initialUrl: '/' });
-
-  expect(await screen.findByLabelText('13:00 de 20 de agosto: Regular, nota 60 de 100')).toBeOnTheScreen();
-  expect(screen.getByLabelText('14:00 de 20 de agosto: Regular, nota 57 de 100')).toBeOnTheScreen();
-  expect(screen.getByLabelText('15:00 de 20 de agosto: Instável, nota 55 de 100')).toBeOnTheScreen();
-  expect(screen.queryByLabelText(/^16:00 de 20 de agosto/)).toBeNull();
-  spy.mockRestore();
 });
 
 it('trocar o local recarrega e anuncia a nova região (D7)', async () => {
   await renderRouter('src/app', { initialUrl: '/' });
-  await screen.findByText('Regular');
+  await screen.findByText('Previsão mais próxima');
 
   await fireEvent.press(screen.getByRole('button', { name: 'Trocar local' }));
   expect(await screen.findByRole('button', { name: 'Região de São Paulo (SP)', selected: true })).toBeOnTheScreen();

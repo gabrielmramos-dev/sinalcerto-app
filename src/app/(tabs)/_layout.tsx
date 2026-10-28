@@ -26,7 +26,12 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: ui.tabs.home, tabBarIcon: ({ color, size }) => <House color={color} size={size} /> }}
+        options={{
+          title: ui.tabs.home,
+          // D29: sem cabeçalho nativo; o título em serifa fica no conteúdo, marcado como cabeçalho.
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <House color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="atividades"

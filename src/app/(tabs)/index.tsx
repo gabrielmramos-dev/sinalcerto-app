@@ -1,31 +1,41 @@
 import { useRouter } from 'expo-router';
+import Sun from 'lucide-react-native/icons/sun';
 import { useCallback, useEffect } from 'react';
 import { AccessibilityInfo, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import type { ProbeForecast } from '@/api/types';
+import type { ProbeForecast, TimelineItem } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
+import { ClockLegend, DayClock } from '@/components/DayClock';
+import { ForecastHero } from '@/components/ForecastHero';
 import { ScreenState } from '@/components/ScreenState';
 import { SourceBanner } from '@/components/SourceBanner';
-import { QualityBadge } from '@/components/StatusBadge';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
+import { bestOverall, countByQuality, dayRange, formatWindows, windowsWhere } from '@/data/forecastSummary';
 import { regionName } from '@/data/regions';
-import { brasiliaClock, brasiliaDay, formatBrasiliaLong, isPast } from '@/data/time';
+import { formatBrasiliaLong, isPast } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
 import { disclaimer, errorMessage, quality, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { createThemedStyles, font, radius, spacing } from '@/theme';
+import { createThemedStyles, elevation, font, radius, spacing, useColors } from '@/theme';
 
 const t = ui.home;
 
 export default function HomeScreen() {
   const styles = useStyles();
   const router = useRouter();
+  // Cabeçalho nativo escondido (D29): o conteúdo começa abaixo do recorte da câmera.
+  const insets = useSafeAreaInsets();
   const { probeId } = useAppState();
   const region = ui.common.region(regionName(probeId));
-  const load = useCallback(() => forecastSource.getForecast(probeId, DEFAULT_MODEL_ID), [probeId]);
-  const forecast = useLoad(load);
+
+  const loadForecast = useCallback(() => forecastSource.getForecast(probeId, DEFAULT_MODEL_ID), [probeId]);
+  const forecast = useLoad(loadForecast);
   const data = forecast.status === 'ok' ? forecast.data : undefined;
+  const loadTimeline = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
+  const timeline = useLoad(loadTimeline);
+  const items = timeline.status === 'ok' ? timeline.data.items : [];
 
   // RNF08: avisa o leitor de tela quando a previsão chega ou muda (ex.: depois de trocar o local).
   useEffect(() => {
@@ -33,75 +43,109 @@ export default function HomeScreen() {
   }, [data, region]);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <SourceBanner />
-      <View style={styles.location}>
-        <Text style={[font.heading, styles.text]}>{region}</Text>
-        <AppButton label={t.changeLocation} hint={t.changeLocationHint} onPress={() => router.push('/local')} />
-      </View>
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}>
+        <SourceBanner />
+        <Text style={[font.title, styles.text]} accessibilityRole="header">
+          {t.appName}
+        </Text>
+        <View style={styles.location}>
+          <Text style={[font.label, styles.text, styles.grow]}>{region}</Text>
+          <AppButton label={t.changeLocation} hint={t.changeLocationHint} onPress={() => router.push('/local')} />
+        </View>
 
-      {forecast.status === 'loading' && <ScreenState kind="loading" />}
-      {forecast.status === 'error' &&
-        (forecast.error instanceof NoDataError ? (
-          <ScreenState kind="empty" message={t.noDataForRegion} />
-        ) : (
-          <ScreenState kind="error" message={errorMessage(forecast.error, t.loadError)} onRetry={forecast.retry} />
-        ))}
-      {data && <ForecastCard forecast={data} />}
-      {data && <NextHours probeId={probeId} after={data.prediction.predictionFor} />}
+        {forecast.status === 'loading' && <ScreenState kind="loading" />}
+        {forecast.status === 'error' &&
+          (forecast.error instanceof NoDataError ? (
+            <ScreenState kind="empty" message={t.noDataForRegion} />
+          ) : (
+            <ScreenState kind="error" message={errorMessage(forecast.error, t.loadError)} onRetry={forecast.retry} />
+          ))}
+        {data && (
+          <ForecastHero
+            title={t.cardTitle}
+            value={data.assessment.quality}
+            lines={[quality[data.assessment.quality].sentence, recommendation[data.recommendation.code]]}
+            notes={[
+              t.forecastFor(formatBrasiliaLong(data.prediction.predictionFor)),
+              ...(isPast(data.prediction.predictionFor) ? [t.pastNote] : []),
+            ]}
+            spoken={`${t.cardTitle}. ${summary(data)}`}
+          />
+        )}
 
-      <Text style={[font.small, styles.muted]}>
-        {disclaimer} {t.regionNote}
-      </Text>
+        {items.length > 0 && <BestMoment items={items} />}
 
-      <AppButton
-        label={t.seeActivities}
-        hint={t.seeActivitiesHint}
-        variant="primary"
-        onPress={() => router.navigate('/atividades')}
-      />
-      <AppButton label={t.seeAllHours} hint={t.seeAllHoursHint} onPress={() => router.navigate('/detalhes')} />
-      <AppButton label={ui.aboutLink} hint={ui.aboutLinkHint} variant="link" onPress={() => router.push('/sobre')} />
-    </ScrollView>
+        {items.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[font.heading, styles.text]} accessibilityRole="header">
+              {t.rangeTitle(dayRange(items))}
+            </Text>
+            <Text style={[font.body, styles.muted]}>{t.clockTitle}</Text>
+            <ClockCard items={items} markTime={data?.prediction.predictionFor} />
+          </View>
+        )}
+
+        <Text style={[font.small, styles.muted]}>
+          {disclaimer} {t.regionNote}
+        </Text>
+
+        <AppButton
+          label={t.seeActivities}
+          hint={t.seeActivitiesHint}
+          variant="primary"
+          onPress={() => router.navigate('/atividades')}
+        />
+        <AppButton label={t.seeAllHours} hint={t.seeAllHoursHint} onPress={() => router.navigate('/detalhes')} />
+        <AppButton label={ui.aboutLink} hint={ui.aboutLinkHint} variant="link" onPress={() => router.push('/sobre')} />
+      </ScrollView>
+      {/* D30: faixa na cor do fundo sobre a área segura do topo; o conteúdo rola por baixo dela, não da barra de status. */}
+      <View style={[styles.statusStrip, { height: insets.top }]} />
+    </View>
   );
 }
 
-/**
- * D22: até 3 horas da timeline depois da hora do cartão. Com os dados atuais o cartão já é a última
- * hora, então a seção diz isso com honestidade; quando houver horas futuras, elas aparecem sozinhas.
- */
-function NextHours({ probeId, after }: { probeId: number; after: string }) {
+/** D29: maior nota da previsão e as horas Instáveis seguidas, calculadas dos dados. */
+function BestMoment({ items }: { items: TimelineItem[] }) {
   const styles = useStyles();
-  const load = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
-  const timeline = useLoad(load);
-  const next =
-    timeline.status === 'ok'
-      ? timeline.data.items.filter((i) => Date.parse(i.predictionFor) > Date.parse(after)).slice(0, 3)
-      : [];
-
+  const c = useColors();
+  const best = bestOverall(items);
+  if (!best) return null;
+  const value = t.bestValue(formatBrasiliaLong(best.predictionFor, false), quality[best.quality].label);
+  const windows = windowsWhere(items, (i) => i.quality === 'UNSTABLE');
+  const avoid = windows.length ? t.avoid(formatWindows(windows)) : t.avoidNone;
   return (
-    <View style={styles.next}>
-      <Text style={[font.heading, styles.text]} accessibilityRole="header">
-        {t.nextHoursTitle}
-      </Text>
-      {timeline.status === 'loading' && <Text style={[font.body, styles.muted]}>{t.nextHoursLoading}</Text>}
-      {timeline.status === 'error' && <Text style={[font.body, styles.text]}>{t.nextHoursError}</Text>}
-      {timeline.status === 'ok' && next.length === 0 && (
-        <Text style={[font.body, styles.text]}>{t.nextHoursNone(formatBrasiliaLong(after, false))}</Text>
-      )}
-      {next.map((item) => {
-        const clock = brasiliaClock(item.predictionFor);
-        const label = ui.details.row(clock, brasiliaDay(item.predictionFor), quality[item.quality].label, item.qualityScore);
-        return (
-          // Linha estática (sem toque), lida como um item só.
-          // eslint-disable-next-line react-native-a11y/has-accessibility-hint
-          <View key={item.predictionFor} style={styles.nextRow} accessible accessibilityLabel={label}>
-            <Text style={[font.label, styles.text]}>{clock}</Text>
-            <QualityBadge value={item.quality} />
-            <Text style={[font.body, styles.text]}>{ui.details.rowScore(item.qualityScore)}</Text>
-          </View>
-        );
-      })}
+    // Lido como um item só. Texto estático, sem dica de toque.
+    // eslint-disable-next-line react-native-a11y/has-accessibility-hint
+    <View style={[styles.card, styles.bestRow]} accessible accessibilityLabel={t.bestSpoken(value, avoid)}>
+      <Sun color={c.moderate} size={28} accessible={false} />
+      <View style={styles.grow}>
+        <Text style={[font.label, styles.text]}>{t.bestTitle}</Text>
+        <Text style={[font.heading, styles.text]}>{value}</Text>
+        <Text style={[font.body, styles.text]}>{avoid}</Text>
+      </View>
+    </View>
+  );
+}
+
+/** Relógio + legenda + resumo, lidos como um grupo pelo resumo em texto (o relógio é decorativo). */
+function ClockCard({ items, markTime }: { items: TimelineItem[]; markTime?: string }) {
+  const styles = useStyles();
+  const count = countByQuality(items);
+  const best = bestOverall(items);
+  const text = t.clockSummary(
+    dayRange(items),
+    count.GOOD,
+    count.MODERATE,
+    count.UNSTABLE,
+    best ? formatBrasiliaLong(best.predictionFor, false) : '',
+  );
+  return (
+    // eslint-disable-next-line react-native-a11y/has-accessibility-hint
+    <View style={styles.card} accessible accessibilityLabel={text}>
+      <DayClock items={items} markTime={markTime} />
+      <ClockLegend />
+      <Text style={[font.body, styles.text, styles.center]}>{text}</Text>
     </View>
   );
 }
@@ -112,39 +156,37 @@ function summary(f: ProbeForecast): string {
   return `${ui.common.qualityContext}: ${q.label}. ${q.sentence} ${recommendation[f.recommendation.code]} ${t.forecastForSpoken(formatBrasiliaLong(f.prediction.predictionFor))}${past}`;
 }
 
-function ForecastCard({ forecast }: { forecast: ProbeForecast }) {
-  const styles = useStyles();
-  const q = quality[forecast.assessment.quality];
-  return (
-    // Lido como um item só, na ordem da tela (RNF02, RNF08). Texto estático: sem dica de toque.
-    // eslint-disable-next-line react-native-a11y/has-accessibility-hint
-    <View style={styles.card} accessible accessibilityLabel={`${t.cardTitle}. ${summary(forecast)}`}>
-      <Text style={[font.heading, styles.text]} accessibilityRole="header">
-        {t.cardTitle}
-      </Text>
-      <QualityBadge value={forecast.assessment.quality} />
-      <Text style={[font.body, styles.text]}>{q.sentence}</Text>
-      <Text style={[font.body, styles.text]}>{recommendation[forecast.recommendation.code]}</Text>
-      <Text style={[font.small, styles.muted]}>{t.forecastFor(formatBrasiliaLong(forecast.prediction.predictionFor))}</Text>
-      {isPast(forecast.prediction.predictionFor) && <Text style={[font.small, styles.text]}>{t.pastNote}</Text>}
-    </View>
-  );
-}
-
 const useStyles = createThemedStyles((c) => ({
   screen: { flex: 1, backgroundColor: c.background },
-  content: { padding: spacing.md, gap: spacing.md },
-  location: { gap: spacing.xs, alignItems: 'flex-start' },
+  content: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
+    gap: spacing.md,
+  },
+  location: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  grow: { flexGrow: 1, flexShrink: 1, gap: spacing.xs },
+  section: { gap: spacing.sm },
   card: {
     backgroundColor: c.surface,
     borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: c.border,
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.md,
+    ...elevation.card,
   },
-  next: { gap: spacing.sm },
-  nextRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
+  bestRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  center: { textAlign: 'center' },
+  statusStrip: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: c.background,
+  },
   text: { color: c.text },
   muted: { color: c.textMuted },
 }));

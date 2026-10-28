@@ -131,6 +131,17 @@ voltar do Android: padrão em todas
 máximo de toques até qualquer tela: 2
 ```
 
+## Componentes do marco
+- `ForecastHero`: cartão de topo com o gradiente da categoria (tokens `hero*From/To`).
+- `SignalBars`: barras de sinal (4/2/1 cheias), decorativas.
+- `DayClock` + `ClockLegend`: relógio de 24 horas com padrão por categoria e legenda; decorativos,
+  sempre dentro de um grupo com resumo em texto.
+- Resumos da previsão: `src/data/forecastSummary.ts` (`dayRange`, `bestOverall`, `windowsWhere`,
+  `formatWindows`, `countByQuality`).
+
 ## Histórico
 - 2026-10-28, E1: proposta SAFE/RISK aprovada pela equipe (fontes, Lucide, ícones nas abas,
   cabeçalho das abas escondido, Fechar no modal, nota discreta). Tema claro e escuro.
+- 2026-10-28, E2: Início redesenhado (D29): cartão em gradiente, melhor momento, relógio de 24 horas.
+  Depois do teste no iPhone (D30): a fatia começa na hora (não fica centrada no rótulo), "Próximas
+  horas" saiu, e uma faixa na cor do fundo cobre a área segura do topo.

@@ -22,6 +22,13 @@ export interface Palette {
   moderateBg: string;
   unstable: string;
   unstableBg: string;
+  /** Gradiente do cartão de topo (D29): início e fim por categoria. Só texto `text` e ícones por cima. */
+  heroGoodFrom: string;
+  heroGoodTo: string;
+  heroModerateFrom: string;
+  heroModerateTo: string;
+  heroUnstableFrom: string;
+  heroUnstableTo: string;
 }
 
 const light: Palette = {
@@ -41,6 +48,12 @@ const light: Palette = {
   moderateBg: '#FDEBCB',
   unstable: '#A3261F',
   unstableBg: '#FBE1DE',
+  heroGoodFrom: '#E3F4E8',
+  heroGoodTo: '#B9E2C6',
+  heroModerateFrom: '#FFF1D2',
+  heroModerateTo: '#F7C76E',
+  heroUnstableFrom: '#FDE6E3',
+  heroUnstableTo: '#F4B3AA',
 };
 
 const dark: Palette = {
@@ -60,6 +73,12 @@ const dark: Palette = {
   moderateBg: '#3A2B10',
   unstable: '#FF9A8F',
   unstableBg: '#3E1A16',
+  heroGoodFrom: '#173A26',
+  heroGoodTo: '#1F5234',
+  heroModerateFrom: '#3A2B10',
+  heroModerateTo: '#5C4314',
+  heroUnstableFrom: '#3E1A16',
+  heroUnstableTo: '#5E2620',
 };
 
 export const palettes = { light, dark } as const;
@@ -88,6 +107,19 @@ export const contrastPairs: [ColorName, ColorName, number][] = [
   ['good', 'background', 3],
   ['moderate', 'background', 3],
   ['unstable', 'background', 3],
+  // Cartão de topo em gradiente (D29): texto e ícone valem nos DOIS extremos de cada gradiente.
+  ['text', 'heroGoodFrom', 4.5],
+  ['text', 'heroGoodTo', 4.5],
+  ['text', 'heroModerateFrom', 4.5],
+  ['text', 'heroModerateTo', 4.5],
+  ['text', 'heroUnstableFrom', 4.5],
+  ['text', 'heroUnstableTo', 4.5],
+  ['good', 'heroGoodFrom', 3],
+  ['good', 'heroGoodTo', 3],
+  ['moderate', 'heroModerateFrom', 3],
+  ['moderate', 'heroModerateTo', 3],
+  ['unstable', 'heroUnstableFrom', 3],
+  ['unstable', 'heroUnstableTo', 3],
 ];
 
 /** Cores do modo atual do sistema. */

@@ -346,6 +346,64 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
 - **Limitações:** a DM Serif Display só tem um peso. O modo escuro ainda não foi visto no aparelho.
   O cabeçalho nativo das 3 abas só é escondido nas etapas de cada tela (E2 a E4).
 
+## D29 — Marco de design, E2: novo Início (2026-10-28)
+- **Decisão:** cabeçalho nativo da aba Início escondido; no topo, "SinalCerto" em serifa, marcado
+  como cabeçalho, respeitando a área segura. Ordem da tela e da leitura: aviso de conexão, título,
+  região + "Trocar local", cartão de topo, "Melhor momento do dia", seção "Previsão de 19 e 20 de
+  agosto" com o relógio de 24 horas e o resumo, próximas horas (D22), aviso de estimativa e botões.
+  - **Cartão de topo:** o único gradiente do app (`react-native-svg`), na cor da categoria; categoria
+    em texto (serifa grande) + forma (`StatusIcon`) + cor + barras de sinal (4, 2 ou 1 cheias). Todo
+    texto do cartão usa `text`: ele passa 4,5:1 nos dois extremos de cada gradiente, nos dois modos.
+    O cinza secundário ficaria abaixo de 4,5:1 no extremo escuro e não é usado ali.
+  - **Melhor momento:** a hora de maior `qualityScore` da previsão (empate: a mais cedo) e "Evite"
+    com as horas Instáveis seguidas, calculadas dos dados (`data/forecastSummary.ts`). Hoje, em SP:
+    "19 de agosto, 23:00: Boa" e "Evite das 15h às 18h (Instável)". A janela diz o fim da última
+    hora ("às 18h" cobre a hora das 17h); o planejador da E3 usa a mesma regra.
+  - **Relógio de 24 horas** (elemento assinatura): uma fatia por hora no relógio de Brasília, 00h
+    no topo; liso = Boa, pontilhado = Regular, quadriculado = Instável, com legenda em texto; ponto e
+    centro na hora do cartão. Título com a data real ("Previsão de 19 e 20 de agosto", de `dayRange`),
+    em vez de "Próximas 24 horas". Resumo em texto com as contagens reais (8 boas, 13 regulares, 3
+    instáveis em SP).
+- **Leitor de tela:** cartão, melhor momento e relógio são grupos lidos como uma frase cada; o
+  relógio, as barras, os ícones e as amostras da legenda ficam escondidos (`accessible={false}`) e
+  a informação está no texto do grupo. Teste automatizado confere a ordem de leitura e que não há
+  imagem solta.
+- **Skills usadas:** `mobile-redesign-app` (etapa da tela Início do plano; manteve conteúdo e
+  navegação e só trocou o visual); `frontend-design` (sem rótulo em maiúsculas acima do título, sem
+  ponto no meio em "19 de agosto, 23:00: Boa", o relógio como única peça de destaque);
+  `mobile-design-system` (tokens do gradiente com os pares no teste de contraste, sombra do cartão
+  com `elevation`); `mobile-taste` (um gradiente só; sem seta no cartão do melhor momento, porque ele
+  não leva a outra tela).
+- **Descartada:** dados dos prints ("06:00", "9 horas boas", "Próximas 24 horas"); seta ">" no cartão
+  do melhor momento; texto da categoria e da hora dentro do relógio como texto escalável.
+- **Limitações:** o centro e os rótulos 00h/06h/12h/18h do relógio são desenho (não crescem com o
+  texto do sistema); a mesma informação está no resumo em texto, que cresce. O relógio tem no
+  máximo 300 pontos de largura.
+
+## D30 — Marco de design, E2: ajustes depois do teste no iPhone (2026-10-28)
+- **Relógio "deslocado em uma hora":** os dados estavam certos (a API e a reserva dão 23:00 do dia
+  19 = Boa, nota 92), mas cada fatia ficava **centrada** no ângulo da hora e ia de meia hora antes
+  a meia hora depois. O verde começava antes do "00h" e terminava depois do "06h", o que parece um
+  deslocamento. **Decisão:** como num relógio de verdade, a fatia da hora h **começa** no ângulo de
+  h:00 e termina em h+1 (`DayClock.slice`); o marcador fica no meio da fatia. Assim a fatia logo à
+  esquerda do "00h" é a das 23h, e o verde vai do "23h" ao "07h", a mesma regra de fim das janelas
+  ("das 23h às 7h", D29/E3).
+- **Teste novo** (`components/DayClock.test.tsx`): lê os caminhos SVG que o componente desenha (não
+  uma cópia da conta) e confere que cada uma das 24 fatias começa no ângulo da sua hora de Brasília
+  e tem a categoria dessa hora; que a fatia à esquerda do 00h (23h) é Boa e a das 22h é Regular; e
+  que o marcador de 3 horas diferentes cai dentro da fatia certa. Esse teste falharia no desenho
+  anterior.
+- **"Próximas horas" sai do Início** ("menos é mais"): o cartão diz a hora da previsão e o relógio
+  mostra o dia inteiro. Substitui a D22 no Início; a lista de todas as horas continua em Detalhes,
+  pelo botão "Ver todas as horas". Os 4 textos `nextHours*` saíram do glossário.
+- **Faixa na área segura do topo:** sem o cabeçalho nativo, o conteúdo rolava por baixo da barra de
+  status (o "Evite das 15h às 18h" aparecia em cima do relógio do iPhone). Uma faixa na cor
+  `background` do tema, com a altura da área segura, fica por cima da rolagem, nos dois modos. O
+  conteúdo continua começando abaixo dela.
+- **Skills usadas:** `mobile-redesign-app` (ajuste dentro da etapa, sem mexer em navegação);
+  `frontend-design` ("menos é mais": tirar a seção repetida em vez de reestilizá-la); `mobile-taste`
+  (área segura: nada de conteúdo sob a barra de status com o cabeçalho escondido).
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

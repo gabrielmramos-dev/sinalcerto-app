@@ -34,7 +34,7 @@ beforeEach(() => announced.mockClear());
 it('Início sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/' });
   await screen.findByText('Previsão mais próxima', {}, { timeout: 5000 });
-  await screen.findByText(/^Nossa previsão vai só até/);
+  await screen.findByText(/^19 e 20 de agosto: 8 horas boas/); // espera a timeline (relógio) carregar
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
