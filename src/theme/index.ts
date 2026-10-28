@@ -120,6 +120,8 @@ export const contrastPairs: [ColorName, ColorName, number][] = [
   ['moderate', 'heroModerateTo', 3],
   ['unstable', 'heroUnstableFrom', 3],
   ['unstable', 'heroUnstableTo', 3],
+  // Cartões de atividade (D31): ícone no quadradinho de fundo suave; borda de selecionado sobre o fundo.
+  ['primary', 'primarySoft', 3],
 ];
 
 /** Cores do modo atual do sistema. */

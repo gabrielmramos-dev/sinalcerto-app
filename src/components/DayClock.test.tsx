@@ -25,8 +25,8 @@ function collect(node: unknown, out: Node[] = []): Node[] {
   return out;
 }
 
-async function draw(markTime?: string) {
-  const r = await render(<DayClock items={items} markTime={markTime} />);
+async function draw(markTime?: string, highlight?: ReadonlySet<string>) {
+  const r = await render(<DayClock items={items} markTime={markTime} highlight={highlight} />);
   const nodes = collect(r.toJSON());
   // Fatias: caminhos que começam por "M x y A" (os padrões da legenda/relógio usam "M0 0L...").
   const slices = nodes
@@ -39,8 +39,20 @@ async function draw(markTime?: string) {
         .map(Number);
       const fill = n.props.fill;
       const q =
-        fill.brushRef === 'clock-moderate' ? 'MODERATE' : fill.brushRef === 'clock-unstable' ? 'UNSTABLE' : 'GOOD';
-      return { from: angle(x0!, y0!), to: angle(x1!, y1!), quality: q };
+        fill.brushRef === 'clock-dim'
+          ? 'DIM'
+          : fill.brushRef === 'clock-moderate'
+            ? 'MODERATE'
+            : fill.brushRef === 'clock-unstable'
+              ? 'UNSTABLE'
+              : 'GOOD';
+      return {
+        from: angle(x0!, y0!),
+        to: angle(x1!, y1!),
+        quality: q,
+        opacity: n.props.opacity ?? 1,
+        outlined: n.props.stroke != null,
+      };
     });
   const marker = nodes.find((n) => n.type === 'RNSVGCircle' && n.props.r === 7);
   return { slices, marker };
@@ -86,3 +98,31 @@ it.each(['2026-08-20T23:00:00Z', '2026-08-20T02:00:00Z', '2026-08-20T18:00:00Z']
     expect(a).toBeLessThan(slice.to);
   },
 );
+
+it('planejador (D31): as horas fora do destaque ficam com padrão de listras e opacidade, não só com outra cor', async () => {
+  // Chamada de vídeo em SP: deve funcionar das 23h às 7h (resposta real salva).
+  const suitable = new Set(
+    items
+      .filter((i) => {
+        const h = brasiliaHour(i.predictionFor);
+        return h === 23 || h < 7;
+      })
+      .map((i) => i.predictionFor),
+  );
+  const { slices } = await draw(undefined, suitable);
+  for (const s of slices) {
+    const hour = Math.floor(s.from / 15);
+    const item = items.find((i) => brasiliaHour(i.predictionFor) === hour)!;
+    if (suitable.has(item.predictionFor)) {
+      expect({ hour, quality: s.quality, outlined: s.outlined }).toEqual({
+        hour,
+        quality: item.quality,
+        outlined: true,
+      });
+    } else {
+      expect(s.quality).toBe('DIM');
+      expect(s.opacity).toBeLessThan(1);
+    }
+  }
+  expect(slices.filter((s) => s.quality === 'DIM')).toHaveLength(16);
+});

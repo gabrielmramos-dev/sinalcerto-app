@@ -3,7 +3,7 @@ import Svg, { Circle, Defs, G, Path, Pattern, Rect, Text as SvgText } from 'reac
 
 import type { TimelineItem } from '@/api/types';
 import { brasiliaClock, brasiliaHour } from '@/data/time';
-import { quality } from '@/i18n/glossary';
+import { quality, ui } from '@/i18n/glossary';
 import { font, fonts, spacing, useColors, type Palette } from '@/theme';
 
 /** Padrões compartilhados pelo relógio e pela legenda (ids por prefixo, um conjunto por Svg). */
@@ -18,6 +18,11 @@ function Patterns({ c, prefix }: { c: Palette; prefix: string }) {
         <Rect width={7} height={7} fill={c.unstable} />
         <Path d="M0 0L7 7M7 0L0 7" stroke={c.surface} strokeWidth={1.2} />
       </Pattern>
+      {/* E3: hora apagada no planejador. Listras finas neutras, diferentes dos 3 padrões de categoria. */}
+      <Pattern id={`${prefix}-dim`} patternUnits="userSpaceOnUse" width={6} height={6}>
+        <Rect width={6} height={6} fill={c.surface} />
+        <Path d="M0 6L6 0" stroke={c.textMuted} strokeWidth={1} />
+      </Pattern>
     </Defs>
   );
 }
@@ -26,18 +31,19 @@ const fillsFor = (c: Palette, prefix: string) =>
   ({ GOOD: c.good, MODERATE: `url(#${prefix}-moderate)`, UNSTABLE: `url(#${prefix}-unstable)` }) as const;
 
 /** Legenda dos padrões: amostra + nome da categoria em texto (o texto escala com o sistema, RNF05). */
-export function ClockLegend() {
+export function ClockLegend({ dimmed = false }: { dimmed?: boolean }) {
   const c = useColors();
-  const fills = fillsFor(c, 'legend');
+  const fills = { ...fillsFor(c, 'legend'), DIM: 'url(#legend-dim)' };
+  const keys = dimmed ? (['GOOD', 'MODERATE', 'UNSTABLE', 'DIM'] as const) : (['GOOD', 'MODERATE', 'UNSTABLE'] as const);
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.md }}>
-      {(['GOOD', 'MODERATE', 'UNSTABLE'] as const).map((q) => (
+      {keys.map((q) => (
         <View key={q} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
           <Svg width={18} height={18} accessible={false} importantForAccessibility="no-hide-descendants">
             <Patterns c={c} prefix="legend" />
-            <Rect width={18} height={18} rx={4} fill={fills[q]} />
+            <Rect width={18} height={18} rx={4} fill={fills[q]} opacity={q === 'DIM' ? DIM_OPACITY : 1} />
           </Svg>
-          <Text style={[font.small, { color: c.text }]}>{quality[q].label}</Text>
+          <Text style={[font.small, { color: c.text }]}>{q === 'DIM' ? ui.activities.planDimmed : quality[q].label}</Text>
         </View>
       ))}
     </View>
@@ -49,6 +55,7 @@ const C = SIZE / 2;
 const R_OUT = 118;
 const R_IN = 84;
 const GAP = 2; // graus entre as fatias
+const DIM_OPACITY = 0.55;
 
 const point = (r: number, deg: number) => {
   const a = (deg * Math.PI) / 180;
@@ -70,6 +77,11 @@ interface Props {
   items: TimelineItem[];
   /** Hora marcada com o ponto e mostrada no centro (ex.: a do cartão do Início). */
   markTime?: string;
+  /**
+   * E3 (planejador): horas em destaque (predictionFor). As outras ficam apagadas com padrão de listras
+   * e opacidade, não só com cor (RNF03). Sem este campo, todas as horas aparecem normais.
+   */
+  highlight?: ReadonlySet<string>;
 }
 
 /**
@@ -78,7 +90,7 @@ interface Props {
  * Decorativo para o leitor de tela: quem usa o relógio põe um resumo em texto no grupo dele, e a
  * escolha de hora existe também pela lista (aba Detalhes).
  */
-export function DayClock({ items, markTime }: Props) {
+export function DayClock({ items, markTime, highlight }: Props) {
   const c = useColors();
   const fillFor = fillsFor(c, 'clock');
   const marked = items.find((i) => i.predictionFor === markTime);
@@ -103,9 +115,17 @@ export function DayClock({ items, markTime }: Props) {
       >
         <Patterns c={c} prefix="clock" />
 
-        {items.map((item) => (
-          <Path key={item.predictionFor} d={slice(brasiliaHour(item.predictionFor))} fill={fillFor[item.quality]} />
-        ))}
+        {items.map((item) => {
+          const d = slice(brasiliaHour(item.predictionFor));
+          if (highlight && !highlight.has(item.predictionFor))
+            return <Path key={item.predictionFor} d={d} fill="url(#clock-dim)" opacity={DIM_OPACITY} />;
+          // Em destaque: padrão da categoria + contorno (a forma diz "esta hora conta", além da cor).
+          return highlight ? (
+            <Path key={item.predictionFor} d={d} fill={fillFor[item.quality]} stroke={c.text} strokeWidth={1.5} />
+          ) : (
+            <Path key={item.predictionFor} d={d} fill={fillFor[item.quality]} />
+          );
+        })}
 
         {labels.map(([text, deg]) => {
           const [x, y] = point(R_OUT + 20, deg).split(' ').map(Number);

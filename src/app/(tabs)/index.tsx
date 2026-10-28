@@ -1,8 +1,7 @@
 import { useRouter } from 'expo-router';
 import Sun from 'lucide-react-native/icons/sun';
 import { useCallback, useEffect } from 'react';
-import { AccessibilityInfo, ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AccessibilityInfo, Text, View } from 'react-native';
 
 import type { ProbeForecast, TimelineItem } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
@@ -10,6 +9,7 @@ import { ClockLegend, DayClock } from '@/components/DayClock';
 import { ForecastHero } from '@/components/ForecastHero';
 import { ScreenState } from '@/components/ScreenState';
 import { SourceBanner } from '@/components/SourceBanner';
+import { TabScreen } from '@/components/TabScreen';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
 import { bestOverall, countByQuality, dayRange, formatWindows, windowsWhere } from '@/data/forecastSummary';
@@ -25,8 +25,6 @@ const t = ui.home;
 export default function HomeScreen() {
   const styles = useStyles();
   const router = useRouter();
-  // Cabeçalho nativo escondido (D29): o conteúdo começa abaixo do recorte da câmera.
-  const insets = useSafeAreaInsets();
   const { probeId } = useAppState();
   const region = ui.common.region(regionName(probeId));
 
@@ -43,8 +41,7 @@ export default function HomeScreen() {
   }, [data, region]);
 
   return (
-    <View style={styles.screen}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}>
+    <TabScreen>
         <SourceBanner />
         <Text style={[font.title, styles.text]} accessibilityRole="header">
           {t.appName}
@@ -98,10 +95,7 @@ export default function HomeScreen() {
         />
         <AppButton label={t.seeAllHours} hint={t.seeAllHoursHint} onPress={() => router.navigate('/detalhes')} />
         <AppButton label={ui.aboutLink} hint={ui.aboutLinkHint} variant="link" onPress={() => router.push('/sobre')} />
-      </ScrollView>
-      {/* D30: faixa na cor do fundo sobre a área segura do topo; o conteúdo rola por baixo dela, não da barra de status. */}
-      <View style={[styles.statusStrip, { height: insets.top }]} />
-    </View>
+    </TabScreen>
   );
 }
 
@@ -157,12 +151,6 @@ function summary(f: ProbeForecast): string {
 }
 
 const useStyles = createThemedStyles((c) => ({
-  screen: { flex: 1, backgroundColor: c.background },
-  content: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
-    gap: spacing.md,
-  },
   location: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -180,13 +168,6 @@ const useStyles = createThemedStyles((c) => ({
   },
   bestRow: { flexDirection: 'row', alignItems: 'flex-start' },
   center: { textAlign: 'center' },
-  statusStrip: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: c.background,
-  },
   text: { color: c.text },
   muted: { color: c.textMuted },
 }));

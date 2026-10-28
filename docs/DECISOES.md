@@ -404,6 +404,49 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   `frontend-design` ("menos é mais": tirar a seção repetida em vez de reestilizá-la); `mobile-taste`
   (área segura: nada de conteúdo sob a barra de status com o cabeçalho escondido).
 
+## D31 — Marco de design, E3: Atividades com o planejador (2026-10-28)
+- **Cabeçalho:** o nativo fica escondido; "Atividades" em serifa, marcado como cabeçalho, e a região
+  logo abaixo. A área segura e a faixa da D30 viraram um componente só (`TabScreen`), usado no
+  Início e em Atividades (e na E4, em Detalhes).
+- **Planejador (sem tela nova):** o relógio fica no topo da aba, com o título "Melhor horário para
+  cada atividade". Tocar num cartão de atividade escolhe essa atividade:
+  - **Destaque:** o relógio destaca só as horas em que ela deve funcionar (`suitable` da API). Elas
+    ficam com o padrão da categoria e um contorno. As outras ficam **apagadas**, com listras finas
+    neutras e opacidade de 55%, e a legenda ganha "Não deve funcionar". O destaque não depende só da
+    cor (RNF03).
+  - **Frase:** segue a regra de janelas do relógio (D30), "Chamada de vídeo: melhor das 23h às 7h".
+    Ela aparece embaixo do relógio, é o nome do grupo do relógio para o leitor de tela, aparece no
+    cartão escolhido e é anunciada quando as 24 horas chegam (RNF08). Casos sem janela têm frase
+    própria: todas as horas ("Mandar mensagens: deve funcionar em todas as horas da previsão") e
+    nenhuma hora.
+  - **Seleção:** o cartão escolhido mostra ✓ e borda no acento, e o VoiceOver lê "selecionado"
+    (`accessibilityState.selected`). Os cartões agora são botões com dica.
+  - **Sem horário escolhido:** os cartões aparecem sem status, só com o nome, e servem ao
+    planejador. O horário continua sendo escolhido logo abaixo ("Para quando?"), como antes.
+- **Custo, como no plano:** `usePlanner` faz 24 chamadas por atividade e região, no máximo 6 ao
+  mesmo tempo, só quando a pessoa toca na atividade, e usa o mesmo cache da D5. A hora já consultada
+  pelos cartões não sai de novo, e voltar a uma atividade já vista não consulta nada. Trocar de
+  atividade para a fila antiga, e as respostas atrasadas entram no cache sem mexer na tela. Se uma
+  hora falha, aparece o aviso com "Tentar de novo: horas de <atividade>", que consulta só o que
+  faltou.
+- **Carregamento:** um esboço do layout (anel do relógio e 3 cartões, em `primarySoft`, sem
+  animação) aparece no lugar do indicador giratório, junto do texto "Carregando os horários…".
+  O esboço é escondido do leitor de tela.
+- **Cartões:** novo visual, com ícone Lucide por atividade num quadradinho `primarySoft`,
+  superfície com sombra (`elevation.card`) e borda de 2 sempre presente, que muda só de cor ao
+  selecionar, para nada pular de lugar. O par `primary` × `primarySoft` (ícone, 3:1) entrou no teste
+  de contraste.
+- **Skills usadas:** `mobile-redesign-app` (etapa 3 do plano, sem tela nova e sem mexer na
+  navegação); `frontend-design` (o relógio continua sendo a única peça de destaque, e o destaque
+  vem do contorno e do apagado, não de mais cor; frase curta no padrão das janelas);
+  `mobile-design-system` (padrão novo `dim` e par de contraste do quadradinho do ícone);
+  `mobile-taste` (esboço do layout no carregamento em vez do indicador; seleção com ✓ e estado
+  acessível; borda fixa para evitar salto de layout; sem animação, porque o movimento é só de
+  resposta ao toque).
+- **Descartada:** uma lista separada de atividades só para o planejador (repetiria os 6 cartões) e a
+  rolagem automática até o relógio ao tocar num cartão. A frase aparece no próprio cartão e é
+  anunciada.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

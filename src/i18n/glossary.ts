@@ -203,6 +203,18 @@ export const ui = {
     cardRetry: (name: string) => `Tentar de novo: ${name}`,
     cardLoading: 'Consultando…',
     cardLoadingSpoken: (name: string) => `${name}: consultando.`,
+    // E3 (D31): planejador
+    screenTitle: 'Atividades',
+    planTitle: 'Melhor horário para cada atividade',
+    planIdle: 'Toque numa atividade abaixo para ver no relógio as horas em que ela deve funcionar.',
+    planLoading: (name: string) => `${name}: consultando as 24 horas…`,
+    planBest: (name: string, windows: string) => `${name}: melhor ${windows}`,
+    planAll: (name: string) => `${name}: deve funcionar em todas as horas da previsão`,
+    planNone: (name: string) => `${name}: nenhuma hora boa nesta previsão`,
+    planError: (name: string) => `Não foi possível consultar todas as horas de ${name}.`,
+    planRetry: (name: string) => `Tentar de novo: horas de ${name}`,
+    planDimmed: 'Não deve funcionar',
+    cardHint: 'Mostra no relógio as horas em que ela deve funcionar',
   },
   timeChooser: {
     used: (when: string) => `Horário usado na previsão: ${when} (horário de Brasília)`,

@@ -136,6 +136,10 @@ máximo de toques até qualquer tela: 2
 - `SignalBars`: barras de sinal (4/2/1 cheias), decorativas.
 - `DayClock` + `ClockLegend`: relógio de 24 horas com padrão por categoria e legenda; decorativos,
   sempre dentro de um grupo com resumo em texto.
+- `DayClock` com `highlight` (E3, planejador): horas fora do destaque com padrão `dim` (listras
+  neutras) e opacidade 0,55; as em destaque ganham contorno. `ClockLegend dimmed` mostra a amostra.
+- `TabScreen`: aba sem cabeçalho nativo, com área segura e faixa na cor do fundo (D30, D31).
+- `ActivityCard`: botão selecionável (✓ + `selected`), ícone Lucide num quadradinho `primarySoft`.
 - Resumos da previsão: `src/data/forecastSummary.ts` (`dayRange`, `bestOverall`, `windowsWhere`,
   `formatWindows`, `countByQuality`).
 
@@ -145,3 +149,4 @@ máximo de toques até qualquer tela: 2
 - 2026-10-28, E2: Início redesenhado (D29): cartão em gradiente, melhor momento, relógio de 24 horas.
   Depois do teste no iPhone (D30): a fatia começa na hora (não fica centrada no rótulo), "Próximas
   horas" saiu, e uma faixa na cor do fundo cobre a área segura do topo.
+- 2026-10-28, E3: Atividades com o planejador no relógio (D31); esboço do layout no carregamento.

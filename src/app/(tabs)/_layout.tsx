@@ -37,6 +37,7 @@ export default function TabLayout() {
         name="atividades"
         options={{
           title: ui.tabs.activities,
+          headerShown: false, // D31: título em serifa no conteúdo, como no Início
           tabBarIcon: ({ color, size }) => <ChartNoAxesColumn color={color} size={size} />,
         }}
       />

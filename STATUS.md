@@ -1,6 +1,6 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-28, M6 aprovado; marco de design (MD) em andamento, E1 e E2 aprovadas. Estados: **feito** (na tela e verificado) ·
+Atualizado: 2026-10-28, M6 aprovado; marco de design (MD) em andamento, E1, E2 e E3 aprovadas. Estados: **feito** (na tela e verificado) ·
 **parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
 Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
@@ -20,6 +20,26 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF07 | feito | `components/NumbersSection.tsx` (seção "O que esperar neste horário" na aba Detalhes; até o M5 chamava "Como ler os números"); bastidores, jitter e faixas de Redes na tela `app/sobre.tsx`; textos em `i18n/glossary.ts`; `data/metrics.ts` (`bandFor`, D23); D24 | Teste automatizado (`data/metrics.test.ts`: bordas das faixas; `__tests__/detalhes.test.tsx`: latência e perda com valor, faixa de Redes e explicação, aviso de que RTT alto sozinho não é defeito, jitter sem valor com aviso, nota explicada, confiança só na hora em que a API manda, equivalência Boa/Regular/Instável = OK/Risco/Falha, categoria sem reclassificação). **Teste manual no iPhone, SDK 58 (2026-10-28):** valores certos (73,2 ms, 3,9%, nota 63, confiança 80% às 20:00), confiança some às 15:00, VoiceOver e texto no máximo ok. Bordas das faixas (D23) confirmadas pela equipe **M5.1 (D26), teste manual no iPhone (2026-10-28):** "O que esperar neste horário" com 73 ms e 3,9% nos textos novos, sem jitter, "Redes" ou OK/Risco/Falha; valores de 15:00 corretos com a confiança sumindo; tela Sobre completa e visível; VoiceOver lendo "milissegundos" e "por cento" por extenso; texto no máximo sem cortes. Guarda de vocabulário automatizado (`__tests__/vocabulario.test.tsx`) | TalkBack (Android) |
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
+
+## Marco de design (MD), E3: Atividades com o planejador (D31)
+- Teste automatizado (`__tests__/atividades.test.tsx`, `components/DayClock.test.tsx`):
+  - título "Atividades" como cabeçalho;
+  - nenhuma chamada antes de tocar numa atividade;
+  - ao tocar: 24 chamadas só daquela atividade, no máximo 6 ao mesmo tempo, com a frase "Chamada de
+    vídeo: melhor das 23h às 7h" anunciada, o cartão com estado selecionado e o relógio lido pela
+    frase;
+  - cache: com 12:00 já consultado, saem só 23 chamadas, e voltar a uma atividade não consulta nada;
+  - "todas as horas" (Mandar mensagens);
+  - erro numa hora, com "Tentar de novo" que consulta só a que faltou;
+  - horas apagadas com padrão e opacidade (16 de 24 para chamada de vídeo).
+
+  `npm run check`: 208 testes. O bundle iOS compila.
+- Teste manual no iPhone (2026-10-28): "Chamada de vídeo: melhor das 23h às 7h"; contorno nas horas
+  boas e listras nas apagadas, legenda "Não deve funcionar"; "Mandar mensagens" com todas as horas;
+  cache ao voltar para a atividade; "Tarde" com status nos cartões e o ponto nas 12h; VoiceOver lendo
+  "selecionado" e a frase; modo escuro e texto no máximo sem confundir listras e categorias; modo
+  avião respondendo na hora. **E3 aprovada.**
+- **Não testado:** Android.
 
 ## Marco de design (MD), E2: novo Início (D29, D30)
 - Teste automatizado: cabeçalhos ("SinalCerto" e "Previsão de 19 e 20 de agosto"), melhor momento e

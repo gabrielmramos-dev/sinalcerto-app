@@ -92,3 +92,74 @@ export function useActivityChecks(params: CheckParams | null) {
 
   return { cards, retry };
 }
+
+export type PlannerState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ok'; suitable: ReadonlySet<string> };
+
+const PLANNER_PARALLEL = 6;
+
+/**
+ * D31 (planejador, E3): `suitable` de UMA atividade nas horas da timeline. As chamadas só saem quando a
+ * pessoa toca na atividade: 24 por atividade e região, no máximo 6 ao mesmo tempo, com o mesmo cache
+ * da D5 (o que já foi consultado nos cartões não sai de novo). Trocar de atividade para a fila antiga.
+ */
+export function usePlanner(
+  params: Omit<CheckParams, 'predictionFor'> | null,
+  hours: readonly string[],
+  activity: Activity | null,
+): { state: PlannerState; retry: () => void } {
+  const { version } = useSourceStatus();
+  const { probeId, latitude, longitude, modelId } = params ?? {};
+  const run = params && activity ? `${probeId}|${modelId}|v${version}|${activity}` : null;
+  const keyOf = (p: string) => `${probeId}|${p}|${modelId}|v${version}|${activity}`; // mesmo formato da D5
+  const [failed, setFailed] = useState<string | null>(null);
+  const [, setDone] = useState(0);
+  const current = useRef(run);
+
+  const start = useCallback(() => {
+    if (run === null) return;
+    const key = (p: string) => `${probeId}|${p}|${modelId}|v${version}|${activity}`;
+    const queue = hours.filter((p) => !cache.has(key(p)));
+    if (queue.length === 0) return;
+    let anyError = false;
+    const worker = async () => {
+      // Para de puxar horas novas se a pessoa trocou de atividade ou de região.
+      for (let p = queue.shift(); p && current.current === run; p = queue.shift()) {
+        try {
+          const data = await withTimeout(
+            forecastSource.checkActivity({ modelId: modelId!, latitude: latitude!, longitude: longitude!, dateTime: p, activity: activity! }),
+            ACTIVITY_TIMEOUT_MS,
+          );
+          cache.set(key(p), data);
+        } catch {
+          anyError = true;
+        }
+      }
+    };
+    Promise.all(Array.from({ length: PLANNER_PARALLEL }, worker)).then(() => {
+      if (current.current !== run) return; // resposta de outra atividade: descartada da tela
+      if (anyError) setFailed(run);
+      setDone((n) => n + 1);
+    });
+  }, [run, hours, probeId, modelId, version, activity, latitude, longitude]);
+
+  useEffect(() => {
+    current.current = run;
+    start();
+  }, [run, start]);
+
+  const retry = () => {
+    setFailed(null);
+    start();
+  };
+
+  if (run === null) return { state: { status: 'idle' }, retry };
+  const results = hours.map((p) => cache.get(keyOf(p)));
+  if (results.every((r) => r !== undefined)) {
+    return { state: { status: 'ok', suitable: new Set(hours.filter((_, i) => results[i]!.suitable)) }, retry };
+  }
+  return { state: { status: failed === run ? 'error' : 'loading' }, retry };
+}

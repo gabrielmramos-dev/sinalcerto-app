@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { useSourceStatus } from '@/data/sourceStatus';
@@ -6,7 +7,7 @@ import { createThemedStyles, font, spacing, useColors } from '@/theme';
 import { AppButton } from './AppButton';
 
 export type ScreenStateProps =
-  | { kind: 'loading'; message?: string }
+  | { kind: 'loading'; message?: string; /** Esboço do layout no lugar do indicador (decorativo). */ placeholder?: ReactNode }
   | { kind: 'error'; message: string; onRetry: () => void }
   | { kind: 'empty'; message: string };
 
@@ -20,7 +21,7 @@ export function ScreenState(props: ScreenStateProps) {
     <View style={styles.box}>
       {props.kind === 'loading' && (
         <>
-          <ActivityIndicator size="large" color={c.primary} accessible={false} />
+          {props.placeholder ?? <ActivityIndicator size="large" color={c.primary} accessible={false} />}
           {/* liveRegion: o TalkBack lê a mensagem quando ela aparece. */}
           <Text style={[font.body, styles.text]} accessibilityLiveRegion="polite">
             {firstLoad ? ui.source.firstLoading : (props.message ?? ui.common.loading)}
