@@ -18,8 +18,11 @@ it('mostra a previsão mais próxima com data real e anuncia (RQ01, RNF08)', asy
   expect(await screen.findByText('Regular')).toBeOnTheScreen();
   expect(screen.getByText('Previsão para 20 de agosto de 2026, 20:00 (horário de Brasília)')).toBeOnTheScreen();
   // Os dados são de agosto: o app não finge que a previsão é de agora.
-  expect(screen.getByText(/Não há previsão para agora/)).toBeOnTheScreen();
-  expect(announce).toHaveBeenCalledWith(expect.stringMatching(/^Região de São Paulo \(SP\)\. Qualidade prevista: Regular\./));
+  expect(screen.getByText(/^Ainda não temos previsão para agora/)).toBeOnTheScreen();
+  expect(screen.getByText('Região escolhida: São Paulo (SP)')).toBeOnTheScreen();
+  expect(announce).toHaveBeenCalledWith(
+    expect.stringMatching(/^Região escolhida: São Paulo \(SP\)\. Qualidade prevista: Regular\./),
+  );
 });
 
 it('o cartão é lido como um item só, com a frase completa', async () => {
@@ -38,11 +41,9 @@ it('sem dados (404) mostra vazio com orientação, não erro', async () => {
   spy.mockRestore();
 });
 
-it('próximas horas com os dados reais: diz que os dados terminam aí (D22)', async () => {
+it('próximas horas com os dados reais: diz até quando vai a previsão (D22, D26)', async () => {
   await renderRouter('src/app', { initialUrl: '/' });
-  expect(
-    await screen.findByText('Não há previsões depois de 20 de agosto, 20:00: os dados disponíveis terminam aí.'),
-  ).toBeOnTheScreen();
+  expect(await screen.findByText('Nossa previsão vai só até 20 de agosto, 20:00.')).toBeOnTheScreen();
   expect(screen.getByRole('button', { name: 'Ver todas as horas' })).toBeOnTheScreen();
 });
 
@@ -68,7 +69,23 @@ it('trocar o local recarrega e anuncia a nova região (D7)', async () => {
 
   announce.mockClear();
   await fireEvent.press(screen.getByRole('button', { name: 'Região de Manaus (AM)' }));
-  expect(await screen.findByText('Região de Manaus (AM)')).toBeOnTheScreen();
+  expect(await screen.findByText('Região escolhida: Manaus (AM)')).toBeOnTheScreen();
   await screen.findByText('Previsão mais próxima');
-  expect(announce).toHaveBeenCalledWith(expect.stringMatching(/^Região de Manaus \(AM\)\. Qualidade prevista:/));
+  expect(announce).toHaveBeenCalledWith(expect.stringMatching(/^Região escolhida: Manaus \(AM\)\. Qualidade prevista:/));
+});
+
+it('link discreto "Sobre o SinalCerto" abre os bastidores, com linguagem técnica (D26)', async () => {
+  await renderRouter('src/app', { initialUrl: '/' });
+  await fireEvent.press(await screen.findByRole('link', { name: 'Sobre o SinalCerto' }));
+
+  expect(
+    await screen.findByText(/^Modelo A \(Grupo 1, Regressão Linear \(Linear Regression\), versão 1\.0\)/),
+  ).toBeOnTheScreen();
+  expect(
+    screen.getByText(/^A previsão disponível vai de 19 de agosto de 2026, 21:00 a 20 de agosto de 2026, 20:00/),
+  ).toBeOnTheScreen();
+  expect(screen.getAllByText(/RIPE Atlas/).length).toBeGreaterThan(0); // origem e regiões
+  expect(screen.getByLabelText('Regular, no app, equivale a Risco, em Redes')).toBeOnTheScreen();
+  expect(screen.getByText(/^Latência \(RTT médio previsto\): excelente, menos de 20 ms; bom, 20 a 50 ms/)).toBeOnTheScreen();
+  expect(screen.getByText(/^Jitter: estável, menos de 20 ms/)).toBeOnTheScreen();
 });

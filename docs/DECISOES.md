@@ -241,6 +241,43 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   passaram em 26 s. O plugin de acessibilidade do ESLint continua declarando só o ESLint 8 e segue
   funcionando pelo `overrides` (D12). O Android não foi testado.
 
+## D26 — Linguagem para leigos; bastidores na tela "Sobre o SinalCerto" (2026-10-28)
+- **Decisão:** fora da tela "Sobre", nenhum texto visível ou lido pelo leitor de tela usa API,
+  modelo, probe, endpoint, dados salvos/mock, "faixas de Redes" ou OK/Risco/Falha. A origem vira
+  "nossa previsão" ou "estimativa". O que o app não tem, ele não mostra: o jitter saiu da tela de
+  valores. A seção de Detalhes passou a se chamar "O que esperar neste horário", e cada número vira
+  consequência prática ("73 ms: as páginas podem demorar um pouco para abrir"; "3,9% (cerca de 4 em
+  cada 100 pedaços de informação se perdem)" + "Chamadas e vídeos devem travar ou picotar."). As
+  faixas de Redes (D23) continuam escolhendo a frase, mas não aparecem. Fora da lista de escolha, a
+  região aparece só pelo nome ("Região escolhida: São Paulo (SP)"). A tela "Sobre o SinalCerto"
+  (link discreto no fim do Início e de Detalhes) reúne, em linguagem técnica: origem dos dados
+  (RIPE Atlas → modelos → Internet Quality API 0.2.0), modelo usado, período coberto, regiões
+  (probes), categorias GOOD/MODERATE/UNSTABLE = Boa/Regular/Instável = OK/Risco/Falha, faixas de
+  Redes (latência, perda e jitter, com o aviso de que a previsão não traz jitter), nota e
+  confiança. Modelo e período são lidos da fonte de dados, não escritos fixos.
+- **Descartada:** manter os termos técnicos com explicação ao lado (a versão do M5).
+- **Motivo:** o app é uma previsão para leigos (RNF07 e o público do documento de requisitos); os
+  termos técnicos falavam com o desenvolvedor. A equipe confirmou a tabela antes/depois em
+  2026-10-28: latência sem decimal, perda com uma casa, "nota" continua, "latência" e "perda de
+  pacotes" ficam entre parênteses nos subtítulos, porque são os termos que a disciplina de Redes
+  procura.
+- **Também:** os ~30 textos que estavam escritos direto nas telas foram para o `glossary.ts`
+  (objeto `ui`), cumprindo a regra da D9. A faixa da latência passa a usar o valor arredondado, o
+  mesmo da tela, para nunca mostrar "20 ms" com duas frases diferentes. Abaixo de 0,5% de perda, o
+  texto diz "menos de 1 em cada 100". `AppButton` ganhou a variante `link` (papel "link", sublinhado,
+  área de 48).
+- **Como é garantido:** `src/__tests__/vocabulario.test.tsx` varre Início, Escolher local,
+  Atividades e Detalhes (textos e rótulos de acessibilidade, inclusive anúncios) e falha se
+  aparecer um termo proibido; ele também confere que pega o termo na tela Sobre.
+- **Jitter:** a previsão não traz jitter, então ele não aparece nas telas principais (o que o app
+  não tem, ele não mostra). A explicação do termo e a faixa de Redes ficam na tela "Sobre", junto
+  do aviso de que a previsão não o inclui. O RNF07 continua atendido: ele pede explicação contextual
+  quando o termo **é apresentado**, e o jitter só é apresentado na tela Sobre, onde está explicado.
+- **Algoritmo:** na tela Sobre, o nome que a API manda aparece traduzido, com o original entre
+  parênteses ("Regressão Linear (Linear Regression)"); a tradução fica no `glossary.ts`.
+- **Limitações:** "latência" e "perda de pacotes" continuam visíveis entre parênteses. O guarda de
+  vocabulário cobre as telas nos estados testados, não todas as combinações possíveis.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

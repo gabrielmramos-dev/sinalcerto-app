@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 
 import type { TimelineItem } from '@/api/types';
 import { brasiliaClock, brasiliaDay } from '@/data/time';
-import { quality } from '@/i18n/glossary';
+import { quality, ui } from '@/i18n/glossary';
 import { colors, font, minTouch, spacing } from '@/theme';
 import { QualityBadge } from './StatusBadge';
 
@@ -15,19 +15,19 @@ interface Props {
 /** RQ02: uma hora da timeline. Texto + ícone + cor + nota; tocar escolhe este horário (D6). */
 export function TimelineRow({ item, selected, onPress }: Props) {
   const clock = brasiliaClock(item.predictionFor);
-  const label = `${clock} de ${brasiliaDay(item.predictionFor)}: ${quality[item.quality].label}, nota ${item.qualityScore} de 100`;
+  const label = ui.details.row(clock, brasiliaDay(item.predictionFor), quality[item.quality].label, item.qualityScore);
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityHint="Usa este horário no app inteiro"
+      accessibilityHint={ui.details.rowHint}
       accessibilityState={{ selected }}
       style={({ pressed }) => [styles.row, selected && styles.selected, pressed && styles.pressed]}
     >
       <Text style={[font.label, styles.text, styles.clock]}>{selected ? `✓ ${clock}` : clock}</Text>
       <QualityBadge value={item.quality} />
-      <Text style={[font.body, styles.text]}>nota {item.qualityScore}</Text>
+      <Text style={[font.body, styles.text]}>{ui.details.rowScore(item.qualityScore)}</Text>
     </Pressable>
   );
 }

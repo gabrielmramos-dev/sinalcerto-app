@@ -5,9 +5,11 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import type { TimelineItem } from '@/api/types';
 import { bestInPeriod, PERIODS, type PeriodId } from '@/data/periods';
 import { brasiliaHour, formatBrasiliaLong, itemAtClock } from '@/data/time';
-import { period as periodText } from '@/i18n/glossary';
+import { period as periodText, ui } from '@/i18n/glossary';
 import { colors, font, spacing } from '@/theme';
 import { AppButton } from './AppButton';
+
+const t = ui.timeChooser;
 
 interface Props {
   items: TimelineItem[];
@@ -59,13 +61,9 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
 
   return (
     <View style={styles.box}>
-      <Text style={[font.body, styles.text]}>
-        {selected
-          ? `Horário usado na previsão: ${formatBrasiliaLong(selected)} (horário de Brasília)`
-          : 'Nenhum horário escolhido ainda.'}
-      </Text>
+      <Text style={[font.body, styles.text]}>{selected ? t.used(formatBrasiliaLong(selected)) : t.none}</Text>
       {rounded && rounded.predictionFor === selected && (
-        <Text style={[font.small, styles.muted]}>Você escolheu {rounded.picked}; a previsão é por hora.</Text>
+        <Text style={[font.small, styles.muted]}>{t.rounded(rounded.picked)}</Text>
       )}
 
       {iosDraft ? (
@@ -77,24 +75,24 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
             is24Hour
             locale="pt-BR"
             onChange={(_, date) => date && setIosDraft(date)}
-            accessibilityLabel="Hora da atividade"
-            accessibilityHint="Escolha a hora e depois toque em Usar este horário"
+            accessibilityLabel={t.pickerLabel}
+            accessibilityHint={t.pickerHint}
           />
           <AppButton
-            label="Usar este horário"
+            label={t.usePicked}
             variant="primary"
             onPress={() => {
               pick(iosDraft);
               setIosDraft(null);
             }}
           />
-          <AppButton label="Cancelar" hint="Fecha o seletor sem mudar o horário" onPress={() => setIosDraft(null)} />
+          <AppButton label={t.cancel} hint={t.cancelHint} onPress={() => setIosDraft(null)} />
         </View>
       ) : (
-        <AppButton label="Mudar horário" hint="Abre o seletor de hora" onPress={openPicker} />
+        <AppButton label={t.change} hint={t.changeHint} onPress={openPicker} />
       )}
 
-      <Text style={[font.label, styles.text]}>Ou escolha a melhor hora de um período:</Text>
+      <Text style={[font.label, styles.text]}>{t.periodsTitle}</Text>
       <View style={styles.periods}>
         {PERIODS.map(({ id }) => {
           const best = bestInPeriod(items, id);
@@ -103,7 +101,7 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
             <AppButton
               key={id}
               label={`${periodText[id]}: ${formatBrasiliaLong(best.predictionFor, false)}`}
-              hint="Usa a hora com a melhor nota prevista neste período"
+              hint={t.periodHint}
               selected={chosenPeriod === id && selected === best.predictionFor}
               onPress={() => {
                 setChosenPeriod(id);

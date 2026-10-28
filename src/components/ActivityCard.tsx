@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { Activity } from '@/api/types';
 import type { CardState } from '@/hooks/useActivityChecks';
-import { activity as activityText, recommendation, suitability } from '@/i18n/glossary';
+import { activity as activityText, recommendation, suitability, ui } from '@/i18n/glossary';
 import { colors, font, spacing } from '@/theme';
 import { AppButton } from './AppButton';
 import { StatusBadge } from './StatusBadge';
@@ -24,15 +24,17 @@ export function ActivityCard({ activity, state, onRetry, showAdvice }: Props) {
     return (
       <View style={styles.card}>
         <Text style={[font.label, styles.text]}>{name}</Text>
-        <Text style={[font.body, styles.error]}>Não foi possível consultar esta atividade.</Text>
-        <AppButton label="Tentar de novo" a11yLabel={`Tentar de novo: ${name}`} onPress={onRetry} />
+        <Text style={[font.body, styles.error]}>{ui.activities.cardError}</Text>
+        <AppButton label={ui.common.retry} a11yLabel={ui.activities.cardRetry(name)} onPress={onRetry} />
       </View>
     );
   }
 
   const suit = state.status === 'ok' ? suitability[`${state.data.suitable}`] : undefined;
   const advice = state.status === 'ok' && showAdvice ? recommendation[state.data.recommendation.code] : undefined;
-  const spoken = suit ? `${name}, ${examples}: ${suit.label}.${advice ? ` ${advice}` : ''}` : `${name}: consultando.`;
+  const spoken = suit
+    ? `${name}, ${examples}: ${suit.label}.${advice ? ` ${advice}` : ''}`
+    : ui.activities.cardLoadingSpoken(name);
 
   return (
     // Sem botão dentro: lido como um item só. Texto estático, sem dica de toque.
@@ -43,7 +45,7 @@ export function ActivityCard({ activity, state, onRetry, showAdvice }: Props) {
       {suit ? (
         <StatusBadge tone={suit.tone} label={suit.label} />
       ) : (
-        <Text style={[font.body, styles.muted]}>Consultando…</Text>
+        <Text style={[font.body, styles.muted]}>{ui.activities.cardLoading}</Text>
       )}
       {advice && <Text style={[font.body, styles.text]}>{advice}</Text>}
     </View>

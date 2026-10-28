@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Quality } from '@/api/types';
-import { quality, type Tone } from '@/i18n/glossary';
+import { quality, ui, type Tone } from '@/i18n/glossary';
 import { colors, font, spacing } from '@/theme';
 import { StatusIcon } from './StatusIcon';
 
@@ -31,7 +31,7 @@ export function StatusBadge({ tone, label, context }: Props) {
 
 export function QualityBadge({ value }: { value: Quality }) {
   const q = quality[value];
-  return <StatusBadge tone={q.tone} label={q.label} context="Qualidade prevista" />;
+  return <StatusBadge tone={q.tone} label={q.label} context={ui.common.qualityContext} />;
 }
 
 const styles = StyleSheet.create({

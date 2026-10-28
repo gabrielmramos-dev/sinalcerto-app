@@ -6,9 +6,11 @@ import { ScreenState } from '@/components/ScreenState';
 import { forecastSource } from '@/data';
 import { regionLabel } from '@/data/regions';
 import { useLoad } from '@/hooks/useLoad';
+import { ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
+const t = ui.location;
 const loadLocations = () => forecastSource.getLocations();
 
 export default function ChooseLocationScreen() {
@@ -19,23 +21,18 @@ export default function ChooseLocationScreen() {
   return (
     // SDK 58: no iOS 26+, o cabeçalho do Stack fica transparente; isto evita a lista passar por baixo dele.
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
-      <Text style={[font.body, styles.text]}>
-        A previsão é de um ponto de referência da rede nesta região, não do seu celular. O app não usa a sua
-        localização.
-      </Text>
-      {locations.status === 'loading' && <ScreenState kind="loading" message="Carregando as regiões…" />}
+      <Text style={[font.body, styles.text]}>{t.intro}</Text>
+      {locations.status === 'loading' && <ScreenState kind="loading" message={t.loading} />}
       {locations.status === 'error' && (
-        <ScreenState kind="error" message="Não foi possível carregar as regiões." onRetry={locations.retry} />
+        <ScreenState kind="error" message={t.loadError} onRetry={locations.retry} />
       )}
-      {locations.status === 'ok' && locations.data.length === 0 && (
-        <ScreenState kind="empty" message="Nenhuma região disponível no momento." />
-      )}
+      {locations.status === 'ok' && locations.data.length === 0 && <ScreenState kind="empty" message={t.empty} />}
       {locations.status === 'ok' &&
         locations.data.map((l) => (
           <AppButton
             key={l.probeId}
             label={regionLabel(l.probeId)}
-            hint="Usa esta região na previsão e volta para o início"
+            hint={t.pickHint}
             selected={l.probeId === probeId}
             onPress={() => {
               setProbeId(l.probeId);

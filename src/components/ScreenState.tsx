@@ -1,5 +1,6 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { ui } from '@/i18n/glossary';
 import { colors, font, spacing } from '@/theme';
 import { AppButton } from './AppButton';
 
@@ -17,7 +18,7 @@ export function ScreenState(props: ScreenStateProps) {
           <ActivityIndicator size="large" color={colors.primary} accessible={false} />
           {/* liveRegion: o TalkBack lê a mensagem quando ela aparece. */}
           <Text style={[font.body, styles.text]} accessibilityLiveRegion="polite">
-            {props.message ?? 'Carregando a previsão…'}
+            {props.message ?? ui.common.loading}
           </Text>
         </>
       )}
@@ -26,7 +27,7 @@ export function ScreenState(props: ScreenStateProps) {
           <Text style={[font.body, styles.error]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
             {props.message}
           </Text>
-          <AppButton label="Tentar de novo" variant="primary" onPress={props.onRetry} />
+          <AppButton label={ui.common.retry} variant="primary" onPress={props.onRetry} />
         </>
       )}
       {props.kind === 'empty' && <Text style={[font.body, styles.text]}>{props.message}</Text>}

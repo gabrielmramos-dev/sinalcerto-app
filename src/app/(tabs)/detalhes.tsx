@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -9,16 +10,18 @@ import { TimelineRow } from '@/components/TimelineRow';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
 import { itemsInPeriod, PERIODS, type PeriodId } from '@/data/periods';
-import { regionLabel } from '@/data/regions';
+import { regionName } from '@/data/regions';
 import { formatBrasiliaLong, groupByDay } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
-import { period as periodText, quality } from '@/i18n/glossary';
+import { period as periodText, quality, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
 type Filter = 'todas' | PeriodId;
+const t = ui.details;
 
 export default function DetailsScreen() {
+  const router = useRouter();
   const { probeId, selectedTime, setSelectedTime } = useAppState();
   const [filter, setFilter] = useState<Filter>('todas');
   const load = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
@@ -31,7 +34,7 @@ export default function DetailsScreen() {
   const all = timeline.status === 'ok' ? timeline.data.items : [];
   const shown = filter === 'todas' ? all : itemsInPeriod(all, filter);
 
-  // "Como ler os números": a hora escolhida ou, sem escolha, a previsão mais próxima (a mesma do Início).
+  // "O que esperar neste horário": a hora escolhida ou, sem escolha, a previsão mais próxima (a mesma do Início).
   const nearest = forecast.status === 'ok' ? forecast.data.prediction : undefined;
   const numbersItem =
     all.find((i) => i.predictionFor === selectedTime) ??
@@ -42,33 +45,30 @@ export default function DetailsScreen() {
   const chooseFilter = (next: Filter) => {
     setFilter(next);
     const n = next === 'todas' ? all.length : itemsInPeriod(all, next).length;
-    AccessibilityInfo.announceForAccessibility(`Mostrando ${n} horas${next === 'todas' ? '' : `: ${periodText[next]}`}`);
+    AccessibilityInfo.announceForAccessibility(t.showingSpoken(n, next === 'todas' ? undefined : periodText[next]));
   };
 
   // D6: o horário escolhido é sempre um item da timeline; vale para o app inteiro.
   const chooseHour = (item: TimelineItem) => {
     setSelectedTime(item.predictionFor);
     AccessibilityInfo.announceForAccessibility(
-      `Horário escolhido: ${formatBrasiliaLong(item.predictionFor, false)}, ${quality[item.quality].label}. Vale também para a aba Atividades.`,
+      t.chosen(formatBrasiliaLong(item.predictionFor, false), quality[item.quality].label),
     );
   };
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={[font.title, styles.text]} accessibilityRole="header">
-        Previsão por hora
+        {t.title}
       </Text>
-      <Text style={[font.small, styles.muted]}>Local de referência: {regionLabel(probeId)}</Text>
+      <Text style={[font.small, styles.muted]}>{ui.common.region(regionName(probeId))}</Text>
 
-      {timeline.status === 'loading' && <ScreenState kind="loading" message="Carregando as horas…" />}
+      {timeline.status === 'loading' && <ScreenState kind="loading" message={t.loading} />}
       {timeline.status === 'error' &&
         (timeline.error instanceof NoDataError ? (
-          <ScreenState
-            kind="empty"
-            message="Ainda não há previsão para esta região. Escolha outra em Trocar local, no Início."
-          />
+          <ScreenState kind="empty" message={ui.common.noDataForRegion} />
         ) : (
-          <ScreenState kind="error" message="Não foi possível carregar as horas." onRetry={timeline.retry} />
+          <ScreenState kind="error" message={t.loadError} onRetry={timeline.retry} />
         ))}
 
       {timeline.status === 'ok' && (
@@ -77,8 +77,8 @@ export default function DetailsScreen() {
             {(['todas', ...PERIODS.map((p) => p.id)] as Filter[]).map((f) => (
               <AppButton
                 key={f}
-                label={f === 'todas' ? 'Todas' : periodText[f]}
-                hint={f === 'todas' ? 'Mostra todas as horas' : 'Mostra só as horas deste período'}
+                label={f === 'todas' ? t.all : periodText[f]}
+                hint={f === 'todas' ? t.allHint : t.periodHint}
                 selected={filter === f}
                 onPress={() => chooseFilter(f)}
               />
@@ -86,12 +86,10 @@ export default function DetailsScreen() {
           </View>
 
           {shown.length === 0 ? (
-            <ScreenState kind="empty" message="Não há previsões neste período nos dados disponíveis." />
+            <ScreenState kind="empty" message={t.emptyPeriod} />
           ) : (
             <>
-              <Text style={[font.body, styles.text]}>
-                Mostrando {shown.length} horas. Toque numa hora para usá-la no app.
-              </Text>
+              <Text style={[font.body, styles.text]}>{t.showing(shown.length)}</Text>
               {groupByDay(shown).map((group) => (
                 <View key={group.day} style={styles.group}>
                   <Text style={[font.heading, styles.text]} accessibilityRole="header">
@@ -119,6 +117,8 @@ export default function DetailsScreen() {
           )}
         </>
       )}
+
+      <AppButton label={ui.aboutLink} hint={ui.aboutLinkHint} variant="link" onPress={() => router.push('/sobre')} />
     </ScrollView>
   );
 }

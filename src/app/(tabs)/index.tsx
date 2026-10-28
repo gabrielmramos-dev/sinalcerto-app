@@ -8,19 +8,19 @@ import { ScreenState } from '@/components/ScreenState';
 import { QualityBadge } from '@/components/StatusBadge';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
-import { regionLabel } from '@/data/regions';
+import { regionName } from '@/data/regions';
 import { brasiliaClock, brasiliaDay, formatBrasiliaLong, isPast } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
-import { disclaimer, quality, recommendation } from '@/i18n/glossary';
+import { disclaimer, quality, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
-const PAST_NOTE = 'Não há previsão para agora. Os dados disponíveis terminam neste horário.';
+const t = ui.home;
 
 export default function HomeScreen() {
   const router = useRouter();
   const { probeId } = useAppState();
-  const region = regionLabel(probeId);
+  const region = ui.common.region(regionName(probeId));
   const load = useCallback(() => forecastSource.getForecast(probeId, DEFAULT_MODEL_ID), [probeId]);
   const forecast = useLoad(load);
   const data = forecast.status === 'ok' ? forecast.data : undefined;
@@ -33,42 +33,39 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.location}>
-        <Text style={[font.small, styles.muted]}>Local de referência</Text>
         <Text style={[font.heading, styles.text]}>{region}</Text>
-        <AppButton label="Trocar local" hint="Abre a lista de regiões" onPress={() => router.push('/local')} />
+        <AppButton label={t.changeLocation} hint={t.changeLocationHint} onPress={() => router.push('/local')} />
       </View>
 
       {forecast.status === 'loading' && <ScreenState kind="loading" />}
       {forecast.status === 'error' &&
         (forecast.error instanceof NoDataError ? (
-          <ScreenState
-            kind="empty"
-            message="Ainda não há previsão para esta região. Escolha outra em Trocar local."
-          />
+          <ScreenState kind="empty" message={t.noDataForRegion} />
         ) : (
-          <ScreenState kind="error" message="Não foi possível carregar a previsão." onRetry={forecast.retry} />
+          <ScreenState kind="error" message={t.loadError} onRetry={forecast.retry} />
         ))}
       {data && <ForecastCard forecast={data} />}
       {data && <NextHours probeId={probeId} after={data.prediction.predictionFor} />}
 
       <Text style={[font.small, styles.muted]}>
-        {disclaimer} A região é um ponto de referência da rede, não a sua localização exata.
+        {disclaimer} {t.regionNote}
       </Text>
 
       <AppButton
-        label="Ver o que dá para fazer"
-        hint="Abre a aba Atividades"
+        label={t.seeActivities}
+        hint={t.seeActivitiesHint}
         variant="primary"
         onPress={() => router.navigate('/atividades')}
       />
-      <AppButton label="Ver todas as horas" hint="Abre a aba Detalhes" onPress={() => router.navigate('/detalhes')} />
+      <AppButton label={t.seeAllHours} hint={t.seeAllHoursHint} onPress={() => router.navigate('/detalhes')} />
+      <AppButton label={ui.aboutLink} hint={ui.aboutLinkHint} variant="link" onPress={() => router.push('/sobre')} />
     </ScrollView>
   );
 }
 
 /**
  * D22: até 3 horas da timeline depois da hora do cartão. Com os dados atuais o cartão já é a última
- * hora, então a seção diz isso com honestidade; quando a API tiver horas futuras, elas aparecem sozinhas.
+ * hora, então a seção diz isso com honestidade; quando houver horas futuras, elas aparecem sozinhas.
  */
 function NextHours({ probeId, after }: { probeId: number; after: string }) {
   const load = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
@@ -81,26 +78,23 @@ function NextHours({ probeId, after }: { probeId: number; after: string }) {
   return (
     <View style={styles.next}>
       <Text style={[font.heading, styles.text]} accessibilityRole="header">
-        Próximas horas
+        {t.nextHoursTitle}
       </Text>
-      {timeline.status === 'loading' && <Text style={[font.body, styles.muted]}>Carregando as próximas horas…</Text>}
-      {timeline.status === 'error' && (
-        <Text style={[font.body, styles.text]}>Não foi possível carregar as próximas horas.</Text>
-      )}
+      {timeline.status === 'loading' && <Text style={[font.body, styles.muted]}>{t.nextHoursLoading}</Text>}
+      {timeline.status === 'error' && <Text style={[font.body, styles.text]}>{t.nextHoursError}</Text>}
       {timeline.status === 'ok' && next.length === 0 && (
-        <Text style={[font.body, styles.text]}>
-          Não há previsões depois de {formatBrasiliaLong(after, false)}: os dados disponíveis terminam aí.
-        </Text>
+        <Text style={[font.body, styles.text]}>{t.nextHoursNone(formatBrasiliaLong(after, false))}</Text>
       )}
       {next.map((item) => {
-        const label = `${brasiliaClock(item.predictionFor)} de ${brasiliaDay(item.predictionFor)}: ${quality[item.quality].label}, nota ${item.qualityScore} de 100`;
+        const clock = brasiliaClock(item.predictionFor);
+        const label = ui.details.row(clock, brasiliaDay(item.predictionFor), quality[item.quality].label, item.qualityScore);
         return (
           // Linha estática (sem toque), lida como um item só.
           // eslint-disable-next-line react-native-a11y/has-accessibility-hint
           <View key={item.predictionFor} style={styles.nextRow} accessible accessibilityLabel={label}>
-            <Text style={[font.label, styles.text]}>{brasiliaClock(item.predictionFor)}</Text>
+            <Text style={[font.label, styles.text]}>{clock}</Text>
             <QualityBadge value={item.quality} />
-            <Text style={[font.body, styles.text]}>nota {item.qualityScore}</Text>
+            <Text style={[font.body, styles.text]}>{ui.details.rowScore(item.qualityScore)}</Text>
           </View>
         );
       })}
@@ -110,8 +104,8 @@ function NextHours({ probeId, after }: { probeId: number; after: string }) {
 
 function summary(f: ProbeForecast): string {
   const q = quality[f.assessment.quality];
-  const past = isPast(f.prediction.predictionFor) ? ` ${PAST_NOTE}` : '';
-  return `Qualidade prevista: ${q.label}. ${q.sentence} ${recommendation[f.recommendation.code]} Previsão para ${formatBrasiliaLong(f.prediction.predictionFor)}, horário de Brasília.${past}`;
+  const past = isPast(f.prediction.predictionFor) ? ` ${t.pastNote}` : '';
+  return `${ui.common.qualityContext}: ${q.label}. ${q.sentence} ${recommendation[f.recommendation.code]} ${t.forecastForSpoken(formatBrasiliaLong(f.prediction.predictionFor))}${past}`;
 }
 
 function ForecastCard({ forecast }: { forecast: ProbeForecast }) {
@@ -119,17 +113,15 @@ function ForecastCard({ forecast }: { forecast: ProbeForecast }) {
   return (
     // Lido como um item só, na ordem da tela (RNF02, RNF08). Texto estático: sem dica de toque.
     // eslint-disable-next-line react-native-a11y/has-accessibility-hint
-    <View style={styles.card} accessible accessibilityLabel={`Previsão mais próxima. ${summary(forecast)}`}>
+    <View style={styles.card} accessible accessibilityLabel={`${t.cardTitle}. ${summary(forecast)}`}>
       <Text style={[font.heading, styles.text]} accessibilityRole="header">
-        Previsão mais próxima
+        {t.cardTitle}
       </Text>
       <QualityBadge value={forecast.assessment.quality} />
       <Text style={[font.body, styles.text]}>{q.sentence}</Text>
       <Text style={[font.body, styles.text]}>{recommendation[forecast.recommendation.code]}</Text>
-      <Text style={[font.small, styles.muted]}>
-        Previsão para {formatBrasiliaLong(forecast.prediction.predictionFor)} (horário de Brasília)
-      </Text>
-      {isPast(forecast.prediction.predictionFor) && <Text style={[font.small, styles.text]}>{PAST_NOTE}</Text>}
+      <Text style={[font.small, styles.muted]}>{t.forecastFor(formatBrasiliaLong(forecast.prediction.predictionFor))}</Text>
+      {isPast(forecast.prediction.predictionFor) && <Text style={[font.small, styles.text]}>{t.pastNote}</Text>}
     </View>
   );
 }

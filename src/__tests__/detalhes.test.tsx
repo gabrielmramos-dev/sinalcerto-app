@@ -61,45 +61,52 @@ it('tocar numa hora escolhe o horário para o app inteiro e anuncia (D6)', async
   ).toBeOnTheScreen();
 });
 
-describe('Como ler os números (RNF07, D23, D24)', () => {
-  it('sem hora escolhida: valores da previsão mais próxima, faixas de Redes, nota e confiança', async () => {
+describe('O que esperar neste horário (RNF07, D23, D24, D26)', () => {
+  it('sem hora escolhida: cada número vira consequência prática, sem termos de bastidor', async () => {
     await open();
-    expect(screen.getByRole('header', { name: 'Como ler os números' })).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: 'O que esperar neste horário' })).toBeOnTheScreen();
     expect(screen.getByText('Valores de 20 de agosto, 20:00 (horário de Brasília).')).toBeOnTheScreen();
     expect(screen.getByText(/^Nenhuma hora escolhida: mostrando a previsão mais próxima/)).toBeOnTheScreen();
 
-    // latência: valor no formato brasileiro, falado por extenso, e a faixa de Redes ao lado
-    expect(screen.getByLabelText('73,2 milissegundos')).toHaveTextContent('73,2 ms');
-    expect(screen.getByText('Pela tabela de Redes: médio (mais de 50 até 100 ms).')).toBeOnTheScreen();
-    expect(screen.getByText(/^Latência alta sozinha não quer dizer defeito/)).toBeOnTheScreen();
-    // perda: faixa "falha" de Redes, mas a categoria continua a da API (Regular): nada é reclassificado
-    expect(screen.getByLabelText('3,9 por cento')).toHaveTextContent('3,9%');
-    expect(screen.getByText('Pela tabela de Redes: falha (mais de 2%).')).toBeOnTheScreen();
+    // latência: sem decimal, com consequência (a faixa "médio" de Redes escolhe a frase, mas não aparece)
+    expect(screen.getByRole('header', { name: 'Tempo de resposta (latência)' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('73 milissegundos: as páginas podem demorar um pouco para abrir.')).toHaveTextContent(
+      '73 ms: as páginas podem demorar um pouco para abrir.',
+    );
+    expect(screen.getByText(/O que mais atrapalha é a informação perdida\.$/)).toBeOnTheScreen();
+    // perda: uma casa decimal, em "pedaços de informação", seguida da consequência
+    expect(screen.getByRole('header', { name: 'Informação perdida (perda de pacotes)' })).toBeOnTheScreen();
+    expect(
+      screen.getByLabelText('3,9 por cento (cerca de 4 em cada 100 pedaços de informação se perdem)'),
+    ).toHaveTextContent('3,9% (cerca de 4 em cada 100 pedaços de informação se perdem)');
+    expect(screen.getByText('Chamadas e vídeos devem travar ou picotar.')).toBeOnTheScreen();
+    // a categoria continua a da API (Regular): nada é reclassificado
     expect(screen.getAllByLabelText('Qualidade prevista: Regular').length).toBeGreaterThan(0);
-    // jitter sem valor, com aviso
-    expect(screen.getByText('A previsão da API não inclui jitter, então não há valor para mostrar.')).toBeOnTheScreen();
     // nota (feedback da Sprint 5)
     expect(screen.getByText('63 de 100')).toBeOnTheScreen();
-    expect(screen.getByText(/A categoria é a informação principal\.$/)).toBeOnTheScreen();
-    // confiança: a API mandou 0,8 para esta hora
+    expect(screen.getByText(/Para decidir, olhe a categoria/)).toBeOnTheScreen();
+    // confiança: existe para esta hora
     expect(await screen.findByLabelText('80 por cento')).toBeOnTheScreen();
-    // equivalência com Redes
-    expect(screen.getByLabelText('Boa, no app, equivale a OK, em Redes')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Regular, no app, equivale a Risco, em Redes')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Instável, no app, equivale a Falha, em Redes')).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: 'Confiança da previsão' })).toBeOnTheScreen();
+    // o que o app não tem, não mostra; o que é bastidor foi para a tela Sobre
+    expect(screen.queryByText(/jitter/i)).toBeNull();
+    expect(screen.queryByText(/Redes/)).toBeNull();
+    expect(screen.queryByLabelText(/equivale a/)).toBeNull();
   });
 
-  it('hora escolhida: valores daquela hora e sem confiança (a API só manda para a mais próxima)', async () => {
+  it('hora escolhida: valores daquela hora e sem confiança (só existe para a mais próxima)', async () => {
     await open();
     await screen.findByLabelText('80 por cento');
     await fireEvent.press(screen.getByRole('button', { name: '15:00 de 20 de agosto: Instável, nota 55 de 100' }));
 
     expect(screen.getByText('Valores de 20 de agosto, 15:00 (horário de Brasília).')).toBeOnTheScreen();
     expect(screen.queryByText(/^Nenhuma hora escolhida/)).toBeNull();
-    expect(screen.getByLabelText('86 milissegundos')).toBeOnTheScreen();
-    expect(screen.getByLabelText('5,1 por cento')).toBeOnTheScreen();
+    expect(screen.getByLabelText('86 milissegundos: as páginas podem demorar um pouco para abrir.')).toBeOnTheScreen();
+    expect(
+      screen.getByLabelText('5,1 por cento (cerca de 5 em cada 100 pedaços de informação se perdem)'),
+    ).toBeOnTheScreen();
     expect(screen.getByText('55 de 100')).toBeOnTheScreen();
-    expect(screen.queryByRole('header', { name: 'Confiança do modelo' })).toBeNull();
+    expect(screen.queryByRole('header', { name: 'Confiança da previsão' })).toBeNull();
   });
 });
 
@@ -126,6 +133,6 @@ it('filtro sem horas nos dados: mensagem de vazio', async () => {
   const spy = jest.spyOn(forecastSource, 'getTimeline').mockResolvedValueOnce(onlyAfternoon);
   await open();
   await fireEvent.press(screen.getByRole('button', { name: 'Manhã' }));
-  expect(screen.getByText('Não há previsões neste período nos dados disponíveis.')).toBeOnTheScreen();
+  expect(screen.getByText('Nossa previsão não tem horas neste período.')).toBeOnTheScreen();
   spy.mockRestore();
 });

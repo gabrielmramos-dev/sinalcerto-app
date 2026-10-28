@@ -6,17 +6,19 @@ import { ScreenState } from '@/components/ScreenState';
 import { TimeChooser } from '@/components/TimeChooser';
 import { DEFAULT_MODEL_ID, forecastSource } from '@/data';
 import { NoDataError } from '@/data/ForecastSource';
-import { regionLabel } from '@/data/regions';
+import { regionName } from '@/data/regions';
 import { formatBrasiliaLong } from '@/data/time';
 import { useActivityChecks } from '@/hooks/useActivityChecks';
 import { useLoad } from '@/hooks/useLoad';
-import { disclaimer, recommendation } from '@/i18n/glossary';
+import { disclaimer, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { colors, font, spacing } from '@/theme';
 
+const t = ui.activities;
+
 export default function ActivitiesScreen() {
   const { probeId, selectedTime, setSelectedTime } = useAppState();
-  const region = regionLabel(probeId);
+  const region = ui.common.region(regionName(probeId));
 
   // A timeline dá os horários possíveis (D6); /locations dá a coordenada da probe (D7), nunca a do aparelho.
   const load = useCallback(
@@ -49,25 +51,22 @@ export default function ActivitiesScreen() {
   // RNF08: resume o resultado para o leitor de tela quando as 6 consultas terminam.
   useEffect(() => {
     if (!ready || !selectedTime || !done) return;
-    const errors = failed ? ` ${failed} não puderam ser consultadas.` : '';
-    AccessibilityInfo.announceForAccessibility(
-      `Horário usado: ${formatBrasiliaLong(selectedTime, false)}. ${good} de 6 atividades devem funcionar.${errors}`,
-    );
+    AccessibilityInfo.announceForAccessibility(t.summary(formatBrasiliaLong(selectedTime, false), good, failed));
   }, [ready, selectedTime, done, good, failed, probeId]);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={[font.title, styles.text]} accessibilityRole="header">
-        Para quando?
+        {t.title}
       </Text>
-      <Text style={[font.small, styles.muted]}>Local de referência: {region}</Text>
+      <Text style={[font.small, styles.muted]}>{region}</Text>
 
-      {data.status === 'loading' && <ScreenState kind="loading" message="Carregando os horários…" />}
+      {data.status === 'loading' && <ScreenState kind="loading" message={t.loading} />}
       {data.status === 'error' &&
         (data.error instanceof NoDataError ? (
-          <ScreenState kind="empty" message="Ainda não há previsão para esta região. Escolha outra em Trocar local, no Início." />
+          <ScreenState kind="empty" message={ui.common.noDataForRegion} />
         ) : (
-          <ScreenState kind="error" message="Não foi possível carregar os horários." onRetry={data.retry} />
+          <ScreenState kind="error" message={t.loadError} onRetry={data.retry} />
         ))}
 
       {ready && (
@@ -75,14 +74,14 @@ export default function ActivitiesScreen() {
           <TimeChooser items={ready.items} selected={selectedTime} onSelect={setSelectedTime} />
 
           {!selectedTime ? (
-            <ScreenState kind="empty" message="Escolha um horário para ver o que dá para fazer." />
+            <ScreenState kind="empty" message={t.chooseFirst} />
           ) : (
             <>
               <Text style={[font.heading, styles.text]} accessibilityRole="header">
-                O que dá para fazer neste horário
+                {t.resultsTitle}
               </Text>
               {sharedCode && done && (
-                <Text style={[font.body, styles.text]}>Dica para este horário: {recommendation[sharedCode]}</Text>
+                <Text style={[font.body, styles.text]}>{t.sharedTip(recommendation[sharedCode])}</Text>
               )}
               {cards.map(({ activity, state }) => (
                 <ActivityCard
