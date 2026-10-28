@@ -204,7 +204,7 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   reimplementa regra. As faixas aparecem só em texto, para não virar uma segunda "cor de status".
 - **Limitações:** os materiais definem "< 20" e "21–50" (latência) e "0–0,5" e "0,5–2" (perda),
   com buracos e sobreposições nas bordas. Escolhemos: 20 ms já é "bom"; 0,5% ainda é "estável";
-  50 e 100 ms e 2% ficam na faixa de baixo. A faixa de Redes e a categoria da API podem divergir
+  50 e 100 ms e 2% ficam na faixa de baixo (escolha confirmada pela equipe em 2026-10-28). A faixa de Redes e a categoria da API podem divergir
   (ex.: SP às 20:00, perda 3,9% = "falha" em Redes, mas a API diz Regular). A tela mostra as duas
   e diz de onde vem cada uma.
 
@@ -219,6 +219,27 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   não traz confiança, e mostrar a de outra hora seria inventar dado.
 - **Limitações:** com os dados atuais, a confiança só aparece para 20/08 20:00. Os valores aparecem
   no formato brasileiro ("73,2 ms") e são lidos por extenso ("73,2 milissegundos").
+
+## D25 — Upgrade do Expo SDK 57 para o 58, forçado pelo Expo Go (2026-10-27)
+- **Decisão:** atualizar o projeto para o SDK 58 (Expo 58.0.20, React Native 0.88.0, React
+  19.3.0, expo-router 58, datetimepicker 9.2.1, react-native-svg 15.16.0, Jest 30.5, ESLint 9.39
+  com eslint-config-expo 58), na branch `sdk-58`, antes do teste do M5.
+- **Descartada:** continuar no SDK 57. O Expo Go do iPhone foi atualizado para o SDK 58 e só abre
+  projetos SDK 58; as notas de versão dizem que o novo Expo Go aceita só o SDK 58. Sem o upgrade,
+  não há como testar no aparelho.
+- **Motivo:** o teste manual no iPhone é a verificação principal de acessibilidade do projeto.
+- **O que mudou no código:** só `src/app/local.tsx` ganhou `contentInsetAdjustmentBehavior=
+  "automatic"`. No iOS 26+, o cabeçalho do Stack do SDK 58 fica transparente, e sem isso a lista de
+  regiões poderia passar por baixo dele (guia oficial de migração do expo-router). Os testes já
+  usavam `await renderRouter` e a testing-library v14, que o SDK 58 exige.
+- **Como foi feito:** `npx expo install expo@^58.0.0` e depois `npx expo install --fix`. O `--fix`
+  falhou por conflito com uma cópia antiga de `expo-symbols` (dependência do expo-router 57 que
+  virou opcional no 58), registrada no `package-lock.json`. Solução: pôr no `package.json` as
+  versões que o `expo install --check` pedia e regenerar o `package-lock.json` (instalação limpa).
+- **Limitações:** a primeira execução dos testes depois da instalação limpa demorou 146 s e 2 testes
+  passaram do limite de 20 s (D21), por falta de cache do Jest. Na execução seguinte, os 101 testes
+  passaram em 26 s. O plugin de acessibilidade do ESLint continua declarando só o ESLint 8 e segue
+  funcionando pelo `overrides` (D12). O Android não foi testado.
 
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app

@@ -17,7 +17,8 @@ export default function ChooseLocationScreen() {
   const locations = useLoad(loadLocations);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    // SDK 58: no iOS 26+, o cabeçalho do Stack fica transparente; isto evita a lista passar por baixo dele.
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <Text style={[font.body, styles.text]}>
         A previsão é de um ponto de referência da rede nesta região, não do seu celular. O app não usa a sua
         localização.

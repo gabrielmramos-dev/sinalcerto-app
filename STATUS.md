@@ -1,6 +1,6 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-27, M4 aprovado; M5 implementado, aguardando o teste no iPhone (sem commit). Estados: **feito** (na tela e verificado) ·
+Atualizado: 2026-10-28, M5 aprovado, no Expo SDK 58 (D25). Estados: **feito** (na tela e verificado) ·
 **parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
 Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
@@ -15,13 +15,20 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF02 | parcial | `AppButton` e `TimelineRow` (role, nome, dica, estado); cartões e linhas lidos como um item; "Tentar de novo: <atividade>"; períodos, filtros, locais e horas com `selected`; lint a11y | Teste automatizado + lint. **VoiceOver no iPhone (2026-10-16):** Início (cartão como frase única com a data, "Trocar local", 3 abas com nome, região selecionada anunciada); Atividades (cartões como frase única, "selecionado" nos períodos, seletor ajustável). **(2026-10-22):** Detalhes (linhas lidas como frase, cabeçalhos de data para pular entre dias, "selecionado" na hora escolhida) | TalkBack (Android) |
 | RNF03 | parcial | Texto + forma + cor em `StatusBadge` (qualidade, atividades, linhas da timeline); seleção com "✓" e `selected` | Teste automatizado. Teste manual no iPhone: status das atividades (2026-10-16) e linhas e filtros da timeline (2026-10-22) com texto, ícone e cor ou "✓" | Android; conferência final no M7 |
 | RNF04 | parcial | `theme/index.ts`, `theme/contrast.ts` | Teste automatizado: 18 pares da paleta | Conferir cada tela no M7 |
-| RNF05 | parcial | Sem `numberOfLines` e sem `lineHeight` fixo; botões e linhas da timeline quebram linha; telas com rolagem | **Texto no máximo no iPhone:** Início, Escolher local e Atividades (2026-10-16); Detalhes e a prévia do Início (2026-10-22), sem cortes nem sobreposições | Android; telas do M5 |
-| RNF06 | parcial | Só toques simples em botões; o seletor de rolagem do iOS tem "Usar este horário" e "Cancelar"; filtros sem rolagem horizontal | Leitura do código. Teste manual no iPhone: seletor ajustável pelo VoiceOver | Android; telas do M5 |
-| RNF07 | parcial | `components/NumbersSection.tsx` (seção "Como ler os números" na aba Detalhes); textos e faixas de Redes em `i18n/glossary.ts`; `data/metrics.ts` (`bandFor`, D23); D24 | Teste automatizado (`data/metrics.test.ts`: bordas das faixas; `__tests__/detalhes.test.tsx`: latência e perda com valor, faixa de Redes e explicação, aviso de que RTT alto sozinho não é defeito, jitter sem valor com aviso, nota explicada, confiança só na hora em que a API manda, equivalência Boa/Regular/Instável = OK/Risco/Falha, categoria sem reclassificação) | Teste manual no iPhone (VoiceOver em ordem e texto no máximo) |
+| RNF05 | parcial | Sem `numberOfLines` e sem `lineHeight` fixo; botões e linhas da timeline quebram linha; telas com rolagem | **Texto no máximo no iPhone:** Início, Escolher local e Atividades (2026-10-16); Detalhes e a prévia do Início (2026-10-22); seção "Como ler os números" e todas as telas no SDK 58 (2026-10-28), sem cortes nem sobreposições | Android |
+| RNF06 | parcial | Só toques simples em botões; o seletor de rolagem do iOS tem "Usar este horário" e "Cancelar"; filtros sem rolagem horizontal | Leitura do código. Teste manual no iPhone: seletor ajustável pelo VoiceOver (2026-10-16; de novo no SDK 58 em 2026-10-28) | Android |
+| RNF07 | parcial | `components/NumbersSection.tsx` (seção "Como ler os números" na aba Detalhes); textos e faixas de Redes em `i18n/glossary.ts`; `data/metrics.ts` (`bandFor`, D23); D24 | Teste automatizado (`data/metrics.test.ts`: bordas das faixas; `__tests__/detalhes.test.tsx`: latência e perda com valor, faixa de Redes e explicação, aviso de que RTT alto sozinho não é defeito, jitter sem valor com aviso, nota explicada, confiança só na hora em que a API manda, equivalência Boa/Regular/Instável = OK/Risco/Falha, categoria sem reclassificação). **Teste manual no iPhone, SDK 58 (2026-10-28):** valores certos (73,2 ms, 3,9%, nota 63, confiança 80% às 20:00), confiança some às 15:00, VoiceOver e texto no máximo ok. Bordas das faixas (D23) confirmadas pela equipe | Revisão de linguagem para leigos (M5.1): hoje a seção ainda usa termos técnicos ("API", "faixas de Redes") |
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
 
-## Verificação desta entrega (M4)
+## Verificação desta entrega (M5 + SDK 58)
+- `npm run check`, 2026-10-27: sem erros, 101 testes em 13 arquivos; `expo-doctor` 20/20; bundle iOS
+  gerado sem erro.
+- Teste manual no iPhone com Expo Go SDK 58 (2026-10-28): app abre; M5 com os valores certos e a
+  confiança sumindo às 15:00; lista de locais visível com o cabeçalho do iOS 26; Atividades e
+  Detalhes funcionando; VoiceOver e texto no máximo ok.
+
+## Verificação da entrega anterior (M4)
 - `npm run check` (typecheck + lint com a11y + Jest), 2026-10-22: sem erros, 94 testes passando em 12 arquivos.
 - Bundle iOS gerado sem erro (2026-10-22).
 - Teste manual no iPhone (2026-10-22): 24 horas com cabeçalhos de data; filtros com ✓ (Noite com 6
