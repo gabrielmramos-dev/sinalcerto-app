@@ -1,6 +1,6 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-28, M6 aprovado (API real com reserva automática). Estados: **feito** (na tela e verificado) ·
+Atualizado: 2026-10-28, M6 aprovado; marco de design (MD) em andamento, E1 aprovada. Estados: **feito** (na tela e verificado) ·
 **parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
 Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
@@ -21,7 +21,18 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
 
-## Verificação desta entrega (M6, API real com reserva automática, D27)
+## Marco de design (MD), E1: tema claro e escuro, fontes e ícones (D28)
+- Teste automatizado: contraste de todos os pares **nos dois modos** (`theme/contrast.test.ts`);
+  `npm run check` com o cache do Jest limpo (163 testes); bundle iOS.
+- Teste manual no iPhone (2026-10-28): abertura sem troca visível de fonte; títulos em serifa e
+  texto em Manrope; abas com ícone e texto, a ativa em verde; modo escuro legível nas 5 telas
+  (inclusive o aviso "Sem conexão"); modo claro correto; VoiceOver lendo só o nome das abas; texto
+  no máximo sem cortes nos dois modos.
+- Efeito nos requisitos: RNF04 agora vale nos dois modos (teste automatizado + aparelho); RNF05
+  conferido com as fontes novas nos dois modos.
+- **Não testado:** Android (modo escuro e fontes).
+
+## Verificação da entrega anterior (M6, API real com reserva automática, D27)
 - `ApiSource` contra a Internet Quality API, `FallbackSource` com reserva automática, aviso de
   conexão nas 5 telas, mensagem de primeira carga lenta, mensagens de 400/422.
 - Teste automatizado: `ApiSource.test.ts`, `FallbackSource.test.ts`, `__tests__/aviso.test.tsx`,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { AccessibilityInfo, ScrollView, StyleSheet, Text } from 'react-native';
+import { AccessibilityInfo, ScrollView, Text } from 'react-native';
 
 import { ActivityCard } from '@/components/ActivityCard';
 import { ScreenState } from '@/components/ScreenState';
@@ -13,11 +13,12 @@ import { useActivityChecks } from '@/hooks/useActivityChecks';
 import { useLoad } from '@/hooks/useLoad';
 import { disclaimer, errorMessage, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, spacing } from '@/theme';
 
 const t = ui.activities;
 
 export default function ActivitiesScreen() {
+  const styles = useStyles();
   const { probeId, selectedTime, setSelectedTime } = useAppState();
   const region = ui.common.region(regionName(probeId));
 
@@ -103,9 +104,9 @@ export default function ActivitiesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = createThemedStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.md },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));

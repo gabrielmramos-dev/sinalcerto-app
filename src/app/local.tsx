@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 
 import { AppButton } from '@/components/AppButton';
 import { ScreenState } from '@/components/ScreenState';
@@ -9,12 +9,13 @@ import { regionLabel } from '@/data/regions';
 import { useLoad } from '@/hooks/useLoad';
 import { errorMessage, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, spacing } from '@/theme';
 
 const t = ui.location;
 const loadLocations = () => forecastSource.getLocations();
 
 export default function ChooseLocationScreen() {
+  const styles = useStyles();
   const router = useRouter();
   const { probeId, setProbeId } = useAppState();
   const locations = useLoad(loadLocations);
@@ -46,8 +47,8 @@ export default function ChooseLocationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = createThemedStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.sm },
-  text: { color: colors.text, marginBottom: spacing.sm },
-});
+  text: { color: c.text, marginBottom: spacing.sm },
+}));

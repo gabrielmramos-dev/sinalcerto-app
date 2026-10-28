@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
-import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, ScrollView, Text, View } from 'react-native';
 
 import type { ProbeForecast } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
@@ -14,11 +14,12 @@ import { brasiliaClock, brasiliaDay, formatBrasiliaLong, isPast } from '@/data/t
 import { useLoad } from '@/hooks/useLoad';
 import { disclaimer, errorMessage, quality, recommendation, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, radius, spacing } from '@/theme';
 
 const t = ui.home;
 
 export default function HomeScreen() {
+  const styles = useStyles();
   const router = useRouter();
   const { probeId } = useAppState();
   const region = ui.common.region(regionName(probeId));
@@ -70,6 +71,7 @@ export default function HomeScreen() {
  * hora, então a seção diz isso com honestidade; quando houver horas futuras, elas aparecem sozinhas.
  */
 function NextHours({ probeId, after }: { probeId: number; after: string }) {
+  const styles = useStyles();
   const load = useCallback(() => forecastSource.getTimeline(probeId, DEFAULT_MODEL_ID), [probeId]);
   const timeline = useLoad(load);
   const next =
@@ -111,6 +113,7 @@ function summary(f: ProbeForecast): string {
 }
 
 function ForecastCard({ forecast }: { forecast: ProbeForecast }) {
+  const styles = useStyles();
   const q = quality[forecast.assessment.quality];
   return (
     // Lido como um item só, na ordem da tela (RNF02, RNF08). Texto estático: sem dica de toque.
@@ -128,20 +131,20 @@ function ForecastCard({ forecast }: { forecast: ProbeForecast }) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = createThemedStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.md },
   location: { gap: spacing.xs, alignItems: 'flex-start' },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
+    backgroundColor: c.surface,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
     padding: spacing.md,
     gap: spacing.sm,
   },
   next: { gap: spacing.sm },
   nextRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));

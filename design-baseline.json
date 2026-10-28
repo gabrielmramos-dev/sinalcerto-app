@@ -1,0 +1,52 @@
+{
+  "tool": "mobile-design-review",
+  "version": 1,
+  "date": "2026-10-28",
+  "pass": "static-only (sem simulador; testes manuais anteriores no iPhone foram funcionais, sem capturas das telas atuais)",
+  "designScore": "B",
+  "designScoreNote": "média 3.55 (A-), limitada a B por haver achado de alto impacto aberto",
+  "slopScore": "A",
+  "categories": {
+    "navigation": "C",
+    "anatomy": "A",
+    "typography": "A-",
+    "color": "A-",
+    "surfaces": "A-",
+    "states": "A-",
+    "interaction": "A-",
+    "forms": "A",
+    "performance": "A",
+    "copy": "A"
+  },
+  "findings": [
+    { "id": "FINDING-001", "impact": "high", "category": "navigation", "summary": "Modal Escolher local sem fechar explícito (só deslizar ou escolher uma região); a verificar no aparelho", "status": "open" },
+    { "id": "FINDING-002", "impact": "medium", "category": "navigation", "summary": "Cabeçalho nativo com o nome da aba + título no conteúdo (Atividades: 'Atividades' e 'Para quando?'; Detalhes: 'Detalhes' e 'Previsão por hora')", "status": "open" },
+    { "id": "FINDING-003", "impact": "medium", "category": "navigation", "summary": "Tela de entrada nunca mostra o nome SinalCerto (Trunk Test Q1 parcial)", "status": "open" },
+    { "id": "FINDING-004", "impact": "medium", "category": "typography", "summary": "Sem nível display: a categoria do Início (a informação principal) usa o mesmo tamanho de outros títulos", "status": "open" },
+    { "id": "FINDING-005", "impact": "medium", "category": "color", "summary": "Sem modo escuro: userInterfaceStyle light e tokens só claros", "status": "open" },
+    { "id": "FINDING-006", "impact": "medium", "category": "surfaces", "tell": 3, "summary": "Pilha de cartões: Atividades com 6 cartões com borda; seção de números com 4 cartões", "status": "open" },
+    { "id": "FINDING-007", "impact": "medium", "category": "states", "tell": 37, "summary": "Carregamento só com indicador giratório + texto, sem esqueleto do layout", "status": "open" },
+    { "id": "FINDING-008", "impact": "medium", "category": "interaction", "tell": 35, "summary": "Retorno de toque só por opacidade 0.8; sem ripple no Android", "status": "open" },
+    { "id": "FINDING-009", "impact": "polish", "category": "navigation", "summary": "Abas só com texto (decisão consciente do M1)", "status": "open" },
+    { "id": "FINDING-010", "impact": "polish", "category": "typography", "summary": "Sem maxFontSizeMultiplier em textos de botão (intencional: RNF05 verificado no iPhone com texto no máximo)", "status": "open" },
+    { "id": "FINDING-011", "impact": "polish", "category": "copy", "summary": "Rodapé do Início junta o aviso de estimativa e o da região num parágrafo só", "status": "open" }
+  ],
+  "dismissed": [
+    { "grep": "tell 33 dashes", "hit": "NumbersSection.tsx:14", "reason": "travessão num comentário de código, não é texto visível" },
+    { "grep": "tell 1 emoji", "hit": "AppButton.tsx:45, TimelineRow.tsx:28 (✓)", "reason": "U+2713 renderizado como texto, marca de estado selecionado exigida pelo RNF03; não é ícone emoji" },
+    { "grep": "tell 13 ScrollView+map", "hit": "5 telas", "reason": "listas fixas e curtas (10 regiões, 24 horas, 6 atividades, 4 períodos, 3 categorias)" },
+    { "grep": "pull-to-refresh", "hit": "nenhum RefreshControl", "reason": "não é feed; dados de um dia; 'Tentar de novo' cobre a recarga (D27)" }
+  ],
+  "accessibilityWins": [
+    "role/nome/estado em todo controle; lint de acessibilidade",
+    "contraste testado por par de cores",
+    "48 dp em todos os toques",
+    "categoria sempre em texto + forma + cor",
+    "texto no máximo e VoiceOver verificados no iPhone a cada marco"
+  ],
+  "unverified": [
+    "nenhum simulador ou aparelho acessível nesta revisão: teclado (não há campos), splash, desempenho de rolagem, escala de fonte, bordas do Android NÃO verificados agora",
+    "se o modal Escolher local mostra botão de voltar/fechar no cabeçalho nativo",
+    "Android em geral"
+  ]
+}

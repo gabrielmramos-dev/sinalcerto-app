@@ -178,6 +178,12 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   leva 6 a 7 s no Windows. Com 5 s ele falhava por tempo, não por erro de lógica, e derrubava os
   testes seguintes do arquivo.
 - **Limitações:** um teste que travar de verdade demora 20 s para falhar, em vez de 5 s.
+- **Atualização (2026-10-28, MD/E1):** limite elevado para 60 s. Com o SDK 58 (React Native 0.88,
+  D25), a primeira execução depois de limpar o cache do Jest leva cerca de 140 s no arquivo que
+  roda primeiro, porque ele compila o React Native e o router; com 20 s, o primeiro teste desse
+  arquivo falhava por tempo e derrubava os seguintes. Isso acontecia na primeira execução de
+  qualquer pessoa da equipe. Com o cache pronto, a suíte inteira roda em cerca de 30 s. Um teste
+  travado de verdade agora demora 60 s para falhar.
 
 ## D22 — Prévia "Próximas horas" no Início (2026-10-22)
 - **Decisão:** abaixo do cartão, a seção "Próximas horas" mostra até 3 horas da timeline depois da
@@ -313,6 +319,32 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
 - **Limitações:** o modo "sem conexão" só sai pelo botão (não detecta sozinho a volta da rede). A
   reserva só tem o model-a. Uma resposta 404 da reserva (região sem dados) não acontece com os dados
   atuais.
+
+## D28 — Marco de design, E1: tema claro e escuro, fontes e ícones (2026-10-28)
+- **Decisão:** tema seguindo o sistema (`userInterfaceStyle: automatic`, sem botão), com os mesmos
+  nomes de tokens desde o M1 e valores claros e escuros (`palettes.light` / `palettes.dark`).
+  Paleta nova a partir dos prints do Figma Make: fundo off-white, acento único verde-floresta,
+  cores de categoria recalibradas. Todos os pares passam no teste de contraste **nos dois modos**.
+  Títulos em DM Serif Display e texto em Manrope (`expo-font` + `@expo-google-fonts`), com a tela
+  de abertura segurada até as fontes carregarem. Ícones Lucide (`lucide-react-native`) nas abas,
+  com o texto embaixo. Cantos por papel (8/12/16/pílula) e elevação com sombra do iOS e
+  `elevation` do Android juntas. Proposta completa, com os riscos, em `docs/MOBILE-DESIGN.md`.
+- **Skills usadas:** `mobile-design-review` (revisão inicial: nota B, linha de base em
+  `design-baseline.json`; mudou a decisão ao apontar a falta do modo escuro e do fechar no modal);
+  `frontend-design` (crítica dos prints: tirou os rótulos em maiúsculas, o ponto no meio e o cartão
+  escuro da nota, e escolheu o relógio como único elemento de destaque); `mobile-design-system`
+  (proposta SAFE/RISK e tokens; mudou a decisão ao exigir os dois modos desde já e ao registrar o
+  fundo creme como risco de "cara de IA", compensado pelo acento verde).
+- **Descartada:** tema só claro; botão de modo escuro; fontes do sistema; ícones desenhados à mão;
+  `expo-linear-gradient` (o gradiente da E2 usa o `react-native-svg`, que já existe).
+- **Motivo:** fidelidade à referência visual aprovada, sem perder acessibilidade.
+- **Como:** `createThemedStyles` monta os estilos dos dois modos uma vez; `useColors` dá as cores
+  do modo atual. As 14 telas e componentes passaram de cores fixas para o tema.
+- **Ícones um a um:** importados por arquivo (`lucide-react-native/icons/house`). O Metro não
+  descarta código não usado: o índice da biblioteca levaria todos os ~1.900 ícones para o app e
+  deixava o primeiro teste de cada arquivo lento demais (passava do limite de 20 s).
+- **Limitações:** a DM Serif Display só tem um peso. O modo escuro ainda não foi visto no aparelho.
+  O cabeçalho nativo das 3 abas só é escondido nas etapas de cada tela (E2 a E4).
 
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app

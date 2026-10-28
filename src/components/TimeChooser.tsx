@@ -1,12 +1,12 @@
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 
 import type { TimelineItem } from '@/api/types';
 import { bestInPeriod, PERIODS, type PeriodId } from '@/data/periods';
 import { brasiliaHour, formatBrasiliaLong, itemAtClock } from '@/data/time';
 import { period as periodText, ui } from '@/i18n/glossary';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, spacing } from '@/theme';
 import { AppButton } from './AppButton';
 
 const t = ui.timeChooser;
@@ -22,6 +22,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 /** RQ04: seletor nativo de hora + botões de período. Só devolve horários que existem na timeline (D6). */
 export function TimeChooser({ items, selected, onSelect }: Props) {
+  const styles = useStyles();
   const [chosenPeriod, setChosenPeriod] = useState<PeriodId | null>(null);
   // O aviso guarda o horário a que se refere: se o horário mudar em outra aba (Detalhes), ele some.
   const [rounded, setRounded] = useState<{ predictionFor: string; picked: string } | null>(null);
@@ -119,9 +120,9 @@ export function TimeChooser({ items, selected, onSelect }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((c) => ({
   box: { gap: spacing.sm },
   periods: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));

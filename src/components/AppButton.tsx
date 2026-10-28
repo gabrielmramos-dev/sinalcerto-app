@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
-import { colors, font, minTouch, spacing } from '@/theme';
+import { createThemedStyles, font, minTouch, radius, spacing, useColors } from '@/theme';
 
 interface Props {
   label: string;
@@ -17,6 +17,8 @@ interface Props {
 }
 
 export function AppButton({ label, a11yLabel, onPress, hint, variant = 'secondary', selected, disabled }: Props) {
+  const styles = useStyles();
+  const c = useColors();
   const primary = variant === 'primary' || selected;
   const link = variant === 'link';
   return (
@@ -38,7 +40,7 @@ export function AppButton({ label, a11yLabel, onPress, hint, variant = 'secondar
       <Text
         style={[
           font.label,
-          { color: primary ? colors.onPrimary : colors.primary },
+          { color: primary ? c.onPrimary : c.primary },
           link && { textDecorationLine: 'underline' },
         ]}
       >
@@ -48,20 +50,20 @@ export function AppButton({ label, a11yLabel, onPress, hint, variant = 'secondar
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((c) => ({
   base: {
     minHeight: minTouch,
     minWidth: minTouch,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  primary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  secondary: { backgroundColor: colors.surface, borderColor: colors.primary },
+  primary: { backgroundColor: c.primary, borderColor: c.primary },
+  secondary: { backgroundColor: c.surface, borderColor: c.primary },
   link: { borderColor: 'transparent', alignSelf: 'flex-start' },
   pressed: { opacity: 0.8 },
   disabled: { opacity: 0.5 },
-});
+}));

@@ -1,9 +1,9 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
 import type { TimelineItem } from '@/api/types';
 import { brasiliaClock, brasiliaDay } from '@/data/time';
 import { quality, ui } from '@/i18n/glossary';
-import { colors, font, minTouch, spacing } from '@/theme';
+import { createThemedStyles, font, minTouch, radius, spacing } from '@/theme';
 import { QualityBadge } from './StatusBadge';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
 
 /** RQ02: uma hora da timeline. Texto + ícone + cor + nota; tocar escolhe este horário (D6). */
 export function TimelineRow({ item, selected, onPress }: Props) {
+  const styles = useStyles();
   const clock = brasiliaClock(item.predictionFor);
   const label = ui.details.row(clock, brasiliaDay(item.predictionFor), quality[item.quality].label, item.qualityScore);
   return (
@@ -32,7 +33,7 @@ export function TimelineRow({ item, selected, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((c) => ({
   // flexWrap: com texto grande, o selo desce para a linha de baixo em vez de cortar (RNF05).
   row: {
     minHeight: minTouch,
@@ -42,13 +43,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: c.surface,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  selected: { borderWidth: 3, borderColor: colors.primary },
+  selected: { borderWidth: 3, borderColor: c.primary },
   pressed: { opacity: 0.8 },
   clock: { minWidth: 64 },
-  text: { color: colors.text },
-});
+  text: { color: c.text },
+}));

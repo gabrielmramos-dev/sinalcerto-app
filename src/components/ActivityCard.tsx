@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { Activity } from '@/api/types';
 import type { CardState } from '@/hooks/useActivityChecks';
 import { activity as activityText, recommendation, suitability, ui } from '@/i18n/glossary';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, radius, spacing } from '@/theme';
 import { AppButton } from './AppButton';
 import { StatusBadge } from './StatusBadge';
 
@@ -17,6 +17,7 @@ interface Props {
 
 /** RQ03: status vem de `suitable` e conselho de `recommendation.code`, os dois da API. */
 export function ActivityCard({ activity, state, onRetry, showAdvice }: Props) {
+  const styles = useStyles();
   const { name, examples } = activityText[activity];
 
   if (state.status === 'error') {
@@ -52,16 +53,16 @@ export function ActivityCard({ activity, state, onRetry, showAdvice }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((c) => ({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
+    backgroundColor: c.surface,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
     padding: spacing.md,
     gap: spacing.sm,
   },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-  error: { color: colors.danger },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+  error: { color: c.danger },
+}));

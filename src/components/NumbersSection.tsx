@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { TimelineItem } from '@/api/types';
 import { bandFor, formatDecimal } from '@/data/metrics';
 import { formatBrasiliaLong } from '@/data/time';
 import { metric, numbersSection as txt, redesBands } from '@/i18n/glossary';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, radius, spacing } from '@/theme';
 import { QualityBadge } from './StatusBadge';
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
  * o nome e os limites delas aparecem apenas na tela "Sobre".
  */
 export function NumbersSection({ item, isNearest, confidence }: Props) {
+  const styles = useStyles();
   // A faixa usa o valor arredondado, o mesmo que aparece na tela (nunca "20 ms" com duas frases).
   const ms = Math.round(item.predictedAvgRttMs);
   const latencyEffect = bandFor(ms, redesBands.latency).effect!;
@@ -74,6 +75,7 @@ interface MetricProps {
 }
 
 function Metric({ term, value, spokenValue, effect, texts }: MetricProps) {
+  const styles = useStyles();
   return (
     <View style={styles.metric}>
       <Text style={[font.heading, styles.text]} accessibilityRole="header">
@@ -94,16 +96,16 @@ function Metric({ term, value, spokenValue, effect, texts }: MetricProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((c) => ({
   section: { gap: spacing.sm, marginTop: spacing.lg },
   metric: {
     gap: spacing.xs,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
+    backgroundColor: c.surface,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
     padding: spacing.md,
   },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));

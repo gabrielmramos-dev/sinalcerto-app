@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { QUALITIES } from '@/api/types';
 import { SourceBanner } from '@/components/SourceBanner';
@@ -11,10 +11,11 @@ import { formatBrasiliaLong } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
 import { about, quality, redesBands } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, spacing } from '@/theme';
 
 /** D26: bastidores da previsão. Única tela com linguagem técnica. */
 export default function AboutScreen() {
+  const styles = useStyles();
   const { probeId } = useAppState();
   const status = useSourceStatus();
   // Modelo e período vêm da própria fonte de dados, para o texto nunca ficar desatualizado.
@@ -97,6 +98,7 @@ export default function AboutScreen() {
 }
 
 function Section({ title, texts, children }: { title: string; texts: string[]; children?: React.ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.section}>
       <Text style={[font.heading, styles.text]} accessibilityRole="header">
@@ -112,10 +114,10 @@ function Section({ title, texts, children }: { title: string; texts: string[]; c
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = createThemedStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.lg },
   section: { gap: spacing.sm },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
-  text: { color: colors.text },
-});
+  text: { color: c.text },
+}));

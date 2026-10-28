@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { sourceStatus, useSourceStatus } from '@/data/sourceStatus';
 import { ui } from '@/i18n/glossary';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, radius, spacing } from '@/theme';
 import { AppButton } from './AppButton';
 
 /**
@@ -10,6 +10,7 @@ import { AppButton } from './AppButton';
  * sourceStatus (uma vez por mudança), não daqui, para não repetir em cada tela aberta.
  */
 export function SourceBanner() {
+  const styles = useStyles();
   const { mode } = useSourceStatus();
   if (mode === 'unknown') return null;
 
@@ -32,9 +33,9 @@ export function SourceBanner() {
   );
 }
 
-const styles = StyleSheet.create({
-  box: { gap: spacing.sm, padding: spacing.md, borderRadius: 12, borderWidth: 1 },
-  offline: { backgroundColor: colors.moderateBg, borderColor: colors.border },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-});
+const useStyles = createThemedStyles((c) => ({
+  box: { gap: spacing.sm, padding: spacing.md, borderRadius: radius.md, borderWidth: 1 },
+  offline: { backgroundColor: c.moderateBg, borderColor: c.border },
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));

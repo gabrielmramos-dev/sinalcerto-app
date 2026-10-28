@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, ScrollView, Text, View } from 'react-native';
 
 import type { TimelineItem } from '@/api/types';
 import { AppButton } from '@/components/AppButton';
@@ -16,12 +16,13 @@ import { formatBrasiliaLong, groupByDay } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
 import { errorMessage, period as periodText, quality, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, spacing } from '@/theme';
 
 type Filter = 'todas' | PeriodId;
 const t = ui.details;
 
 export default function DetailsScreen() {
+  const styles = useStyles();
   const router = useRouter();
   const { probeId, selectedTime, setSelectedTime } = useAppState();
   const [filter, setFilter] = useState<Filter>('todas');
@@ -125,11 +126,11 @@ export default function DetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = createThemedStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.md },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   group: { gap: spacing.sm },
-  text: { color: colors.text },
-  muted: { color: colors.textMuted },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));
