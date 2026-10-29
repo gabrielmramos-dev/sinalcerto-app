@@ -127,6 +127,9 @@ export const disclaimer =
 export const ui = {
   tabs: { home: 'Início', activities: 'Atividades', details: 'Detalhes' },
   common: {
+    // D36: nunca expor nome de rota ("(tabs)") no botão voltar
+    appName: 'SinalCerto',
+    back: 'Voltar',
     qualityContext: 'Qualidade prevista',
     loading: 'Carregando a previsão…',
     retry: 'Tentar de novo',
@@ -179,6 +182,9 @@ export const ui = {
     loadError: 'Não foi possível carregar as regiões.',
     empty: 'Nenhuma região disponível no momento.',
     pickHint: 'Usa esta região na previsão e volta para o início',
+    // D36
+    close: 'Fechar',
+    closeHint: 'Fecha sem trocar a região',
   },
   activities: {
     // D34 (wireframe v2): "O que você quer fazer?"

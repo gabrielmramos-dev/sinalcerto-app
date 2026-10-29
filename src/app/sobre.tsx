@@ -13,7 +13,7 @@ import { about, disclaimer, quality, redesBands, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { createThemedStyles, font, spacing } from '@/theme';
 
-/** D26: bastidores da previsão. Única tela com linguagem técnica. */
+/** D26: bastidores da previsão. Única tela com linguagem técnica. D36: estilo do wireframe v2. */
 export default function AboutScreen() {
   const styles = useStyles();
   const { probeId } = useAppState();
@@ -33,7 +33,11 @@ export default function AboutScreen() {
     // Cabeçalho do Stack transparente no iOS 26+ (SDK 58): o conteúdo não passa por baixo dele.
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <SourceBanner />
-      <Text style={[font.body, styles.text]}>{about.intro}</Text>
+      {/* D36: título em serifa no conteúdo, como nas abas; o cabeçalho nativo fica só com o voltar. */}
+      <Text style={[font.title, styles.text]} accessibilityRole="header">
+        {about.title}
+      </Text>
+      <Text style={[font.body, styles.muted]}>{about.intro}</Text>
 
       {/* D34: o "Saiba mais" do Início traz para cá o texto completo do aviso. */}
       <Section title={about.estimateTitle} texts={[disclaimer, ui.home.regionNote]} />
@@ -119,8 +123,10 @@ function Section({ title, texts, children }: { title: string; texts: string[]; c
 
 const useStyles = createThemedStyles((c) => ({
   screen: { flex: 1, backgroundColor: c.background },
-  content: { padding: spacing.md, gap: spacing.lg },
-  section: { gap: spacing.sm },
+  content: { padding: spacing.md, gap: spacing.md },
+  // D36: seções separadas por divisória fina, com o mesmo espaço em cima e embaixo.
+  section: { gap: spacing.sm, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: c.border },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
   text: { color: c.text },
+  muted: { color: c.textMuted },
 }));

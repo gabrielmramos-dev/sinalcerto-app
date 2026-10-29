@@ -114,10 +114,10 @@ it('trocar o local recarrega e anuncia a nova região (D7)', async () => {
   await screen.findByLabelText(CARD);
 
   await fireEvent.press(screen.getByRole('button', { name: 'Trocar local' }));
-  expect(await screen.findByRole('button', { name: 'Região de São Paulo (SP)', selected: true })).toBeOnTheScreen();
+  expect(await screen.findByRole('button', { name: 'São Paulo (SP)', selected: true })).toBeOnTheScreen();
 
   announce.mockClear();
-  await fireEvent.press(screen.getByRole('button', { name: 'Região de Manaus (AM)' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Manaus (AM)' }));
   expect(await screen.findByText('Manaus (AM)')).toBeOnTheScreen();
   await screen.findByRole('adjustable'); // a faixa da região nova carregou
   expect(announce).toHaveBeenCalledWith(expect.stringMatching(/^Região escolhida: Manaus \(AM\)\. /));

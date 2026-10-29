@@ -124,7 +124,8 @@ export function DayStrip({ items, selected, onSelect, caption, ref }: Props) {
           // 'activate' (toque duplo): não faz nada; sem isso o toque cairia no meio da faixa.
         }}
         onAccessibilityTap={() => {}}
-        style={styles.strip}
+        // D36: o mesmo retorno ao toque do resto do app (escurece um pouco).
+        style={({ pressed }) => [styles.strip, pressed && styles.pressed]}
       >
         <Svg
           width="100%"

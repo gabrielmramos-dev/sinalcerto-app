@@ -629,6 +629,39 @@ aplicado: o layout final é o do wireframe.
 - **Removido:** `NumbersSection` e `TimelineRow`, substituídos por `HourRow`, e os textos sem uso do
   glossário (`numbersSection` e `period`).
 
+## D36 — Marco de design, E5: Escolher local e Sobre no wireframe v2 (2026-10-29)
+Bases em `docs/fundamentacao-design.md`. Skills: `mobile-taste` (todo modal com saída visível,
+retorno ao toque), `mobile-design-review` (mesmo padrão de lista e de espaçamento das abas) e
+`mobile-redesign-app` (não mudar a navegação aprendida).
+
+- **Escolher local (modal):**
+  - **Cabeçalho próprio, no padrão das abas:** "Escolher local" em serifa, marcado como cabeçalho, e o
+    botão "Fechar" visível à direita (≥ 48 dp). Ao abrir, o foco do leitor de tela vai para "Fechar",
+    depois de 0,5 s, para deixar a animação do modal terminar. "Fechar" volta sem trocar a região.
+  - **Lista:** as regiões ficam numa lista com divisórias finas, como em Detalhes, com linhas de
+    ≥ 48 dp. A região atual tem fundo suave, ✓ e estado selecionado. Tocar escolhe e fecha, como antes.
+  - **Nome falado:** é só o nome da região ("São Paulo (SP)"), igual ao texto visível (WCAG 2.5.3). O
+    título "Escolher local" dá o contexto. O `regionLabel` ("Região de …") saiu.
+  - **Divisória:** fica por fora da seleção, sempre sobre a superfície (sobre o fundo suave, no modo
+    escuro, daria menos de 3:1).
+- **Sobre:**
+  - **Navegação:** o voltar nativo continua (navegação aprendida), com o cabeçalho sem título. O
+    título "Sobre o SinalCerto" vai para o conteúdo, em serifa e marcado como cabeçalho.
+  - **Visual:** seções separadas por divisória fina e com o mesmo espaçamento; a introdução fica em
+    texto de apoio. O conteúdo do M5.1 e do M6 não mudou. A tela não tem links nem textos
+    centralizados; se ganhar algum, segue o padrão do Início (contêiner centralizado).
+- **Retorno ao toque:** continua o escurecimento em todo o app, sem escala nem ondinha (decisão da
+  equipe). Ele entrou onde faltava: na faixa do dia e nas linhas novas da lista de regiões.
+- **`AppButton`:** passou a aceitar `ref`, usado para levar o foco a "Fechar".
+- **Correções depois do teste no iPhone:**
+  - **Voltar da tela Sobre:** mostrava "(tabs)", o nome interno da rota. Agora a tela das abas tem
+    título ("SinalCerto"), e o voltar da tela Sobre diz "Voltar". A guarda de vocabulário passou a
+    barrar "(tabs)"; ela ignora só o id interno da tela, que não aparece nem é lido. As outras telas
+    têm título próprio e não expõem nome de rota.
+  - **Aviso de conexão:** saiu do modal Escolher local e fica nas abas e na tela Sobre. No modal, também
+    não aparece o "Sem conexão".
+  - **Teste novo:** escolher Belo Horizonte e reabrir o modal mostra o ✓ em Belo Horizonte, só nela.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

@@ -21,10 +21,12 @@ const FORBIDDEN = [
   /\bOK\b/,
   /\bRisco\b/,
   /\bFalha\b/,
+  /\(tabs\)/, // D36: nome interno de rota (apareceu no voltar da tela Sobre)
 ];
 
 function forbiddenOnScreen(): string[] {
-  const tree = JSON.stringify(screen.toJSON());
+  // O id interno da tela ("(tabs):0-0") não é visível nem lido; fica fora da varredura.
+  const tree = JSON.stringify(screen.toJSON()).replace(/"screenId":"[^"]*"/g, '');
   const spoken = announced.mock.calls.map(([s]) => String(s)).join(' ');
   return FORBIDDEN.filter((re) => re.test(tree) || re.test(spoken)).map(String);
 }
@@ -40,7 +42,7 @@ it('Início sem termos de bastidor', async () => {
 
 it('Escolher local sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/local' });
-  await screen.findByRole('button', { name: 'Região de São Paulo (SP)' }, { timeout: 5000 });
+  await screen.findByRole('button', { name: 'São Paulo (SP)' }, { timeout: 5000 });
   expect(forbiddenOnScreen()).toEqual([]);
 });
 

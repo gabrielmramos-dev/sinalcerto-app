@@ -1,4 +1,5 @@
-import { Pressable, Text } from 'react-native';
+import type { ComponentRef, Ref } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 import { createThemedStyles, font, minTouch, radius, spacing, useColors } from '@/theme';
 
@@ -14,15 +15,18 @@ interface Props {
   /** Para botões que funcionam como opção (ex.: período do dia). */
   selected?: boolean;
   disabled?: boolean;
+  /** D36: para levar o foco do leitor de tela ao botão (ex.: "Fechar" ao abrir o modal). */
+  ref?: Ref<ComponentRef<typeof View>>;
 }
 
-export function AppButton({ label, a11yLabel, onPress, hint, variant = 'secondary', selected, disabled }: Props) {
+export function AppButton({ label, a11yLabel, onPress, hint, variant = 'secondary', selected, disabled, ref }: Props) {
   const styles = useStyles();
   const c = useColors();
   const primary = variant === 'primary' || selected;
   const link = variant === 'link';
   return (
     <Pressable
+      ref={ref}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole={link ? 'link' : 'button'}

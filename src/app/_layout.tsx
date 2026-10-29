@@ -1,5 +1,10 @@
 import { DMSerifDisplay_400Regular } from '@expo-google-fonts/dm-serif-display';
-import { Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
+import {
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+} from '@expo-google-fonts/manrope';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -44,9 +49,12 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: c.background },
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="local" options={{ presentation: 'modal', title: ui.location.title }} />
-        <Stack.Screen name="sobre" options={{ title: about.title }} />
+        {/* D36: título de verdade, para o nome da rota "(tabs)" nunca aparecer (ex.: no voltar do iOS). */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: ui.common.appName }} />
+        {/* D36: o modal tem título e "Fechar" próprios, no conteúdo. */}
+        <Stack.Screen name="local" options={{ presentation: 'modal', title: ui.location.title, headerShown: false }} />
+        {/* D36: o voltar nativo continua (navegação aprendida); o título vai para o conteúdo, em serifa. */}
+        <Stack.Screen name="sobre" options={{ title: about.title, headerTitle: '', headerBackTitle: ui.common.back }} />
       </Stack>
     </AppStateProvider>
   );

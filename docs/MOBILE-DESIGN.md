@@ -124,8 +124,8 @@ app/
   (tabs)/index        Início      → push sobre · modal local
   (tabs)/atividades   Atividades
   (tabs)/detalhes     Detalhes    → push sobre
-  local               modal (pageSheet), botão Fechar no cabeçalho (E5)
-  sobre               push, cabeçalho nativo com voltar
+  local               modal (pageSheet), título e botão Fechar próprios, foco no Fechar (D36)
+  sobre               push, voltar nativo; título em serifa no conteúdo (D36)
 sheets: nenhuma
 voltar do Android: padrão em todas
 máximo de toques até qualquer tela: 2
