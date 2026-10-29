@@ -1,5 +1,7 @@
 # SinalCerto
 
+[![check](https://github.com/gabrielmramos-dev/sinalcerto-app/actions/workflows/check.yml/badge.svg)](https://github.com/gabrielmramos-dev/sinalcerto-app/actions/workflows/check.yml)
+
 O SinalCerto mostra, em linguagem simples, como a internet deve estar em cada hora do dia na sua
 região: Boa, Regular ou Instável. Ele ajuda quem não entende de redes a escolher a melhor hora para uma
 chamada de vídeo, um envio de arquivo ou uma aula on-line, com foco em acessibilidade.
@@ -43,7 +45,7 @@ Para gerar um APK novo (equipe): `npm install -g eas-cli`, `eas login` e
 
 ## Como rodar em desenvolvimento
 
-1. Instale o **Node.js 20 ou mais novo** e, no celular, o **Expo Go** com suporte ao **SDK 58**.
+1. Instale o **Node.js 22.13 ou mais novo** (exigência do Expo SDK 58) e, no celular, o **Expo Go** com suporte ao **SDK 58**.
 2. Na pasta do projeto:
    ```bash
    npm install
@@ -60,7 +62,7 @@ usa a API real e cai sozinho na previsão guardada quando ela não responde (D27
 
 | Comando | O que faz |
 |---|---|
-| `npm run check` | Tipos, lint (com regras de acessibilidade) e testes. Rodar antes de cada entrega. |
+| `npm run check` | Tipos, lint (com regras de acessibilidade) e testes. Rodar antes de cada entrega; o GitHub Actions roda o mesmo em todo push e PR na `main`. |
 | `npm test` | Só os testes (Jest). |
 | `npm run coverage` | Testes com o resumo da cobertura. |
 | `npm run icons` | Gera o ícone e a tela de abertura a partir de `assets/icon-src/sinal.svg` (D38). |

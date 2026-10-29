@@ -720,6 +720,18 @@ retorno ao toque), `mobile-design-review` (mesmo padrão de lista e de espaçame
   o verde do próprio tema. Um teste (`__tests__/icons.test.ts`) confere que as cores do script e do
   `app.json` são as do tema e que as três combinações passam 3:1.
 
+## D39 — GitHub Actions, versão 1.0.0 e repositório (2026-10-29)
+- **CI:** `.github/workflows/check.yml` roda `npm ci` e `npm run check` (tipos, lint com acessibilidade
+  e testes) em todo push e PR na `main`, com o selo no topo do README.
+  - **Node 22, e não Node 20:** o Expo SDK 58 e o React Native 0.88 exigem Node ^22.13 (`engines`
+    dos pacotes). O README também passou a pedir Node 22.13 ou mais novo; antes ele dizia Node 20.
+- **Versão 1.0.0:** a tag `v1.0.0` fica na `main`. As notas da release estão em `docs/releases/v1.0.0.md`
+  (o que o app faz, link do APK, testes e cobertura, limitações).
+- **Release, descrição e tópicos do repositório:** precisam do GitHub CLI (`gh`), que não está
+  instalado no computador usado pela IA. A equipe roda os comandos (`gh release create` e
+  `gh repo edit`) com a própria conta.
+- **Branches já mergeadas:** a lista foi mostrada à equipe antes de apagar qualquer branch no remoto.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".
