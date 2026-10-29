@@ -447,6 +447,145 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   rolagem automática até o relógio ao tocar num cartão. A frase aparece no próprio cartão e é
   anunciada.
 
+## D32 — Marco de design, E4 (Detalhes): pausada (2026-10-28)
+A E4 foi interrompida antes do commit para a revisão da D33. O trabalho ficou guardado em
+`git stash` ("E4 pausada") e será retomado com a faixa do dia, depois do teste do Início e de
+Atividades.
+
+## D33 — Faixa do dia no lugar do relógio; uma pergunta por tela (2026-10-28)
+Bases: `docs/fundamentacao-design.md`, itens 1, 2 e 4.
+- **Troca:** o relógio de 24 horas (D29–D31) sai, e entra a **faixa do dia**, com 24 barras
+  verticais em ordem de tempo, uma por hora. É o mesmo componente (`DayStrip`) em Início,
+  Atividades e, depois, Detalhes.
+  - **Cleveland e McGill (1984):** posição numa escala comum e comprimento são lidos com mais
+    precisão que ângulo, e a cor sozinha é a codificação menos precisa.
+  - **Waldner et al. (2019):** com leigos e dados de 24 horas, o gráfico de barras linear foi o mais
+    preciso e o mais rápido em todas as tarefas, e o relógio não melhorou a compreensão do padrão
+    diário.
+- **Codificação:**
+  - **Altura:** a nota da previsão, com o eixo começando em 0.
+  - **Categoria:** cor e padrão (liso = Boa, pontilhado = Regular, quadriculado = Instável), como antes.
+  - **Rótulos:** a cada 3 horas, com a data na virada do dia.
+  - **Ordem:** a do tempo, de 19/08 21h a 20/08 20h, para a janela "das 23h às 7h" ficar inteira.
+- **Troca consciente (FINDING-003):** com a altura pela nota, a nota fica mais visível na faixa,
+  embora a D24 diga que a categoria é a informação principal. A categoria continua vindo da API, sem
+  reclassificação, e é a cor, o padrão e o texto do resumo. A nota aparece só como altura.
+- **Escolha da hora:** a hora escolhida tem contorno e o horário escrito acima da barra. A faixa
+  inteira é uma área de toque só, e o toque escolhe a barra mais próxima (cada barra tem uns 14 pt,
+  menos que os 48 dp do RNF09). Os botões "Hora anterior" e "Próxima hora" (48 dp) fazem o ajuste
+  fino. A escolha vale para o app inteiro, inclusive no Início.
+- **VoiceOver:** a faixa é ajustável (deslizar para cima ou para baixo muda a hora) e lê "20 de
+  agosto, 20:00: Regular". O resumo em texto fica logo abaixo.
+- **Planejador (D31):** continua com as horas acesas e as apagadas com listras e opacidade. A frase
+  fica logo abaixo da faixa, uma vez só.
+- **Uma pergunta por tela** (Nielsen Norman Group: hierarquia visual e revelação progressiva):
+  - **Início, "como está e quando é melhor?":**
+    - região curta ("Curitiba (PR)") com o botão compacto "Trocar";
+    - cartão de topo com a categoria, o ícone, as barras de sinal e uma frase, mais a linha
+      "Última previsão disponível: 20 de agosto, 20:00";
+    - saem "Previsão mais próxima", o conselho, a data longa e o aviso "Ainda não temos previsão
+      para agora…";
+    - o melhor momento fica só no cartão dele, e o resumo da faixa só tem a contagem.
+  - **Atividades, "quando posso fazer isto?":** chips de atividade no topo, a faixa com o
+    planejador, "Para quando?" e os cartões de status em grade de 2 colunas (1 coluna com
+    `fontScale` ≥ 1,3). Os cartões voltam a ser só informação.
+  - **Números:** concentrados em Detalhes.
+
+## D34 — Início e Atividades alinhados ao wireframe v2 (2026-10-28)
+Referência: `docs/design/wireframe-v2.md`. Substitui os pedidos de ajuste anteriores. Bases em
+`docs/fundamentacao-design.md`, mais as fontes indicadas pela equipe para esta revisão:
+- **Lei de Jakob:** seguir o padrão dos apps de previsão do tempo.
+- **NN/g, Horizontal Scrolling:** a faixa inteira visível, sem rolagem lateral.
+- **NN/g, accordions no mobile:** a linha tocada abre os detalhes, uma por vez.
+- **Sivle / yr.no:** mostrar ao leigo a consequência.
+- **Cleveland & McGill:** barras de altura igual.
+
+Skills: `mobile-taste` (hierarquia, alvos de toque, uma resposta por tela) e `mobile-design-review`
+(revisão dos prints e das trocas abaixo).
+
+**Início ("como está a internet?"):** só mudaram o layout e o texto; a lógica já tinha sido aprovada no
+iPhone.
+- **Topo:** sem o título grande "SinalCerto". "Previsão atualizada" já era uma linha pequena e
+  discreta e ficou como estava. A primeira linha é "São Paulo (SP)" com "Trocar".
+- **Ordem:** cartão, faixa, Melhor/Evite, botão e linha do aviso.
+- **Cartão:** a data e a hora em cima ("20 de agosto, 20:00"), depois o ícone e a categoria grande,
+  depois a frase. Segue sempre a hora selecionada na faixa.
+- **Faixa:** saíram o título "Previsão de 19 e 20 de agosto" e a frase de contagem, que vai para
+  Detalhes. Acima das barras, "19 e 20 de agosto" à esquerda (secundário) e "20:00 · Regular" à
+  direita (negrito, Text fora do SVG, que cresce com a fonte). "Hora anterior" e "Próxima hora"
+  continuam (RNF06), com a legenda compacta.
+- **Melhor/Evite:** cartão simples, sem sol e sem título, em duas linhas com divisória: "Melhor"
+  (verde) "das 23h às 7h · Boa" e "Evite" (vermelho) "das 15h às 18h · Instável". Os dois tons passam
+  4,5:1 sobre a superfície nos dois modos (pares novos no teste de contraste).
+- **Botão e aviso:** botão "O que dá para fazer?" e a linha "É uma estimativa e pode errar. Saiba
+  mais", que leva à seção "É uma estimativa" da tela Sobre.
+
+**Atividades ("o que você quer fazer?"):**
+- **Topo:** título "O que você quer fazer?" e a linha "Toque numa atividade para ver os melhores
+  horários.".
+- **O que saiu:** a faixa, os chips, "Para quando?", "Mudar horário", os períodos, a grade de cartões,
+  a "Dica para este horário" e o aviso longo. Os componentes `TimeChooser`, `ActivityCard` e
+  `ActivityChips` foram apagados.
+- **Linhas:** uma coluna, uma linha por atividade (alvo ≥ 48), com o ícone, o nome e, à direita, o
+  status na hora selecionada, com ícone e texto: "Funciona", "Pode falhar" ou "Não deve funcionar".
+  O nome falado é "Chamada de vídeo, às 20:00: pode falhar".
+- **Status, só com campos da API:** `suitable` → "Funciona". Não adequada numa hora Instável
+  (`forecast.quality`) → "Não deve funcionar". Nos outros casos → "Pode falhar".
+- **Linha aberta:** tocar abre a linha (uma por vez, borda verde, `accessibilityState.expanded`) com
+  "Melhor" e "Evite" no mesmo componente do Início (`BestAvoid`). Enquanto as 24 horas carregam,
+  aparece um indicador com o nome "Carregando horários", sem texto com reticências. O custo é o do
+  plano: 24 chamadas por atividade, no máximo 6 por vez, com cache.
+- **Frases de horário** (`src/lib/hourPhrases.ts`, com testes): horas seguidas viram faixas, em
+  ordem, sem nunca dar a volta do fim para o começo dos dados. Só a minoria é listada, e a outra
+  linha vira "o resto do dia". Quando cabe, aparecem "o dia todo" e "nenhum horário". Exemplos em
+  SP: chamada de vídeo, "Melhor: das 23h às 7h / Evite: o resto do dia"; enviar arquivos, "Melhor: o
+  resto do dia / Evite: das 15h às 18h"; mandar mensagens, "Melhor: o dia todo / Evite: nenhum
+  horário".
+- **Rodapé:** "Às 20:00 (20/08)" com o link "Trocar hora", que leva ao Início e põe o foco do leitor
+  de tela na faixa. A hora é a mesma do app inteiro.
+
+**Mantido da revisão anterior (prints do iPhone):**
+1. **Hora selecionada única no app.** O app abre na hora mais próxima de agora, que com os dados
+   atuais é a última (20/08 20:00), e o cartão mostra sempre a hora selecionada (`useChosenHour`).
+   - **Por quê:** no print, o cartão dizia "Regular, 20:00" e a faixa marcava "01:00", que é Boa.
+     Duas respostas na mesma tela fazem o leigo duvidar de ambas (NN/g: um único foco previsível).
+2. **Rótulo "01:00 · Boa" em texto.**
+   - **Por quê:** WCAG 2.2, critério 1.4.1 (não só a cor), e Kay et al. 2016 (resultado discreto
+     escrito). Cresce com a fonte (critério 1.4.4, NBR 17060).
+3. **Barras com altura igual.**
+   - **Por quê:** a categoria vem da pior métrica, e a nota é uma média. Uma barra Regular mais alta
+     que uma Boa seria lida como "melhor" (Cleveland & McGill 1984). Waldner et al. 2019: a vantagem
+     do formato linear vem da posição no tempo. Isso resolve a troca consciente da D33
+     (FINDING-003).
+4. **Melhor momento como faixa de horas Boas seguidas** (`src/lib/bestPeriod.ts`). A janela termina
+   no fim da última hora (regra da D30, a mesma do "Evite"), por isso "às 7h".
+5. **Aviso de estimativa em uma linha**, com o texto completo na tela Sobre (revelação progressiva).
+   Saíram "Ver todas as horas", que repetia a aba Detalhes, e o link "Sobre o SinalCerto" do Início,
+   que repetia o "Saiba mais".
+6. **"Hora anterior" e "Próxima hora" compactos**, com seta e texto. O alvo ficou em 48, o mínimo
+   do projeto (RNF09), que cumpre os 44pt pedidos.
+
+**Ajuste de alinhamento (bug de layout):**
+- **Início:** "É uma estimativa e pode errar." e "Saiba mais" ficam um embaixo do outro, centralizados
+  (pedido no iPhone; antes, à esquerda), sem space-between.
+- **Atividades:** "Às 20:00 (20/08)" e "Trocar hora" seguem o mesmo padrão.
+- **Links (`AppButton` link):** sem recuo lateral. O link se alinha à esquerda por padrão; nos dois
+  blocos, uma View em volta é que fica no centro. O alvo de 48
+  de altura continua. Também vale para "Sobre o SinalCerto" em Detalhes.
+
+**Efeitos e pendências:**
+- **"Jogos online" (RQ03):** não foi adicionado. A API (0.2.0, no ar e no `openapi.json`) só aceita
+  VIDEO_CALL, AUDIO_CALL, STREAMING, FILE_UPLOAD, WEB_BROWSING e MESSAGING, e um teste com
+  `ONLINE_GAMING` volta erro 422. Sem a atividade na API, não há de onde tirar o status. Está parado
+  até a equipe decidir.
+- **RQ04 (escolha de horário):** agora a escolha é feita pela faixa do Início e pela lista de
+  Detalhes. O seletor nativo de hora e os botões de período (D17, D18) saíram, junto com os testes
+  deles.
+- **Atividades:** consulta os 6 status da hora selecionada ao abrir a aba (antes, só depois de
+  escolher um horário; muda a D5).
+- **Leitor de tela:** com o título grande fora, o Início não tem mais um cabeçalho para navegar por
+  títulos. A tela é anunciada pelo nome da aba.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

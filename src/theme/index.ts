@@ -122,6 +122,10 @@ export const contrastPairs: [ColorName, ColorName, number][] = [
   ['unstable', 'heroUnstableTo', 3],
   // Cartões de atividade (D31): ícone no quadradinho de fundo suave; borda de selecionado sobre o fundo.
   ['primary', 'primarySoft', 3],
+  // D34: "Melhor"/"Evite" e o status das atividades, em texto colorido sobre a superfície.
+  ['good', 'surface', 4.5],
+  ['moderate', 'surface', 4.5],
+  ['unstable', 'surface', 4.5],
 ];
 
 /** Cores do modo atual do sistema. */

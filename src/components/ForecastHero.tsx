@@ -14,11 +14,12 @@ const STOPS: Record<Tone, [keyof Palette, keyof Palette]> = {
 };
 
 interface Props {
-  title: string;
+  /** Linha pequena acima da categoria (D34: a data e a hora selecionadas). */
+  title?: string;
   value: Quality;
   lines: string[];
-  /** Notas menores (data, aviso de dado antigo). */
-  notes: string[];
+  /** Notas menores, abaixo da frase. */
+  notes?: string[];
   /** Tudo o que o cartão diz, numa frase só, na ordem da tela (RNF02, RNF08). */
   spoken: string;
 }
@@ -27,7 +28,7 @@ interface Props {
  * D29: o único gradiente do app. Categoria em texto + forma + cor + barras (RNF03). Todo texto usa
  * `text`, que passa 4,5:1 nos dois extremos do gradiente, nos dois modos (contrast.test.ts).
  */
-export function ForecastHero({ title, value, lines, notes, spoken }: Props) {
+export function ForecastHero({ title, value, lines, notes = [], spoken }: Props) {
   const styles = useStyles();
   const c = useColors();
   const tone = quality[value].tone;
@@ -45,7 +46,7 @@ export function ForecastHero({ title, value, lines, notes, spoken }: Props) {
         </Defs>
         <Rect width="100%" height="100%" fill="url(#hero)" />
       </Svg>
-      <Text style={[font.label, styles.text]}>{title}</Text>
+      {title && <Text style={[font.small, styles.text]}>{title}</Text>}
       <View style={styles.row}>
         <StatusIcon tone={tone} size={34} />
         <Text style={[font.display, styles.text, styles.category]}>{quality[value].label}</Text>

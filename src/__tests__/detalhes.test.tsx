@@ -50,15 +50,15 @@ it('tocar numa hora escolhe o horário para o app inteiro e anuncia (D6)', async
   const row = screen.getByRole('button', { name: '15:00 de 20 de agosto: Instável, nota 55 de 100' });
   await fireEvent.press(row);
 
-  expect(screen.getByRole('button', { name: '15:00 de 20 de agosto: Instável, nota 55 de 100', selected: true })).toBeOnTheScreen();
+  expect(
+    screen.getByRole('button', { name: '15:00 de 20 de agosto: Instável, nota 55 de 100', selected: true }),
+  ).toBeOnTheScreen();
   expect(announce).toHaveBeenCalledWith(
     'Horário escolhido: 20 de agosto, 15:00, Instável. Vale também para a aba Atividades.',
   );
 
   await act(() => router.navigate('/atividades'));
-  expect(
-    await screen.findByText('Horário usado na previsão: 20 de agosto de 2026, 15:00 (horário de Brasília)'),
-  ).toBeOnTheScreen();
+  expect(await screen.findByText('Às 15:00 (20/08)')).toBeOnTheScreen();
 });
 
 describe('O que esperar neste horário (RNF07, D23, D24, D26)', () => {
@@ -114,7 +114,7 @@ it('sem dados (404): estado vazio com orientação', async () => {
   const spy = jest.spyOn(forecastSource, 'getTimeline').mockRejectedValueOnce(new NoDataError('sem dados'));
   await renderRouter('src/app', { initialUrl: '/detalhes' });
   expect(
-    await screen.findByText('Ainda não há previsão para esta região. Escolha outra em Trocar local, no Início.'),
+    await screen.findByText('Ainda não há previsão para esta região. Escolha outra no botão Trocar, no Início.'),
   ).toBeOnTheScreen();
   spy.mockRestore();
 });

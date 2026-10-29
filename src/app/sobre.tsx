@@ -9,7 +9,7 @@ import { MOCK_SAVED_AT } from '@/data/MockSource';
 import { useSourceStatus } from '@/data/sourceStatus';
 import { formatBrasiliaLong } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
-import { about, quality, redesBands } from '@/i18n/glossary';
+import { about, disclaimer, quality, redesBands, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
 import { createThemedStyles, font, spacing } from '@/theme';
 
@@ -34,6 +34,9 @@ export default function AboutScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <SourceBanner />
       <Text style={[font.body, styles.text]}>{about.intro}</Text>
+
+      {/* D34: o "Saiba mais" do Início traz para cá o texto completo do aviso. */}
+      <Section title={about.estimateTitle} texts={[disclaimer, ui.home.regionNote]} />
 
       <Section title={about.sourceTitle} texts={[about.source]} />
 

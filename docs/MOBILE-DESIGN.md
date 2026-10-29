@@ -21,7 +21,7 @@ Previsão da qualidade da internet para leigos, com foco em acessibilidade (WCAG
 | MOTION | 1 | 3 | só o que responde a um toque (expandir linha, destacar o relógio); movimento reduzido respeitado |
 | DENSITY | 4 | 3 | arejado: público leigo, texto grande |
 
-**Elemento assinatura (um só):** o relógio de 24 horas com padrão por categoria (E2 a E4). O resto
+**Elemento assinatura (um só):** a faixa do dia, com 24 barras e padrão por categoria (D33; substituiu o relógio de 24 horas da E2 e da E3). O resto
 fica quieto.
 
 ## Design System
@@ -49,9 +49,9 @@ gain: a categoria vira a coisa mais visível da tela, que é o que o stakeholder
 cost: o contraste tem de valer no ponto mais claro e no mais escuro do gradiente, nos dois modos
 ```
 ```
-RISK: padrões (liso, pontilhado, quadriculado) nas fatias do relógio de 24 horas (E2 a E4)
+RISK: padrões (liso, pontilhado, quadriculado) nas barras da faixa do dia (D33; antes, nas fatias do relógio)
 gain: a categoria não depende só da cor nem no gráfico (RNF03); é o elemento memorável
-cost: em tamanho pequeno o padrão pode virar ruído; o relógio precisa de resumo em texto
+cost: em tamanho pequeno o padrão pode virar ruído; a faixa precisa de resumo em texto
 ```
 ```
 RISK: fundo off-white quente (#F6F5F1), como nos prints
@@ -134,12 +134,18 @@ máximo de toques até qualquer tela: 2
 ## Componentes do marco
 - `ForecastHero`: cartão de topo com o gradiente da categoria (tokens `hero*From/To`).
 - `SignalBars`: barras de sinal (4/2/1 cheias), decorativas.
-- `DayClock` + `ClockLegend`: relógio de 24 horas com padrão por categoria e legenda; decorativos,
-  sempre dentro de um grupo com resumo em texto.
-- `DayClock` com `highlight` (E3, planejador): horas fora do destaque com padrão `dim` (listras
-  neutras) e opacidade 0,55; as em destaque ganham contorno. `ClockLegend dimmed` mostra a amostra.
+- `DayStrip` (D33): faixa do dia.
+  - **Barras:** 24, em ordem de tempo, todas da mesma altura (D34); a cor e o padrão são a categoria.
+  - **Rótulos:** a cada 3 horas, com a data na virada.
+  - **Hora escolhida:** contorno na barra e "01:00 · Boa" em Text acima (D34), crescendo com o texto.
+  - **Toque:** uma área só, mais "Hora anterior" e "Próxima hora".
+  - **Leitor de tela:** ajustável, com legenda e resumo em texto.
+
+  Substituiu o `DayClock`.
 - `TabScreen`: aba sem cabeçalho nativo, com área segura e faixa na cor do fundo (D30, D31).
-- `ActivityCard`: botão selecionável (✓ + `selected`), ícone Lucide num quadradinho `primarySoft`.
+- `ActivityRow` (D34): linha de atividade (alvo ≥ 48) com status em ícone + texto; abre Melhor/Evite, uma
+  por vez (`expanded`).
+- `BestAvoid` (D34): "Melhor" (verde) e "Evite" (vermelho) em duas linhas com divisória; Início e Atividades.
 - Resumos da previsão: `src/data/forecastSummary.ts` (`dayRange`, `bestOverall`, `windowsWhere`,
   `formatWindows`, `countByQuality`).
 
@@ -150,3 +156,7 @@ máximo de toques até qualquer tela: 2
   Depois do teste no iPhone (D30): a fatia começa na hora (não fica centrada no rótulo), "Próximas
   horas" saiu, e uma faixa na cor do fundo cobre a área segura do topo.
 - 2026-10-28, E3: Atividades com o planejador no relógio (D31); esboço do layout no carregamento.
+- 2026-10-28, D33: relógio trocado pela faixa do dia, com as bases em `docs/fundamentacao-design.md`;
+  Início e Atividades com uma pergunta por tela. E4 (Detalhes) pausada.
+- 2026-10-28, D34 (wireframe v2, `docs/design/wireframe-v2.md`): Início sem título (cartão, faixa,
+  Melhor/Evite, botão, aviso); Atividades em lista com status e linha que abre Melhor/Evite.

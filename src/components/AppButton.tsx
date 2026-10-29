@@ -63,7 +63,8 @@ const useStyles = createThemedStyles((c) => ({
   },
   primary: { backgroundColor: c.primary, borderColor: c.primary },
   secondary: { backgroundColor: c.surface, borderColor: c.primary },
-  link: { borderColor: 'transparent', alignSelf: 'flex-start' },
+  // Sem recuo lateral: o texto do link alinha com o texto ao redor; a altura mínima de 48 continua.
+  link: { borderColor: 'transparent', alignSelf: 'flex-start', paddingHorizontal: 0 },
   pressed: { opacity: 0.8 },
   disabled: { opacity: 0.5 },
 }));

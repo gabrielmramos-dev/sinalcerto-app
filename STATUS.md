@@ -21,6 +21,62 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
 
+## Marco de design (MD), D33: faixa do dia; Início e Atividades com uma pergunta por tela
+- Bases em `docs/fundamentacao-design.md`. A E4 (Detalhes) está pausada e guardada em `git stash`
+  ("E4 pausada"), sem commit (D32).
+- Teste automatizado:
+  - **Faixa (`components/DayStrip.test.tsx`):**
+    - 24 barras em ordem de tempo, com altura pela nota (eixo em 0) e a categoria certa;
+    - a mais alta é a das 23h;
+    - rótulos a cada 3 horas e as datas 19/08 e 20/08;
+    - contorno só na hora escolhida, com o horário acima;
+    - horas apagadas com listras e opacidade (16 de 24 na chamada de vídeo);
+    - toque escolhe a barra certa;
+    - ajustável no leitor de tela, com o toque duplo sem efeito;
+    - botões de hora com anúncio e desativados nas pontas.
+  - **Início (`__tests__/inicio.test.tsx`):**
+    - cartão com a categoria, uma frase e "Última previsão disponível: 20 de agosto, 20:00", sem
+      o título, o conselho e o aviso longo;
+    - região curta com "Trocar";
+    - melhor momento só no cartão dele;
+    - resumo da faixa só com a contagem;
+    - a hora escolhida na faixa vale em Atividades;
+    - ordem de leitura.
+  - **Atividades (`__tests__/atividades.test.tsx`):**
+    - chips com estado selecionado;
+    - planejador com 24 chamadas, no máximo 6 ao mesmo tempo, e cache;
+    - a frase aparece uma vez só;
+    - grade de 2 colunas que vira 1 com `fontScale` ≥ 1,3.
+
+  `npm run check`: 211 testes. O bundle iOS compila.
+- Teste manual no iPhone (prints, 2026-10-28): rodada de revisão com 6 ajustes pedidos (D34).
+- **D34 (wireframe v2, `docs/design/wireframe-v2.md`), teste automatizado:**
+  - **Início:**
+    - abre em 20:00, e o cartão (data em cima, categoria, frase) segue a faixa;
+    - sem título grande, título da faixa ou contagem;
+    - faixa com "19 e 20 de agosto" e "20:00 · Regular";
+    - "Melhor: das 23h às 7h · Boa / Evite: das 15h às 18h · Instável";
+    - botão "O que dá para fazer?" e "Saiba mais" para a seção nova da tela Sobre;
+    - ordem de leitura.
+  - **Atividades:**
+    - lista de 6 linhas com status em texto ("Funciona", "Pode falhar", "Não deve funcionar") na
+      hora selecionada;
+    - uma linha aberta por vez, com `expanded`, indicador "Carregando horários" e Melhor/Evite
+      anunciados;
+    - 23 chamadas (a hora selecionada já no cache), no máximo 6 por vez;
+    - erro com "Tentar de novo";
+    - "Trocar hora" põe o foco na faixa do Início.
+  - **Frases (`lib/hourPhrases.test.ts`):** minoria listada, "o resto do dia", "o dia todo",
+    "nenhum horário", sem dar a volta nos dados.
+
+  `npm run check`: 221 testes. O bundle iOS compila.
+- **Não feito:** "Jogos online" (RQ03), porque a API não tem essa atividade (ver D34). O RQ03 continua
+  com 6 atividades.
+- **RQ04:** o seletor nativo de hora e os períodos saíram de Atividades. A hora agora é escolhida pela
+  faixa do Início e pela lista de Detalhes.
+- Teste manual no iPhone (2026-10-28): Início e Atividades no wireframe v2 aprovados, inclusive o aviso e
+  "Saiba mais" e "Às 20:00" e "Trocar hora" centralizados. **Não testado:** Android.
+
 ## Marco de design (MD), E3: Atividades com o planejador (D31)
 - Teste automatizado (`__tests__/atividades.test.tsx`, `components/DayClock.test.tsx`):
   - título "Atividades" como cabeçalho;

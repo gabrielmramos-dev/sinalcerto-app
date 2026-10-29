@@ -40,4 +40,5 @@ porta), use `npx expo start -c --port 8082`.
 ## Documentação
 
 `PLAN.md` (marcos) · `STATUS.md` (o que está feito, de verdade) · `docs/DECISOES.md` ·
-`docs/M0-design.md` (telas e glossário) · `docs/prompts-ia.md` (registro de uso de IA).
+`docs/M0-design.md` (telas e glossário) · `docs/prompts-ia.md` (registro de uso de IA) ·
+[`docs/fundamentacao-design.md`](docs/fundamentacao-design.md) (bases das decisões de design).

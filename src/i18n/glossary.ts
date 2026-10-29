@@ -143,8 +143,6 @@ export const numbersSection = {
 export const disclaimer =
   'É uma estimativa feita a partir de como a internet se comportou antes. Pode errar. O app não mede a sua conexão.';
 
-/** "1 hora boa", "8 horas boas". */
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 /** Textos das telas e componentes (D26: antes ficavam espalhados no código das telas). */
 export const ui = {
@@ -154,33 +152,45 @@ export const ui = {
     loading: 'Carregando a previsão…',
     retry: 'Tentar de novo',
     region: (name: string) => `Região escolhida: ${name}`,
-    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra em Trocar local, no Início.',
+    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra no botão Trocar, no Início.',
   },
   home: {
     changeLocation: 'Trocar local',
     changeLocationHint: 'Abre a lista de regiões',
-    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra em Trocar local.',
+    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra no botão Trocar.',
     loadError: 'Não foi possível carregar a previsão.',
-    cardTitle: 'Previsão mais próxima',
-    forecastFor: (when: string) => `Previsão para ${when} (horário de Brasília)`,
-    forecastForSpoken: (when: string) => `Previsão para ${when}, horário de Brasília.`,
-    pastNote: 'Ainda não temos previsão para agora. Esta é a nossa previsão mais recente.',
     regionNote: 'A previsão vale para a região escolhida, não exatamente para onde você está.',
-    seeActivities: 'Ver o que dá para fazer',
+    // D34 (wireframe v2)
+    seeActivities: 'O que dá para fazer?',
     seeActivitiesHint: 'Abre a aba Atividades',
-    seeAllHours: 'Ver todas as horas',
-    seeAllHoursHint: 'Abre a aba Detalhes',
-    // D29 (MD/E2)
-    appName: 'SinalCerto',
-    rangeTitle: (range: string) => `Previsão de ${range}`,
-    bestTitle: 'Melhor momento do dia',
-    bestValue: (when: string, qualityLabel: string) => `${when}: ${qualityLabel}`,
-    avoid: (windows: string) => `Evite ${windows} (Instável).`,
-    avoidNone: 'Nenhuma hora instável na previsão.',
-    bestSpoken: (best: string, avoid: string) => `Melhor momento do dia: ${best}. ${avoid}`,
-    clockTitle: 'Como o sinal vai variar',
-    clockSummary: (range: string, good: number, moderate: number, unstable: number, best: string) =>
-      `${range}: ${plural(good, 'hora boa', 'horas boas')}, ${plural(moderate, 'regular', 'regulares')} e ${plural(unstable, 'instável', 'instáveis')}. Melhor momento: ${best}.`,
+    changeShort: 'Trocar',
+    // D34: estimativa em uma linha; o texto completo fica na tela Sobre
+    estimate: 'É uma estimativa e pode errar.',
+    learnMore: 'Saiba mais',
+    learnMoreLabel: 'Saiba mais sobre a estimativa',
+    learnMoreHint: 'Abre a tela Sobre o SinalCerto',
+  },
+  // D34: linhas Melhor/Evite (Início e Atividades)
+  hours: {
+    best: 'Melhor',
+    avoid: 'Evite',
+    all: 'o dia todo',
+    none: 'nenhum horário',
+    rest: 'o resto do dia',
+    withQuality: (when: string, qualityLabel: string) => `${when} · ${qualityLabel}`,
+    spoken: (best: string, avoid: string) => `Melhor: ${best}. Evite: ${avoid}.`,
+  },
+  // D33: faixa do dia (Início, Atividades e, depois, Detalhes)
+  strip: {
+    label: 'Faixa do dia, hora a hora',
+    hint: 'Deslize para cima ou para baixo para mudar a hora',
+    // D34: "01:00 · Boa", igual na tela e no leitor de tela
+    value: (clock: string, qualityLabel: string) => `${clock} · ${qualityLabel}`,
+    none: 'Nenhuma hora escolhida',
+    prev: 'Hora anterior',
+    prevHint: 'Escolhe a hora anterior na faixa do dia',
+    next: 'Próxima hora',
+    nextHint: 'Escolhe a próxima hora na faixa do dia',
   },
   location: {
     title: 'Escolher local',
@@ -191,44 +201,25 @@ export const ui = {
     pickHint: 'Usa esta região na previsão e volta para o início',
   },
   activities: {
-    title: 'Para quando?',
+    // D34 (wireframe v2): "O que você quer fazer?"
+    title: 'O que você quer fazer?',
+    intro: 'Toque numa atividade para ver os melhores horários.',
     loading: 'Carregando os horários…',
     loadError: 'Não foi possível carregar os horários.',
-    chooseFirst: 'Escolha um horário para ver o que dá para fazer.',
-    resultsTitle: 'O que dá para fazer neste horário',
-    sharedTip: (tip: string) => `Dica para este horário: ${tip}`,
     summary: (when: string, good: number, failed: number) =>
       `Horário usado: ${when}. ${good} de 6 atividades devem funcionar.${failed ? ` ${failed} não puderam ser consultadas.` : ''}`,
-    cardError: 'Não foi possível consultar esta atividade.',
+    status: { works: 'Funciona', mayFail: 'Pode falhar', wontWork: 'Não deve funcionar' },
+    statusLoading: 'carregando',
+    statusError: 'Sem resposta',
+    rowLabel: (name: string, clock: string, status: string) => `${name}, às ${clock}: ${status}`,
+    rowHint: 'Mostra os melhores horários desta atividade',
     cardRetry: (name: string) => `Tentar de novo: ${name}`,
-    cardLoading: 'Consultando…',
-    cardLoadingSpoken: (name: string) => `${name}: consultando.`,
-    // E3 (D31): planejador
-    screenTitle: 'Atividades',
-    planTitle: 'Melhor horário para cada atividade',
-    planIdle: 'Toque numa atividade abaixo para ver no relógio as horas em que ela deve funcionar.',
-    planLoading: (name: string) => `${name}: consultando as 24 horas…`,
-    planBest: (name: string, windows: string) => `${name}: melhor ${windows}`,
-    planAll: (name: string) => `${name}: deve funcionar em todas as horas da previsão`,
-    planNone: (name: string) => `${name}: nenhuma hora boa nesta previsão`,
+    planLoading: 'Carregando horários',
     planError: (name: string) => `Não foi possível consultar todas as horas de ${name}.`,
     planRetry: (name: string) => `Tentar de novo: horas de ${name}`,
-    planDimmed: 'Não deve funcionar',
-    cardHint: 'Mostra no relógio as horas em que ela deve funcionar',
-  },
-  timeChooser: {
-    used: (when: string) => `Horário usado na previsão: ${when} (horário de Brasília)`,
-    none: 'Nenhum horário escolhido ainda.',
-    rounded: (picked: string) => `Você escolheu ${picked}; a previsão é por hora.`,
-    pickerLabel: 'Hora da atividade',
-    pickerHint: 'Escolha a hora e depois toque em Usar este horário',
-    usePicked: 'Usar este horário',
-    cancel: 'Cancelar',
-    cancelHint: 'Fecha o seletor sem mudar o horário',
-    change: 'Mudar horário',
-    changeHint: 'Abre o seletor de hora',
-    periodsTitle: 'Ou escolha a melhor hora de um período:',
-    periodHint: 'Usa a hora com a melhor nota prevista neste período',
+    at: (clock: string, day: string) => `Às ${clock} (${day})`,
+    changeHour: 'Trocar hora',
+    changeHourHint: 'Abre o Início, na faixa do dia, para escolher outra hora',
   },
   details: {
     title: 'Previsão por hora',
@@ -277,6 +268,7 @@ export function errorMessage(error: unknown, fallback: string): string {
 export const about = {
   title: 'Sobre o SinalCerto',
   intro: 'Esta tela mostra os bastidores da previsão, com os termos técnicos.',
+  estimateTitle: 'É uma estimativa',
   sourceTitle: 'De onde vêm os dados',
   source:
     'Medições históricas da rede RIPE Atlas foram usadas para treinar modelos de previsão (turma de Estrutura de Dados). A Internet Quality API 0.2.0 entrega as previsões já calculadas. O app não mede a sua conexão e não executa nenhum modelo.',

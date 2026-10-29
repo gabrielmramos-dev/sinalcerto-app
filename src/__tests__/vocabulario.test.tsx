@@ -33,8 +33,8 @@ beforeEach(() => announced.mockClear());
 
 it('Início sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/' });
-  await screen.findByText('Previsão mais próxima', {}, { timeout: 5000 });
-  await screen.findByText(/^19 e 20 de agosto: 8 horas boas/); // espera a timeline (relógio) carregar
+  await screen.findByText('20 de agosto, 20:00', {}, { timeout: 5000 });
+  await screen.findByLabelText(/^Melhor: /); // espera a timeline (Melhor/Evite) carregar
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
@@ -44,10 +44,12 @@ it('Escolher local sem termos de bastidor', async () => {
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
-it('Atividades (com horário escolhido) sem termos de bastidor', async () => {
+it('Atividades (status e uma linha aberta) sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/atividades' });
-  await fireEvent.press(await screen.findByRole('button', { name: 'Tarde: 20 de agosto, 12:00' }, { timeout: 5000 }));
-  await screen.findByLabelText(/^Mandar mensagens, textos, áudios curtos: /);
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Chamada de vídeo, às 20:00: pode falhar' }, { timeout: 5000 }),
+  );
+  await screen.findByLabelText(/^Melhor: /, {}, { timeout: 5000 });
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
