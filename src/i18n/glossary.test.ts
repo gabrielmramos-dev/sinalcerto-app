@@ -1,5 +1,5 @@
 import { ACTIVITIES, QUALITIES, RECOMMENDATION_CODES } from '@/api/types';
-import { about, activity, numbersSection, quality, recommendation, redesBands } from './glossary';
+import { about, activity, lossMeaning, quality, recommendation, redesBands } from './glossary';
 
 // Se a API ganhar um valor novo de enum, estes testes lembram de traduzir.
 describe('glossário cobre todos os enums da API', () => {
@@ -9,9 +9,9 @@ describe('glossário cobre todos os enums da API', () => {
 });
 
 it('perda em pedaços de informação: "menos de 1", singular e plural (D26)', () => {
-  expect(numbersSection.lossValue('0,4', 0.4)).toBe('0,4% (menos de 1 em cada 100 pedaços de informação se perde)');
-  expect(numbersSection.lossValue('1,2', 1.2)).toBe('1,2% (cerca de 1 em cada 100 pedaços de informação se perde)');
-  expect(numbersSection.lossValue('3,9', 3.9)).toBe('3,9% (cerca de 4 em cada 100 pedaços de informação se perdem)');
+  expect(lossMeaning(0.4)).toBe('Menos de 1 em cada 100 pedaços de informação se perde.');
+  expect(lossMeaning(1.2)).toBe('Cerca de 1 em cada 100 pedaços de informação se perde.');
+  expect(lossMeaning(3.9)).toBe('Cerca de 4 em cada 100 pedaços de informação se perdem.');
 });
 
 it('toda faixa de latência e de perda tem frase de consequência (D26)', () => {

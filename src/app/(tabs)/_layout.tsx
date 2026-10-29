@@ -43,7 +43,11 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="detalhes"
-        options={{ title: ui.tabs.details, tabBarIcon: ({ color, size }) => <Clock color={color} size={size} /> }}
+        options={{
+          title: ui.tabs.details,
+          headerShown: false, // D35: título no conteúdo, como no Início e em Atividades
+          tabBarIcon: ({ color, size }) => <Clock color={color} size={size} />,
+        }}
       />
     </Tabs>
   );

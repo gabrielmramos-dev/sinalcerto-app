@@ -126,6 +126,13 @@ export const contrastPairs: [ColorName, ColorName, number][] = [
   ['good', 'surface', 4.5],
   ['moderate', 'surface', 4.5],
   ['unstable', 'surface', 4.5],
+  // D35: hora selecionada em Detalhes (fundo suave): texto, explicações e a forma da categoria.
+  ['text', 'primarySoft', 4.5],
+  ['textMuted', 'primarySoft', 4.5],
+  ['primary', 'primarySoft', 4.5],
+  ['good', 'primarySoft', 3],
+  ['moderate', 'primarySoft', 3],
+  ['unstable', 'primarySoft', 3],
 ];
 
 /** Cores do modo atual do sistema. */

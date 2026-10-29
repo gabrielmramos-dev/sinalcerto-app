@@ -16,8 +16,8 @@ it('chamada de vídeo em SP (8 boas de 24): lista as boas e o resto vira "o rest
   expect(text(bestAndAvoid(sp, suitable('VIDEO_CALL')))).toEqual({ best: 'das 23h às 7h', avoid: 'o resto do dia' });
 });
 
-it('enviar arquivos em SP (21 boas de 24): só a exceção em "Evite"', () => {
-  expect(text(bestAndAvoid(sp, suitable('FILE_UPLOAD')))).toEqual({ best: 'o resto do dia', avoid: 'das 15h às 18h' });
+it('enviar arquivos em SP (21 boas de 24): "quase o dia todo" e só a exceção em "Evite"', () => {
+  expect(text(bestAndAvoid(sp, suitable('FILE_UPLOAD')))).toEqual({ best: 'quase o dia todo', avoid: 'das 15h às 18h' });
 });
 
 it('mandar mensagens em SP (24 boas): "o dia todo" e "nenhum horário"', () => {
@@ -34,7 +34,7 @@ it('nenhuma hora boa: "nenhum horário" e "o dia todo"', () => {
 it('nunca dá a volta nos dados: ruins no começo e no fim viram duas faixas, não "das 23h às 0h"', () => {
   // 21h ruim, 22h–23h boas, 0h ruim (a última hora). Minoria ruim: lista as duas faixas separadas.
   const r = bestAndAvoid(fake([false, true, true, true, true, false]), (i) => i.good);
-  expect(text(r)).toEqual({ best: 'o resto do dia', avoid: 'das 21h às 22h e das 2h às 3h' });
+  expect(text(r)).toEqual({ best: 'quase o dia todo', avoid: 'das 21h às 22h e das 2h às 3h' });
 });
 
 it('empate: lista as duas linhas', () => {

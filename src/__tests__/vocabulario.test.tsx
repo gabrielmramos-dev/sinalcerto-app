@@ -53,9 +53,11 @@ it('Atividades (status e uma linha aberta) sem termos de bastidor', async () => 
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
-it('Detalhes (com a seção de números e a confiança) sem termos de bastidor', async () => {
+it('Detalhes (linha aberta, com as métricas e a confiança) sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/detalhes' });
-  await screen.findByLabelText('80 por cento', {}, { timeout: 5000 });
+  // D35: as métricas e a confiança só aparecem com a linha da hora aberta.
+  await fireEvent.press(await screen.findByRole('button', { name: '20:00, Regular' }, { timeout: 5000 }));
+  await screen.findByLabelText('Nota 63 de 100. Confiança 80 por cento', {}, { timeout: 5000 });
   expect(forbiddenOnScreen()).toEqual([]);
 });
 

@@ -2,7 +2,6 @@
 // D26: fora da tela "Sobre", nada de API, modelo, probe, dados salvos, faixas de Redes ou OK/Risco/Falha.
 import type { Activity, Quality, RecommendationCode } from '@/api/types';
 import { InvalidRequestError } from '@/data/ForecastSource';
-import type { PeriodId } from '@/data/periods';
 
 export type Tone = 'good' | 'moderate' | 'unstable';
 
@@ -41,13 +40,6 @@ export const activity: Record<Activity, { name: string; examples: string }> = {
   FILE_UPLOAD: { name: 'Enviar arquivos', examples: 'fotos, documentos' },
   WEB_BROWSING: { name: 'Navegar na internet', examples: 'sites, notícias' },
   MESSAGING: { name: 'Mandar mensagens', examples: 'textos, áudios curtos' },
-};
-
-export const period: Record<PeriodId, string> = {
-  madrugada: 'Madrugada',
-  manha: 'Manhã',
-  tarde: 'Tarde',
-  noite: 'Noite',
 };
 
 export const metric = {
@@ -121,28 +113,15 @@ export const redesBands = {
   ],
 } satisfies Record<'latency' | 'packetLoss' | 'jitter', Band[]>;
 
-/** Seção da aba Detalhes (D24, D26). */
-export const numbersSection = {
-  title: 'O que esperar neste horário',
-  valuesFor: (when: string) => `Valores de ${when} (horário de Brasília).`,
-  nearestNote: 'Nenhuma hora escolhida: mostrando a previsão mais próxima. Toque numa hora acima para ver outra.',
-  latencyValue: (ms: number, effect: string) => `${ms} ms: ${effect}`,
-  latencySpoken: (ms: number, effect: string) => `${ms} milissegundos: ${effect}`,
-  /** "3,9% (cerca de 4 em cada 100 pedaços de informação se perdem)". Abaixo de 0,5%, "menos de 1". */
-  lossValue: (pctText: string, pct: number) => {
-    const n = Math.round(pct);
-    if (n < 1) return `${pctText}% (menos de 1 em cada 100 pedaços de informação se perde)`;
-    return `${pctText}% (cerca de ${n} em cada 100 pedaços de informação se ${n === 1 ? 'perde' : 'perdem'})`;
-  },
-  lossSpoken: (spokenValue: string) => spokenValue.replace(/(\d+(,\d+)?)%/, '$1 por cento'),
-  scoreValue: (score: number) => `${score} de 100`,
-  confidenceValue: (pct: number) => `${pct}%`,
-  confidenceSpoken: (pct: number) => `${pct} por cento`,
+/** D35: o que a perda quer dizer, na explicação sob demanda de Detalhes. Abaixo de 0,5%, "menos de 1". */
+export const lossMeaning = (pct: number) => {
+  const n = Math.round(pct);
+  if (n < 1) return 'Menos de 1 em cada 100 pedaços de informação se perde.';
+  return `Cerca de ${n} em cada 100 pedaços de informação se ${n === 1 ? 'perde' : 'perdem'}.`;
 };
 
 export const disclaimer =
   'É uma estimativa feita a partir de como a internet se comportou antes. Pode errar. O app não mede a sua conexão.';
-
 
 /** Textos das telas e componentes (D26: antes ficavam espalhados no código das telas). */
 export const ui = {
@@ -177,6 +156,7 @@ export const ui = {
     all: 'o dia todo',
     none: 'nenhum horário',
     rest: 'o resto do dia',
+    mostly: 'quase o dia todo',
     withQuality: (when: string, qualityLabel: string) => `${when} · ${qualityLabel}`,
     spoken: (best: string, avoid: string) => `Melhor: ${best}. Evite: ${avoid}.`,
   },
@@ -222,21 +202,27 @@ export const ui = {
     changeHourHint: 'Abre o Início, na faixa do dia, para escolher outra hora',
   },
   details: {
-    title: 'Previsão por hora',
+    // D35 (wireframe v2): "Hora a hora"
+    title: 'Hora a hora',
+    subtitle: (region: string, good: number, moderate: number, unstable: number) =>
+      `${region} · ${good} ${good === 1 ? 'boa' : 'boas'}, ${moderate} ${moderate === 1 ? 'regular' : 'regulares'}, ${unstable} ${unstable === 1 ? 'instável' : 'instáveis'}`,
     loading: 'Carregando as horas…',
     loadError: 'Não foi possível carregar as horas.',
-    all: 'Todas',
-    allHint: 'Mostra todas as horas',
-    periodHint: 'Mostra só as horas deste período',
-    emptyPeriod: 'Nossa previsão não tem horas neste período.',
-    showing: (n: number) => `Mostrando ${n} horas. Toque numa hora para usá-la no app.`,
-    showingSpoken: (n: number, periodName?: string) => `Mostrando ${n} horas${periodName ? `: ${periodName}` : ''}`,
     chosen: (when: string, qualityLabel: string) =>
       `Horário escolhido: ${when}, ${qualityLabel}. Vale também para a aba Atividades.`,
-    rowHint: 'Usa este horário no app inteiro',
-    row: (clock: string, day: string, qualityLabel: string, score: number) =>
-      `${clock} de ${day}: ${qualityLabel}, nota ${score} de 100`,
-    rowScore: (score: number) => `nota ${score}`,
+    row: (clock: string, qualityLabel: string) => `${clock}, ${qualityLabel}`,
+    rowHint: 'Usa este horário no app inteiro e mostra o que esperar',
+    expect: 'O que esperar neste horário',
+    latencyName: 'Tempo de resposta',
+    lossName: 'Informação perdida',
+    metricLine: (name: string, value: string) => `${name} · ${value}`,
+    whatIsIt: 'O que é isso?',
+    whatIsItLabel: (name: string) => `O que é isso? ${name}`,
+    whatIsItHint: 'Mostra ou esconde a explicação',
+    score: (score: number) => `Nota ${score} de 100`,
+    confidence: (pct: number) => `Confiança ${pct}%`,
+    confidenceSpoken: (pct: number) => `Confiança ${pct} por cento`,
+    scoreName: 'Nota e confiança',
   },
   /** D27: aviso da fonte, em linguagem de usuário (sem API, mock ou servidor). */
   source: {

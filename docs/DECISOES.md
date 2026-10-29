@@ -536,11 +536,17 @@ iPhone.
   aparece um indicador com o nome "Carregando horários", sem texto com reticências. O custo é o do
   plano: 24 chamadas por atividade, no máximo 6 por vez, com cache.
 - **Frases de horário** (`src/lib/hourPhrases.ts`, com testes): horas seguidas viram faixas, em
-  ordem, sem nunca dar a volta do fim para o começo dos dados. Só a minoria é listada, e a outra
-  linha vira "o resto do dia". Quando cabe, aparecem "o dia todo" e "nenhum horário". Exemplos em
-  SP: chamada de vídeo, "Melhor: das 23h às 7h / Evite: o resto do dia"; enviar arquivos, "Melhor: o
-  resto do dia / Evite: das 15h às 18h"; mandar mensagens, "Melhor: o dia todo / Evite: nenhum
-  horário".
+  ordem, sem nunca dar a volta do fim para o começo dos dados. Só a minoria é listada. A outra linha
+  resume:
+  - **Só uma exceção ruim:** o "Melhor" diz "quase o dia todo". Ele é lido antes do "Evite", então não
+    pode depender dele, e "o resto do dia" não fazia sentido ali (corrigido em 2026-10-29).
+  - **Só uma janela boa:** o "Evite" diz "o resto do dia".
+  - **Sem horário a evitar:** "o dia todo" e "nenhum horário".
+
+  Exemplos em SP:
+  - chamada de vídeo: "Melhor: das 23h às 7h / Evite: o resto do dia";
+  - enviar arquivos: "Melhor: quase o dia todo / Evite: das 15h às 18h";
+  - mandar mensagens: "Melhor: o dia todo / Evite: nenhum horário".
 - **Rodapé:** "Às 20:00 (20/08)" com o link "Trocar hora", que leva ao Início e põe o foco do leitor
   de tela na faixa. A hora é a mesma do app inteiro.
 
@@ -585,6 +591,43 @@ iPhone.
   escolher um horário; muda a D5).
 - **Leitor de tela:** com o título grande fora, o Início não tem mais um cabeçalho para navegar por
   títulos. A tela é anunciada pelo nome da aba.
+
+## D35 — Detalhes no wireframe v2: "Hora a hora" (2026-10-29)
+Referência: `docs/design/wireframe-v2.md`, seção Detalhes. Bases em `docs/fundamentacao-design.md`.
+Skills: `mobile-taste` (alvos de toque, lista em vez de cartões, uma linha aberta por vez) e
+`mobile-design-review` (contraste, ordem de leitura, o que sai da tela). O stash "E4 pausada" não foi
+aplicado: o layout final é o do wireframe.
+
+- **Topo:** título "Hora a hora", no mesmo padrão de Início e Atividades (sem cabeçalho nativo), com a
+  linha "São Paulo (SP) · 8 boas, 13 regulares, 3 instáveis". Saíram os filtros de período e o
+  "Mostrando N horas". Com eles saiu `data/periods.ts` (D17), que só servia aos filtros.
+- **Lista vertical das 24 horas** (NN/g, Horizontal Scrolling: nada escondido numa rolagem lateral),
+  agrupada por dia com cabeçalhos pequenos ("19 de agosto", "20 de agosto") e divisórias finas.
+  - **Linha (≥ 48 dp):** hora, forma colorida + status em texto e seta.
+  - **Sem nota na linha.**
+  - **Hora selecionada no app:** vem com fundo suave e ✓, e a tela rola até ela ao abrir.
+- **Accordion no mobile (NN/g):** tocar abre a linha (uma aberta por vez), com
+  `accessibilityState.expanded` e o nome falado "20:00, Regular". Também escolhe a hora para o app
+  inteiro (D34). Tocar de novo fecha, e a hora continua escolhida.
+- **"O que esperar neste horário"** (dentro da linha aberta): uma linha por métrica, com o nome simples,
+  o valor e a frase de efeito das faixas da D23. Exemplos: "Tempo de resposta · 73 ms" / "As páginas
+  podem demorar um pouco para abrir."; "Informação perdida · 3,9%" / "Chamadas e vídeos devem travar
+  ou picotar.". As métricas são lidas em ordem.
+- **Explicações sob demanda (NN/g, Progressive Disclosure):** "O que é isso?" (≥ 48 dp, `expanded`)
+  abre o texto longo de cada métrica. São os textos atuais; a frase "cerca de 4 em cada 100 pedaços se
+  perdem" foi para dentro dessa explicação (`lossMeaning`).
+- **Nota secundária:** "Nota 63 de 100 · Confiança 80%" em texto menor, no fim, com "O que é isso?"
+  levando à explicação atual da nota. Fica secundária porque pode contradizer a categoria: a categoria
+  vem da pior métrica, e a nota é uma média (D24). A confiança só aparece na hora em que a API a manda.
+- **Correção depois do teste no iPhone:** "O que é isso?" fica na mesma linha do nome e do valor,
+  alinhado à direita ("Tempo de resposta · 73 ms ... O que é isso?"), e desce com texto grande. A área
+  de toque de 48 vem do `hitSlop`, sem somar vão vertical. A linha da nota segue o mesmo padrão.
+- **Fim da tela:** o link "Sobre o SinalCerto" fica centralizado, no mesmo padrão do Início.
+- **Contraste:** a linha selecionada usa o fundo suave (`primarySoft`). Os pares de texto, apoio,
+  link e as formas das categorias sobre esse fundo entraram no teste de contraste, nos dois modos. A
+  divisória fica por fora da seleção, sempre sobre a superfície.
+- **Removido:** `NumbersSection` e `TimelineRow`, substituídos por `HourRow`, e os textos sem uso do
+  glossário (`numbersSection` e `period`).
 
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
