@@ -6,6 +6,12 @@ O SinalCerto mostra, em linguagem simples, como a internet deve estar em cada ho
 região: Boa, Regular ou Instável. Ele ajuda quem não entende de redes a escolher a melhor hora para uma
 chamada de vídeo, um envio de arquivo ou uma aula on-line, com foco em acessibilidade.
 
+
+
+https://github.com/user-attachments/assets/d5759abe-1315-44ab-a10f-66b2dad88ec2
+
+
+
 Projeto integrador de Análise e Desenvolvimento de Sistemas (Braz Cubas), disciplina de Programação
 para Dispositivos Móveis. React Native + Expo SDK 58 + TypeScript.
 
