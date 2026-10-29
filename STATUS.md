@@ -1,6 +1,6 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-29, M6 aprovado; marco de design (MD) em andamento: E1 a E3 e Início/Atividades no wireframe v2 aprovados; Detalhes (D35) aprovado; E5 (D36) aprovado. Estados: **feito** (na tela e verificado) ·
+Atualizado: 2026-10-29, M6 aprovado; **design concluído** (marco MD, E1 a E5, nota de design A). Estados: **feito** (na tela e verificado) ·
 **parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
 Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
@@ -20,6 +20,17 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF07 | feito | `components/NumbersSection.tsx` (seção "O que esperar neste horário" na aba Detalhes; até o M5 chamava "Como ler os números"); bastidores, jitter e faixas de Redes na tela `app/sobre.tsx`; textos em `i18n/glossary.ts`; `data/metrics.ts` (`bandFor`, D23); D24 | Teste automatizado (`data/metrics.test.ts`: bordas das faixas; `__tests__/detalhes.test.tsx`: latência e perda com valor, faixa de Redes e explicação, aviso de que RTT alto sozinho não é defeito, jitter sem valor com aviso, nota explicada, confiança só na hora em que a API manda, equivalência Boa/Regular/Instável = OK/Risco/Falha, categoria sem reclassificação). **Teste manual no iPhone, SDK 58 (2026-10-28):** valores certos (73,2 ms, 3,9%, nota 63, confiança 80% às 20:00), confiança some às 15:00, VoiceOver e texto no máximo ok. Bordas das faixas (D23) confirmadas pela equipe **M5.1 (D26), teste manual no iPhone (2026-10-28):** "O que esperar neste horário" com 73 ms e 3,9% nos textos novos, sem jitter, "Redes" ou OK/Risco/Falha; valores de 15:00 corretos com a confiança sumindo; tela Sobre completa e visível; VoiceOver lendo "milissegundos" e "por cento" por extenso; texto no máximo sem cortes. Guarda de vocabulário automatizado (`__tests__/vocabulario.test.tsx`) | TalkBack (Android) |
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
+
+## Design concluído (2026-10-29)
+- **Revisão final** (`mobile-design-review`, comparada com `design-baseline.json`): nota de design B → **A**,
+  nota de "cara de IA" **A**.
+  - **Alto impacto:** nenhum aberto. O FINDING-001 (modal sem "Fechar") foi resolvido na D36.
+  - **Médios em aberto:** Início sem o nome do app e sem título para navegar por cabeçalhos; carregamento só
+    com indicador giratório em Início, Detalhes e Escolher local; retorno ao toque só por escurecimento
+    (decisão da equipe); rótulos da faixa do dia que não crescem com o texto; linhas de Atividades como
+    superfícies separadas.
+- Revisão só pelo código; as telas foram testadas pela equipe no iPhone a cada etapa. **Não testado:** Android.
+- Merge da `md-design` na `main`, sem squash.
 
 ## Marco de design (MD), E5: Escolher local e Sobre (D36)
 - Teste automatizado (`__tests__/local-sobre.test.tsx`):

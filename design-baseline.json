@@ -1,16 +1,18 @@
 {
   "tool": "mobile-design-review",
   "version": 1,
-  "date": "2026-10-28",
-  "pass": "static-only (sem simulador; testes manuais anteriores no iPhone foram funcionais, sem capturas das telas atuais)",
-  "designScore": "B",
-  "designScoreNote": "média 3.55 (A-), limitada a B por haver achado de alto impacto aberto",
+  "date": "2026-10-29",
+  "pass": "static-only nesta revisão (sem simulador); as telas foram testadas pela equipe no iPhone a cada etapa (E1 a E5)",
+  "previous": { "date": "2026-10-28", "designScore": "B", "slopScore": "A" },
+  "designScore": "A",
+  "designScoreNote": "média 3.75 (A); nenhum achado de alto impacto aberto, então sem limite em B",
   "slopScore": "A",
+  "slopScoreNote": "média 3.85 (A); 3 achados médios ligados a tells (3, 35, 37)",
   "categories": {
-    "navigation": "C",
+    "navigation": "A-",
     "anatomy": "A",
     "typography": "A-",
-    "color": "A-",
+    "color": "A",
     "surfaces": "A-",
     "states": "A-",
     "interaction": "A-",
@@ -18,35 +20,44 @@
     "performance": "A",
     "copy": "A"
   },
+  "delta": {
+    "navigation": "C -> A-",
+    "color": "A- -> A",
+    "outras": "sem mudança de letra (anatomy A, typography A-, surfaces A-, states A-, interaction A-, forms A, performance A, copy A)"
+  },
   "findings": [
-    { "id": "FINDING-001", "impact": "high", "category": "navigation", "summary": "Modal Escolher local sem fechar explícito (só deslizar ou escolher uma região); a verificar no aparelho", "status": "open" },
-    { "id": "FINDING-002", "impact": "medium", "category": "navigation", "summary": "Cabeçalho nativo com o nome da aba + título no conteúdo (Atividades: 'Atividades' e 'Para quando?'; Detalhes: 'Detalhes' e 'Previsão por hora')", "status": "open" },
-    { "id": "FINDING-003", "impact": "medium", "category": "navigation", "summary": "Tela de entrada nunca mostra o nome SinalCerto (Trunk Test Q1 parcial)", "status": "open" },
-    { "id": "FINDING-004", "impact": "medium", "category": "typography", "summary": "Sem nível display: a categoria do Início (a informação principal) usa o mesmo tamanho de outros títulos", "status": "open" },
-    { "id": "FINDING-005", "impact": "medium", "category": "color", "summary": "Sem modo escuro: userInterfaceStyle light e tokens só claros", "status": "open" },
-    { "id": "FINDING-006", "impact": "medium", "category": "surfaces", "tell": 3, "summary": "Pilha de cartões: Atividades com 6 cartões com borda; seção de números com 4 cartões", "status": "open" },
-    { "id": "FINDING-007", "impact": "medium", "category": "states", "tell": 37, "summary": "Carregamento só com indicador giratório + texto, sem esqueleto do layout", "status": "open" },
-    { "id": "FINDING-008", "impact": "medium", "category": "interaction", "tell": 35, "summary": "Retorno de toque só por opacidade 0.8; sem ripple no Android", "status": "open" },
-    { "id": "FINDING-009", "impact": "polish", "category": "navigation", "summary": "Abas só com texto (decisão consciente do M1)", "status": "open" },
-    { "id": "FINDING-010", "impact": "polish", "category": "typography", "summary": "Sem maxFontSizeMultiplier em textos de botão (intencional: RNF05 verificado no iPhone com texto no máximo)", "status": "open" },
-    { "id": "FINDING-011", "impact": "polish", "category": "copy", "summary": "Rodapé do Início junta o aviso de estimativa e o da região num parágrafo só", "status": "open" }
+    { "id": "FINDING-001", "impact": "high", "category": "navigation", "summary": "Modal Escolher local sem fechar explícito", "status": "resolved", "resolvedBy": "D36: botão Fechar (48 dp) com foco do leitor de tela ao abrir" },
+    { "id": "FINDING-002", "impact": "medium", "category": "navigation", "summary": "Cabeçalho nativo + título no conteúdo (título duplo)", "status": "resolved", "resolvedBy": "D29/D31/D35: abas sem cabeçalho nativo; Sobre com o voltar sem título (D36)" },
+    { "id": "FINDING-003", "impact": "medium", "category": "navigation", "summary": "O Início não mostra o nome SinalCerto nem tem título para a navegação por cabeçalhos do leitor de tela (o wireframe v2 tirou o título; Trunk Test Q1 parcial)", "status": "open" },
+    { "id": "FINDING-004", "impact": "medium", "category": "typography", "summary": "Sem nível display para a categoria", "status": "resolved", "resolvedBy": "D28/D29: font.display no cartão de topo" },
+    { "id": "FINDING-005", "impact": "medium", "category": "color", "summary": "Sem modo escuro", "status": "resolved", "resolvedBy": "D28: tema claro e escuro; contraste testado nos dois modos" },
+    { "id": "FINDING-006", "impact": "medium", "category": "surfaces", "tell": 3, "summary": "Pilha de cartões com borda em Atividades e na seção de números", "status": "resolved", "resolvedBy": "D34/D35: lista de linhas em Atividades; métricas dentro da linha aberta em Detalhes", "supersededBy": "FINDING-013" },
+    { "id": "FINDING-007", "impact": "medium", "category": "states", "tell": 37, "summary": "Carregamento só com indicador giratório + texto em Início, Detalhes e Escolher local (Atividades já tem esqueleto)", "status": "open" },
+    { "id": "FINDING-008", "impact": "medium", "category": "interaction", "tell": 35, "summary": "Retorno de toque só por escurecimento, sem escala no iOS nem ondinha no Android", "status": "open", "note": "decisão da equipe na E5 (D36): manter o escurecimento em todo o app" },
+    { "id": "FINDING-009", "impact": "polish", "category": "navigation", "summary": "Abas só com texto", "status": "resolved", "resolvedBy": "D28: ícones Lucide + texto" },
+    { "id": "FINDING-010", "impact": "polish", "category": "typography", "summary": "Sem maxFontSizeMultiplier em textos de botão", "status": "open", "note": "intencional: RNF05 verificado no iPhone com texto no máximo" },
+    { "id": "FINDING-011", "impact": "polish", "category": "copy", "summary": "Rodapé do Início com dois avisos num parágrafo", "status": "resolved", "resolvedBy": "D34: uma linha com Saiba mais" },
+    { "id": "FINDING-012", "impact": "medium", "category": "typography", "summary": "Rótulos de hora e data dentro da faixa do dia são texto SVG (11 pt) e não crescem com o texto do sistema", "status": "open", "note": "a hora escolhida e a categoria estão em texto escalável acima da faixa, e a faixa é ajustável no VoiceOver" },
+    { "id": "FINDING-013", "impact": "medium", "category": "surfaces", "tell": 3, "summary": "Atividades: as 6 linhas são superfícies separadas (arredondadas, com espaço entre elas), perto de uma pilha de cartões; Detalhes e Escolher local usam lista agrupada com divisórias", "status": "open" },
+    { "id": "FINDING-014", "impact": "polish", "category": "copy", "summary": "Textos com ponto no meio ('20:00 · Regular', 'São Paulo (SP) · 8 boas...')", "status": "open", "note": "pedido explícito do wireframe v2" }
   ],
   "dismissed": [
-    { "grep": "tell 33 dashes", "hit": "NumbersSection.tsx:14", "reason": "travessão num comentário de código, não é texto visível" },
-    { "grep": "tell 1 emoji", "hit": "AppButton.tsx:45, TimelineRow.tsx:28 (✓)", "reason": "U+2713 renderizado como texto, marca de estado selecionado exigida pelo RNF03; não é ícone emoji" },
-    { "grep": "tell 13 ScrollView+map", "hit": "5 telas", "reason": "listas fixas e curtas (10 regiões, 24 horas, 6 atividades, 4 períodos, 3 categorias)" },
-    { "grep": "pull-to-refresh", "hit": "nenhum RefreshControl", "reason": "não é feed; dados de um dia; 'Tentar de novo' cobre a recarga (D27)" }
+    { "grep": "tell 33 dashes", "hit": "HourRow.tsx:26", "reason": "traço num comentário de código (0–1), não é texto visível" },
+    { "grep": "tell 1 emoji", "hit": "AppButton.tsx:51, HourRow.tsx:54 (e comentários)", "reason": "U+2713 renderizado como texto, marca de selecionado exigida pelo RNF03; não é ícone emoji" },
+    { "grep": "tell 2 gradient count", "hit": "ForecastHero.tsx (1 LinearGradient)", "reason": "o único gradiente do app, declarado como RISK no MOBILE-DESIGN.md (D29)" },
+    { "grep": "tell 13 ScrollView+map", "hit": "local.tsx, sobre.tsx", "reason": "listas fixas e curtas (10 regiões, 3 categorias)" },
+    { "grep": "tell 5 shadowColor", "hit": "theme/index.ts (elevation.card)", "reason": "sombra do iOS e elevation 2 do Android no mesmo token" }
   ],
   "accessibilityWins": [
-    "role/nome/estado em todo controle; lint de acessibilidade",
-    "contraste testado por par de cores",
-    "48 dp em todos os toques",
-    "categoria sempre em texto + forma + cor",
-    "texto no máximo e VoiceOver verificados no iPhone a cada marco"
+    "role/nome/estado em todo controle, incluindo expanded nas linhas que abrem e adjustable na faixa do dia",
+    "contraste testado por par de cores nos dois modos",
+    "48 dp em todos os toques (hitSlop em 'O que é isso?')",
+    "categoria sempre em texto + forma + cor; seleção com ✓",
+    "foco do leitor de tela levado à faixa ('Trocar hora') e ao 'Fechar' do modal",
+    "guarda de vocabulário contra termos de bastidor e nomes de rota"
   ],
   "unverified": [
-    "nenhum simulador ou aparelho acessível nesta revisão: teclado (não há campos), splash, desempenho de rolagem, escala de fonte, bordas do Android NÃO verificados agora",
-    "se o modal Escolher local mostra botão de voltar/fechar no cabeçalho nativo",
+    "nenhum simulador ou aparelho acessível nesta revisão: splash, desempenho de rolagem, escala de fonte e bordas do Android NÃO verificados agora (a equipe verificou texto no máximo e VoiceOver no iPhone a cada etapa)",
     "Android em geral"
   ]
 }

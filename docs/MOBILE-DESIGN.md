@@ -160,3 +160,5 @@ máximo de toques até qualquer tela: 2
   Início e Atividades com uma pergunta por tela. E4 (Detalhes) pausada.
 - 2026-10-28, D34 (wireframe v2, `docs/design/wireframe-v2.md`): Início sem título (cartão, faixa,
   Melhor/Evite, botão, aviso); Atividades em lista com status e linha que abre Melhor/Evite.
+- 2026-10-29, fechamento: revisão final contra `design-baseline.json`: nota B → A, nenhum achado alto;
+  E5 (D36: Escolher local e Sobre). Merge da md-design na main.
