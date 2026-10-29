@@ -42,7 +42,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm test",
-    "icons": "node scripts/build-icons.mjs"
+    "icons": "node scripts/build-icons.mjs",
+    "coverage": "jest --coverage --coverageReporters=text-summary"
   },
   "private": true,
   "jest": {
@@ -53,7 +54,12 @@
     ],
     "moduleNameMapper": {
       "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js"
-    }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.test.{ts,tsx}",
+      "!src/__tests__/**"
+    ]
   },
   "overrides": {
     "eslint-plugin-react-native-a11y": {
