@@ -43,6 +43,17 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "969eceae-2d10-48af-847a-b09b1f33f4c3"
+      }
+    },
+    "owner": "gabrieldotech"
   }
 }

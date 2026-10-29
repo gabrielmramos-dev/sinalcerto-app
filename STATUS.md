@@ -27,6 +27,8 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 - Conferido no computador: a configuração do Expo é válida; o pacote Android compila (`expo export`); o
   endereço da API vai embutido no build.
 - Início: a região passou a ser o cabeçalho da tela para o leitor de tela (teste automatizado).
+- Projeto EAS criado pela equipe (2026-10-29): @gabrieldotech/sinalcerto-app, com o `projectId` no `app.json`. O
+  build `preview` carregou do `eas.json` o endereço da API e `EXPO_PUBLIC_DATA_SOURCE=auto` (API com reserva).
 - **Pendente:** o build no EAS (rodado pela equipe), a instalação no Android do Léo e o roteiro com
   TalkBack e texto grande. **O app nunca rodou em Android até aqui.**
 - **Ícone e tela de abertura do SinalCerto (D38):** três barras de sinal no verde do tema, geradas de
