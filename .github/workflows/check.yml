@@ -1,0 +1,22 @@
+# D39: tipos, lint (com acessibilidade) e testes em todo push e PR na main.
+# Node 22: o Expo SDK 58 e o React Native 0.88 exigem Node ^22.13 (o Node 20 não é suportado).
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
