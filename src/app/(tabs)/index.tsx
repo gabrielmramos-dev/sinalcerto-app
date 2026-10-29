@@ -60,9 +60,10 @@ export default function HomeScreen() {
       <SourceBanner />
       {/* Região curta na tela; o leitor de tela ouve "Região escolhida: …". Quebra linha só com texto grande. */}
       <View style={styles.location}>
-        {/* Texto estático: o rótulo só completa o contexto para o leitor de tela. */}
+        {/* D37: a região é o cabeçalho da tela para o leitor de tela (navegação por títulos), sem mudar o
+            visual. O rótulo só completa o contexto ("Região escolhida: …"). */}
         {/* eslint-disable-next-line react-native-a11y/has-accessibility-hint */}
-        <Text style={[font.label, styles.text, styles.grow]} accessibilityLabel={region}>
+        <Text style={[font.label, styles.text, styles.grow]} accessibilityRole="header" accessibilityLabel={region}>
           {name}
         </Text>
         <AppButton
