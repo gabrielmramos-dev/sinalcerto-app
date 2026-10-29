@@ -21,6 +21,19 @@ Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
 | RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
 | RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
 
+## APK Android de demonstração (D37)
+- Configurado: `eas.json` (perfil `preview`, APK, distribuição interna) e `app.json` (pacote
+  `br.edu.brazcubas.sinalcerto`, `versionCode` 1, fundo da tela de abertura nas cores do tema).
+- Conferido no computador: a configuração do Expo é válida; o pacote Android compila (`expo export`); o
+  endereço da API vai embutido no build.
+- Início: a região passou a ser o cabeçalho da tela para o leitor de tela (teste automatizado).
+- Projeto EAS criado pela equipe (2026-10-29): @gabrieldotech/sinalcerto-app, com o `projectId` no `app.json`. O
+  build `preview` carregou do `eas.json` o endereço da API e `EXPO_PUBLIC_DATA_SOURCE=auto` (API com reserva).
+- **Pendente:** o build no EAS (rodado pela equipe), a instalação no Android do Léo e o roteiro com
+  TalkBack e texto grande. **O app nunca rodou em Android até aqui.**
+- **Ícone e tela de abertura do SinalCerto (D38):** três barras de sinal no verde do tema, geradas de
+  um SVG por `npm run icons`; contraste ≥ 3:1 conferido por teste.
+
 ## Design concluído (2026-10-29)
 - **Revisão final** (`mobile-design-review`, comparada com `design-baseline.json`): nota de design B → **A**,
   nota de "cara de IA" **A**.

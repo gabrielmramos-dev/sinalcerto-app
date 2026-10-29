@@ -1,0 +1,7 @@
+<!-- D38: símbolo do SinalCerto. Três barras de sinal crescentes, sem texto. Fonte versionada dos ícones;
+     os PNGs são gerados por scripts/build-icons.mjs (a cor é trocada pelo script em cada saída). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 500">
+  <rect x="0" y="280" width="120" height="220" rx="36" fill="#86D2A3"/>
+  <rect x="180" y="140" width="120" height="360" rx="36" fill="#86D2A3"/>
+  <rect x="360" y="0" width="120" height="500" rx="36" fill="#86D2A3"/>
+</svg>

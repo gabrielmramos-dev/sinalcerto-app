@@ -1,0 +1,18 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://internet-quality-api.onrender.com",
+        "EXPO_PUBLIC_DATA_SOURCE": "auto"
+      }
+    }
+  }
+}

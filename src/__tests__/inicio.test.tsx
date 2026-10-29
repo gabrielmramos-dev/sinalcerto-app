@@ -32,6 +32,14 @@ describe('D34 (wireframe v2): Início, "como está a internet?"', () => {
     expect(screen.queryByText('Melhor momento do dia')).toBeNull();
   });
 
+  it('D37: a região é o cabeçalho da tela para o leitor de tela (o primeiro), com o mesmo texto visível', async () => {
+    await renderRouter('src/app', { initialUrl: '/' });
+    await screen.findByLabelText(CARD);
+    const header = screen.getByRole('header', { name: 'Região escolhida: São Paulo (SP)' });
+    expect(header).toHaveTextContent('São Paulo (SP)');
+    expect(screen.getAllByRole('header')[0]).toBe(header);
+  });
+
   it('mudar a seleção na faixa muda o cartão (uma resposta só na tela)', async () => {
     await renderRouter('src/app', { initialUrl: '/' });
     const strip = await screen.findByRole('adjustable');

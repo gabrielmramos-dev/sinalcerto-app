@@ -662,6 +662,64 @@ retorno ao toque), `mobile-design-review` (mesmo padrão de lista e de espaçame
     não aparece o "Sem conexão".
   - **Teste novo:** escolher Belo Horizonte e reabrir o modal mostra o ✓ em Belo Horizonte, só nela.
 
+## D37 — APK Android de demonstração via EAS Build (2026-10-29)
+- **Objetivo:** um APK para a equipe (Léo) instalar no Android sem Expo Go e sem Play Store. É o
+  primeiro uso do app em Android de verdade (até aqui, só iPhone).
+- **`eas.json`:** perfil `preview`, com `distribution: internal` e `android.buildType: apk` (instala
+  direto, sem loja). Usa `appVersionSource: local`, ou seja, a versão vem do `app.json`.
+- **`app.json`:**
+  - **Identificação:** `android.package` `br.edu.brazcubas.sinalcerto`, `versionCode` 1, nome
+    "SinalCerto".
+  - **Tela de abertura:** a imagem é a mesma de antes, com fundo nas cores do tema (#F6F5F1 no claro,
+    #0F1512 no escuro), para não piscar branco antes da primeira tela.
+  - **Ícone e tela de abertura:** substituídos pela marca do SinalCerto na D38.
+- **Fonte de dados:**
+  - **Como hoje (D27):** API real por padrão, com a reserva guardada no app quando ela não responde.
+  - **No build:** o perfil passa `EXPO_PUBLIC_API_BASE_URL` (o endereço da API) e
+    `EXPO_PUBLIC_DATA_SOURCE=auto` em `env`. O EAS envia só os arquivos que o git acompanha, e o
+    `.env` está no `.gitignore`. Por isso as variáveis ficam no `eas.json`, e não num `.env`.
+  - **Conferido:** num `expo export` para Android com essas variáveis, o endereço da API aparece no
+    pacote JavaScript e o nome da variável não aparece, sinal de que o valor foi embutido no build. O
+    código também tem o mesmo endereço como padrão.
+- **Acessibilidade (correção antes do APK):**
+  - **Cabeçalho do Início:** a região ("São Paulo (SP)") passou a ser o cabeçalho da tela para o leitor
+    de tela, lido como "Região escolhida: São Paulo (SP)". Assim, o Início volta a ter um título para
+    a navegação por cabeçalhos (FINDING-003 da revisão final, em parte), sem mudar o visual aprovado.
+  - **Teste:** a região é o primeiro cabeçalho da tela.
+- **Quem faz o quê:** o login no Expo e o build são feitos pela equipe no terminal (comandos no
+  README, "Como instalar o APK"). A IA não roda login nem build.
+
+## D38 — Ícone e tela de abertura do SinalCerto (2026-10-29)
+- **Símbolo:** três barras de sinal crescentes, com cantos arredondados e sem texto. A fonte versionada
+  é `assets/icon-src/sinal.svg`. Os PNGs saem de `npm run icons` (`scripts/build-icons.mjs`), que
+  centraliza o símbolo e troca a cor em cada saída.
+- **Dependência nova:** `sharp` (só de desenvolvimento). Ela converte o SVG em PNG, não entra no app e
+  foi sugerida pela equipe.
+- **Saídas:**
+  - **Ícone** (`icon.png`, 1024×1024): fundo escuro do app (#0F1512) e símbolo no verde do tema escuro
+    (#86D2A3), em cerca de 49% da tela, com margem para a máscara do iOS.
+  - **Android adaptativo:**
+    - **Desenho e fundo:** só o símbolo, com fundo pela `backgroundColor` #0F1512. Saiu a imagem de fundo
+      do modelo do Expo.
+    - **Área segura:** o símbolo ocupa cerca de 37% da tela, e os cantos das barras ficam a cerca de 0,26
+      da tela a partir do centro, dentro do círculo seguro de 66% (raio 0,33).
+    - **Monocromático (Android 13+):** a mesma forma em branco; o sistema pinta.
+  - **Tela de abertura:** o símbolo no verde de cada tema, sobre o fundo de cada tema. No claro, #1F6B45
+    sobre #F6F5F1; no escuro, #86D2A3 sobre #0F1512. A imagem do modo escuro está em `dark.image` no
+    plugin `expo-splash-screen`.
+  - **Favicon:** o mesmo símbolo. A web não é alvo, mas o favicon deixa de ser o do modelo.
+- **Contraste do símbolo sobre o fundo (≥ 3:1, WCAG 1.4.11):**
+
+  | Uso | Contraste |
+  |---|---|
+  | Ícone e adaptativo | 10,35:1 |
+  | Tela de abertura clara | 5,93:1 |
+  | Tela de abertura escura | 10,35:1 |
+
+  O verde do tema escuro sobre o fundo claro daria só 1,64:1. Por isso cada modo da tela de abertura usa
+  o verde do próprio tema. Um teste (`__tests__/icons.test.ts`) confere que as cores do script e do
+  `app.json` são as do tema e que as três combinações passam 3:1.
+
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app
 nunca apresenta a previsão como sendo de "agora".

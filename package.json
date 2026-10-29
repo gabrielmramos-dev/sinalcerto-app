@@ -30,6 +30,7 @@
     "jest": "~30.5.2",
     "jest-expo": "~58.0.12",
     "react-dom": "19.3.0",
+    "sharp": "^0.35.5",
     "test-renderer": "^1.3.1",
     "typescript": "~6.0.3"
   },
@@ -40,7 +41,8 @@
     "test": "jest",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "icons": "node scripts/build-icons.mjs"
   },
   "private": true,
   "jest": {
