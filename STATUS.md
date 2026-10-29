@@ -1,25 +1,46 @@
 # STATUS — verdade primeiro
 
-Atualizado: 2026-10-29, M6 aprovado; **design concluído** (marco MD, E1 a E5, nota de design A). Estados: **feito** (na tela e verificado) ·
-**parcial** (parte pronta; o que falta está dito) · **pendente** (não começou).
+Atualizado: 2026-10-29, **M7 concluído, exceto o teste com TalkBack** (pendente do Android). Design
+concluído (marco MD, nota A). Estados: **feito** (na tela e verificado) · **parcial** (parte pronta; o
+que falta está dito) · **pendente** (não começou).
 "Teste automatizado" = Jest (`npm test`). "Teste manual" = descrito na linha.
-Aparelho de teste até agora: só iPhone. **Nada foi testado em Android.**
+Aparelho de teste até agora: só iPhone. **Nada foi testado em Android** (o APK está pronto, D37).
 
 | Req | Estado | Onde está | Como foi verificado | Falta |
 |---|---|---|---|---|
-| RQ01 | feito | `app/(tabs)/index.tsx` (cartão "Previsão mais próxima"), `components/StatusBadge.tsx` | Teste automatizado (`__tests__/inicio.test.tsx`: categoria, data real, aviso de dado antigo, anúncio). Teste manual no iPhone (2026-10-16): troca de local funciona e o Início volta com a região escolhida | TalkBack (Android). O cartão continua sendo a previsão mais próxima de agora (RQ01); o horário escolhido aparece em Atividades e Detalhes |
-| RQ02 | feito | `app/(tabs)/detalhes.tsx` ("Hora a hora": 24 horas em lista vertical por dia, linha que abre o que esperar, D35), `components/HourRow.tsx`, `data/time.ts` (`groupByDay`); faixa do dia no Início (D33, D34). Os filtros por período saíram na D35 | Teste automatizado (`__tests__/detalhes.test.tsx`: 24 linhas com nome completo, 2 cabeçalhos, filtro Noite com 6 horas em 2 datas, `selected`, anúncios, tocar numa hora vale na aba Atividades, estados carregando/erro/vazio/filtro sem horas; `__tests__/inicio.test.tsx`: prévia honesta e prévia com 3 horas). **Teste manual no iPhone (2026-10-22):** 24 horas com cabeçalhos de data; filtros com ✓ (Noite com 6 horas nas duas datas); hora escolhida em Detalhes valendo em Atividades; "Próximas horas" com a mensagem honesta | TalkBack (Android). A prévia com horas futuras só foi vista em teste automatizado (os dados atuais não têm horas depois do cartão) |
-| RQ03 | feito | `app/(tabs)/atividades.tsx`, `components/ActivityCard.tsx`, `hooks/useActivityChecks.ts` (D5, D19, D20) | Teste automatizado: 6 cartões com `suitable` e `code` da API, erro e "Tentar de novo" por cartão, timeout de 15 s, cache, descarte de resposta atrasada, anúncio do resumo. **Teste manual no iPhone (2026-10-16):** 6 cartões com status em texto, ícone e cor | TalkBack (Android) |
-| RQ04 | parcial | `components/TimeChooser.tsx`, `data/periods.ts` (D17), `data/time.ts` (`itemAtClock`, D6, D18) | Teste automatizado: 4 períodos com data completa e maior nota; 15:20 → 15:00 com aviso; o aviso some quando o horário muda em Detalhes; tocar num período fecha o seletor; só `predictionFor` da timeline enviado (o seletor nativo é um substituto nos testes). **Teste manual no iPhone (2026-10-16):** botões de período com ✓; seletor nativo de rolagem: 15:20 virou 15:00, com aviso. **(2026-10-22):** o seletor fecha ao tocar num período; o aviso "Você escolheu 15:20" some ao trocar a hora em Detalhes | **Seletor do Android (diálogo `DateTimePickerAndroid`): não testado no aparelho nem nos testes automatizados** |
-| RNF01 | pendente | — | — | Checklist NBR 17060 / WCAG no M7 |
-| RNF02 | parcial | `AppButton` e `TimelineRow` (role, nome, dica, estado); cartões e linhas lidos como um item; "Tentar de novo: <atividade>"; períodos, filtros, locais e horas com `selected`; lint a11y | Teste automatizado + lint. **VoiceOver no iPhone (2026-10-16):** Início (cartão como frase única com a data, "Trocar local", 3 abas com nome, região selecionada anunciada); Atividades (cartões como frase única, "selecionado" nos períodos, seletor ajustável). **(2026-10-22):** Detalhes (linhas lidas como frase, cabeçalhos de data para pular entre dias, "selecionado" na hora escolhida) | TalkBack (Android) |
-| RNF03 | parcial | Texto + forma + cor em `StatusBadge` (qualidade, atividades, linhas da timeline); seleção com "✓" e `selected` | Teste automatizado. Teste manual no iPhone: status das atividades (2026-10-16) e linhas e filtros da timeline (2026-10-22) com texto, ícone e cor ou "✓" | Android; conferência final no M7 |
-| RNF04 | parcial | `theme/index.ts`, `theme/contrast.ts` | Teste automatizado: 18 pares da paleta | Conferir cada tela no M7 |
-| RNF05 | parcial | Sem `numberOfLines` e sem `lineHeight` fixo; botões e linhas da timeline quebram linha; telas com rolagem | **Texto no máximo no iPhone:** Início, Escolher local e Atividades (2026-10-16); Detalhes e a prévia do Início (2026-10-22); seção "Como ler os números" e todas as telas no SDK 58 (2026-10-28), sem cortes nem sobreposições | Android |
-| RNF06 | parcial | Só toques simples em botões; o seletor de rolagem do iOS tem "Usar este horário" e "Cancelar"; filtros sem rolagem horizontal | Leitura do código. Teste manual no iPhone: seletor ajustável pelo VoiceOver (2026-10-16; de novo no SDK 58 em 2026-10-28) | Android |
-| RNF07 | feito | `components/NumbersSection.tsx` (seção "O que esperar neste horário" na aba Detalhes; até o M5 chamava "Como ler os números"); bastidores, jitter e faixas de Redes na tela `app/sobre.tsx`; textos em `i18n/glossary.ts`; `data/metrics.ts` (`bandFor`, D23); D24 | Teste automatizado (`data/metrics.test.ts`: bordas das faixas; `__tests__/detalhes.test.tsx`: latência e perda com valor, faixa de Redes e explicação, aviso de que RTT alto sozinho não é defeito, jitter sem valor com aviso, nota explicada, confiança só na hora em que a API manda, equivalência Boa/Regular/Instável = OK/Risco/Falha, categoria sem reclassificação). **Teste manual no iPhone, SDK 58 (2026-10-28):** valores certos (73,2 ms, 3,9%, nota 63, confiança 80% às 20:00), confiança some às 15:00, VoiceOver e texto no máximo ok. Bordas das faixas (D23) confirmadas pela equipe **M5.1 (D26), teste manual no iPhone (2026-10-28):** "O que esperar neste horário" com 73 ms e 3,9% nos textos novos, sem jitter, "Redes" ou OK/Risco/Falha; valores de 15:00 corretos com a confiança sumindo; tela Sobre completa e visível; VoiceOver lendo "milissegundos" e "por cento" por extenso; texto no máximo sem cortes. Guarda de vocabulário automatizado (`__tests__/vocabulario.test.tsx`) | TalkBack (Android) |
-| RNF08 | parcial | Anúncios: previsão (Início), resumo das atividades (Atividades), filtro e hora escolhida (Detalhes) | Teste automatizado (o anúncio é chamado com o texto certo). **VoiceOver no iPhone (2026-10-16):** novo local anunciado ao voltar; resumo das atividades anunciado. **(2026-10-22):** anúncios de filtro e de hora escolhida | TalkBack (Android) |
-| RNF09 | parcial | `AppButton` e `TimelineRow` com mínimo de 48 | Teste automatizado (`AppButton`) | Conferir a barra de abas no celular |
+| RQ01 | feito | Início: cartão da hora escolhida (`app/(tabs)/index.tsx`, `components/ForecastHero.tsx`) | Teste automatizado (`__tests__/inicio.test.tsx`). iPhone a cada etapa (último: 2026-10-29) | TalkBack |
+| RQ02 | feito | Início: faixa das 24 horas (`components/DayStrip.tsx`); Detalhes: hora a hora (`app/(tabs)/detalhes.tsx`, `components/HourRow.tsx`) | Teste automatizado (`DayStrip.test.tsx`, `detalhes.test.tsx`). iPhone (2026-10-29) | TalkBack |
+| RQ03 | parcial | Atividades (`app/(tabs)/atividades.tsx`, `components/ActivityRow.tsx`, `hooks/useActivityChecks.ts`, `lib/hourPhrases.ts`) | Teste automatizado (`atividades.test.tsx`, `hourPhrases.test.ts`). iPhone (2026-10-28) | **Jogos online:** a API 0.2.0 não tem essa atividade (6 de 7). TalkBack |
+| RQ04 | feito | Hora escolhida no app inteiro (`hooks/useChosenHour.ts`): faixa do Início (toque, botões e leitor de tela) e lista de Detalhes | Teste automatizado (`inicio.test.tsx`, `detalhes.test.tsx`, `DayStrip.test.tsx`). iPhone (2026-10-28 e 29). O seletor nativo de hora e os períodos saíram na D34/D35 | TalkBack |
+| RNF01 | parcial | Critérios da WCAG 2.2 AA aplicados em todas as telas (os RNF abaixo) | Testes automatizados e VoiceOver no iPhone | TalkBack; checklist formal da NBR 17060 |
+| RNF02 | parcial | Nome, função e estado em todo controle (`selected`, `expanded`, `adjustable`); lint de acessibilidade | VoiceOver no iPhone, em todas as telas, a cada etapa | **TalkBack** |
+| RNF03 | feito | Categoria em texto + forma + cor; padrão nas barras; ✓ na seleção | Teste automatizado (`DayStrip.test.tsx`). iPhone nos dois modos | — |
+| RNF04 | feito | `theme/index.ts`, `theme/contrast.ts` | Teste automatizado de todos os pares, nos modos claro e escuro (`theme/contrast.test.ts`), e do ícone (`__tests__/icons.test.ts`) | — |
+| RNF05 | parcial | Sem `numberOfLines` nem `lineHeight` fixo; linhas quebram com texto grande | Texto no máximo no iPhone, em todas as telas (2026-10-29) | Android. Os rótulos de hora dentro da faixa não crescem (a hora e a categoria estão em texto que cresce) |
+| RNF06 | feito | Só toques simples; a faixa também tem "Hora anterior/Próxima hora" | Leitura do código e testes | — |
+| RNF07 | feito | "O que esperar neste horário" em Detalhes, com "O que é isso?" (D35); termos técnicos só na tela Sobre | Teste automatizado (`detalhes.test.tsx`, `vocabulario.test.tsx`) | — |
+| RNF08 | parcial | Anúncios da previsão e da hora escolhida; foco no "Fechar" do modal (D36) e na faixa ("Trocar hora", D34) | Teste automatizado; VoiceOver no iPhone | TalkBack |
+| RNF09 | feito | 48 dp em botões, linhas e links (`minTouch`; `hitSlop` em "O que é isso?") | Teste automatizado | — |
+
+## M7: passada final (2026-10-29)
+- **README reescrito** para quem nunca viu o projeto: telas, APK, desenvolvimento, arquitetura,
+  requisitos, acessibilidade, design, testes, equipe e limitações.
+- **Roteiro da Mostra:** `docs/MOSTRA.md`, com o roteiro de 3 minutos, o plano B e as perguntas
+  prováveis.
+- **Cobertura (SCRUM-23, só medida, sem meta):** `npm run coverage`, em `src`, sem os arquivos de
+  teste. A pasta `coverage/` não vai para o git.
+
+  | Medida | Resultado |
+  |---|---|
+  | Instruções | 95,39% (725/760) |
+  | Ramos | 87,84% (441/502) |
+  | Funções | 93,72% (254/271) |
+  | Linhas | 96,37% (612/635) |
+
+  A menor é `app/(tabs)/detalhes.tsx` (65% das linhas): a rolagem até a hora escolhida depende de
+  medidas da tela, que o Jest não calcula.
+- **Testes:** 243 passando, 2 pulados (API ao vivo), em 22 arquivos.
+- **Pendente:** o teste com TalkBack e com texto grande no Android (APK pronto, D37).
 
 ## APK Android de demonstração (D37)
 - Configurado: `eas.json` (perfil `preview`, APK, distribuição interna) e `app.json` (pacote
