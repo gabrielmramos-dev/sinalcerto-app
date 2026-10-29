@@ -1,5 +1,5 @@
 import { contrastRatio } from './contrast';
-import { colors, contrastPairs } from './index';
+import { contrastPairs, palettes } from './index';
 
 describe('contrastRatio', () => {
   it('bate com os valores de referência da WCAG', () => {
@@ -18,8 +18,13 @@ describe('contrastRatio', () => {
   });
 });
 
-describe('paleta (RNF04)', () => {
+// RNF04 nos dois modos (D28): o tema segue o sistema, então os dois precisam passar.
+describe.each(Object.entries(palettes))('paleta %s (RNF04)', (_mode, colors) => {
   it.each(contrastPairs)('%s sobre %s >= %s:1', (fg, bg, min) => {
     expect(contrastRatio(colors[fg], colors[bg])).toBeGreaterThanOrEqual(min);
   });
+});
+
+it('claro e escuro têm exatamente os mesmos tokens', () => {
+  expect(Object.keys(palettes.dark).sort()).toEqual(Object.keys(palettes.light).sort());
 });

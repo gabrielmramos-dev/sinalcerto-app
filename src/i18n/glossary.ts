@@ -2,7 +2,6 @@
 // D26: fora da tela "Sobre", nada de API, modelo, probe, dados salvos, faixas de Redes ou OK/Risco/Falha.
 import type { Activity, Quality, RecommendationCode } from '@/api/types';
 import { InvalidRequestError } from '@/data/ForecastSource';
-import type { PeriodId } from '@/data/periods';
 
 export type Tone = 'good' | 'moderate' | 'unstable';
 
@@ -41,13 +40,6 @@ export const activity: Record<Activity, { name: string; examples: string }> = {
   FILE_UPLOAD: { name: 'Enviar arquivos', examples: 'fotos, documentos' },
   WEB_BROWSING: { name: 'Navegar na internet', examples: 'sites, notícias' },
   MESSAGING: { name: 'Mandar mensagens', examples: 'textos, áudios curtos' },
-};
-
-export const period: Record<PeriodId, string> = {
-  madrugada: 'Madrugada',
-  manha: 'Manhã',
-  tarde: 'Tarde',
-  noite: 'Noite',
 };
 
 export const metric = {
@@ -121,23 +113,11 @@ export const redesBands = {
   ],
 } satisfies Record<'latency' | 'packetLoss' | 'jitter', Band[]>;
 
-/** Seção da aba Detalhes (D24, D26). */
-export const numbersSection = {
-  title: 'O que esperar neste horário',
-  valuesFor: (when: string) => `Valores de ${when} (horário de Brasília).`,
-  nearestNote: 'Nenhuma hora escolhida: mostrando a previsão mais próxima. Toque numa hora acima para ver outra.',
-  latencyValue: (ms: number, effect: string) => `${ms} ms: ${effect}`,
-  latencySpoken: (ms: number, effect: string) => `${ms} milissegundos: ${effect}`,
-  /** "3,9% (cerca de 4 em cada 100 pedaços de informação se perdem)". Abaixo de 0,5%, "menos de 1". */
-  lossValue: (pctText: string, pct: number) => {
-    const n = Math.round(pct);
-    if (n < 1) return `${pctText}% (menos de 1 em cada 100 pedaços de informação se perde)`;
-    return `${pctText}% (cerca de ${n} em cada 100 pedaços de informação se ${n === 1 ? 'perde' : 'perdem'})`;
-  },
-  lossSpoken: (spokenValue: string) => spokenValue.replace(/(\d+(,\d+)?)%/, '$1 por cento'),
-  scoreValue: (score: number) => `${score} de 100`,
-  confidenceValue: (pct: number) => `${pct}%`,
-  confidenceSpoken: (pct: number) => `${pct} por cento`,
+/** D35: o que a perda quer dizer, na explicação sob demanda de Detalhes. Abaixo de 0,5%, "menos de 1". */
+export const lossMeaning = (pct: number) => {
+  const n = Math.round(pct);
+  if (n < 1) return 'Menos de 1 em cada 100 pedaços de informação se perde.';
+  return `Cerca de ${n} em cada 100 pedaços de informação se ${n === 1 ? 'perde' : 'perdem'}.`;
 };
 
 export const disclaimer =
@@ -147,30 +127,53 @@ export const disclaimer =
 export const ui = {
   tabs: { home: 'Início', activities: 'Atividades', details: 'Detalhes' },
   common: {
+    // D36: nunca expor nome de rota ("(tabs)") no botão voltar
+    appName: 'SinalCerto',
+    back: 'Voltar',
     qualityContext: 'Qualidade prevista',
     loading: 'Carregando a previsão…',
     retry: 'Tentar de novo',
     region: (name: string) => `Região escolhida: ${name}`,
-    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra em Trocar local, no Início.',
+    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra no botão Trocar, no Início.',
   },
   home: {
     changeLocation: 'Trocar local',
     changeLocationHint: 'Abre a lista de regiões',
-    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra em Trocar local.',
+    noDataForRegion: 'Ainda não há previsão para esta região. Escolha outra no botão Trocar.',
     loadError: 'Não foi possível carregar a previsão.',
-    cardTitle: 'Previsão mais próxima',
-    forecastFor: (when: string) => `Previsão para ${when} (horário de Brasília)`,
-    forecastForSpoken: (when: string) => `Previsão para ${when}, horário de Brasília.`,
-    pastNote: 'Ainda não temos previsão para agora. Esta é a nossa previsão mais recente.',
     regionNote: 'A previsão vale para a região escolhida, não exatamente para onde você está.',
-    seeActivities: 'Ver o que dá para fazer',
+    // D34 (wireframe v2)
+    seeActivities: 'O que dá para fazer?',
     seeActivitiesHint: 'Abre a aba Atividades',
-    seeAllHours: 'Ver todas as horas',
-    seeAllHoursHint: 'Abre a aba Detalhes',
-    nextHoursTitle: 'Próximas horas',
-    nextHoursLoading: 'Carregando as próximas horas…',
-    nextHoursError: 'Não foi possível carregar as próximas horas.',
-    nextHoursNone: (when: string) => `Nossa previsão vai só até ${when}.`,
+    changeShort: 'Trocar',
+    // D34: estimativa em uma linha; o texto completo fica na tela Sobre
+    estimate: 'É uma estimativa e pode errar.',
+    learnMore: 'Saiba mais',
+    learnMoreLabel: 'Saiba mais sobre a estimativa',
+    learnMoreHint: 'Abre a tela Sobre o SinalCerto',
+  },
+  // D34: linhas Melhor/Evite (Início e Atividades)
+  hours: {
+    best: 'Melhor',
+    avoid: 'Evite',
+    all: 'o dia todo',
+    none: 'nenhum horário',
+    rest: 'o resto do dia',
+    mostly: 'quase o dia todo',
+    withQuality: (when: string, qualityLabel: string) => `${when} · ${qualityLabel}`,
+    spoken: (best: string, avoid: string) => `Melhor: ${best}. Evite: ${avoid}.`,
+  },
+  // D33: faixa do dia (Início, Atividades e, depois, Detalhes)
+  strip: {
+    label: 'Faixa do dia, hora a hora',
+    hint: 'Deslize para cima ou para baixo para mudar a hora',
+    // D34: "01:00 · Boa", igual na tela e no leitor de tela
+    value: (clock: string, qualityLabel: string) => `${clock} · ${qualityLabel}`,
+    none: 'Nenhuma hora escolhida',
+    prev: 'Hora anterior',
+    prevHint: 'Escolhe a hora anterior na faixa do dia',
+    next: 'Próxima hora',
+    nextHint: 'Escolhe a próxima hora na faixa do dia',
   },
   location: {
     title: 'Escolher local',
@@ -179,51 +182,53 @@ export const ui = {
     loadError: 'Não foi possível carregar as regiões.',
     empty: 'Nenhuma região disponível no momento.',
     pickHint: 'Usa esta região na previsão e volta para o início',
+    // D36
+    close: 'Fechar',
+    closeHint: 'Fecha sem trocar a região',
   },
   activities: {
-    title: 'Para quando?',
+    // D34 (wireframe v2): "O que você quer fazer?"
+    title: 'O que você quer fazer?',
+    intro: 'Toque numa atividade para ver os melhores horários.',
     loading: 'Carregando os horários…',
     loadError: 'Não foi possível carregar os horários.',
-    chooseFirst: 'Escolha um horário para ver o que dá para fazer.',
-    resultsTitle: 'O que dá para fazer neste horário',
-    sharedTip: (tip: string) => `Dica para este horário: ${tip}`,
     summary: (when: string, good: number, failed: number) =>
       `Horário usado: ${when}. ${good} de 6 atividades devem funcionar.${failed ? ` ${failed} não puderam ser consultadas.` : ''}`,
-    cardError: 'Não foi possível consultar esta atividade.',
+    status: { works: 'Funciona', mayFail: 'Pode falhar', wontWork: 'Não deve funcionar' },
+    statusLoading: 'carregando',
+    statusError: 'Sem resposta',
+    rowLabel: (name: string, clock: string, status: string) => `${name}, às ${clock}: ${status}`,
+    rowHint: 'Mostra os melhores horários desta atividade',
     cardRetry: (name: string) => `Tentar de novo: ${name}`,
-    cardLoading: 'Consultando…',
-    cardLoadingSpoken: (name: string) => `${name}: consultando.`,
-  },
-  timeChooser: {
-    used: (when: string) => `Horário usado na previsão: ${when} (horário de Brasília)`,
-    none: 'Nenhum horário escolhido ainda.',
-    rounded: (picked: string) => `Você escolheu ${picked}; a previsão é por hora.`,
-    pickerLabel: 'Hora da atividade',
-    pickerHint: 'Escolha a hora e depois toque em Usar este horário',
-    usePicked: 'Usar este horário',
-    cancel: 'Cancelar',
-    cancelHint: 'Fecha o seletor sem mudar o horário',
-    change: 'Mudar horário',
-    changeHint: 'Abre o seletor de hora',
-    periodsTitle: 'Ou escolha a melhor hora de um período:',
-    periodHint: 'Usa a hora com a melhor nota prevista neste período',
+    planLoading: 'Carregando horários',
+    planError: (name: string) => `Não foi possível consultar todas as horas de ${name}.`,
+    planRetry: (name: string) => `Tentar de novo: horas de ${name}`,
+    at: (clock: string, day: string) => `Às ${clock} (${day})`,
+    changeHour: 'Trocar hora',
+    changeHourHint: 'Abre o Início, na faixa do dia, para escolher outra hora',
   },
   details: {
-    title: 'Previsão por hora',
+    // D35 (wireframe v2): "Hora a hora"
+    title: 'Hora a hora',
+    subtitle: (region: string, good: number, moderate: number, unstable: number) =>
+      `${region} · ${good} ${good === 1 ? 'boa' : 'boas'}, ${moderate} ${moderate === 1 ? 'regular' : 'regulares'}, ${unstable} ${unstable === 1 ? 'instável' : 'instáveis'}`,
     loading: 'Carregando as horas…',
     loadError: 'Não foi possível carregar as horas.',
-    all: 'Todas',
-    allHint: 'Mostra todas as horas',
-    periodHint: 'Mostra só as horas deste período',
-    emptyPeriod: 'Nossa previsão não tem horas neste período.',
-    showing: (n: number) => `Mostrando ${n} horas. Toque numa hora para usá-la no app.`,
-    showingSpoken: (n: number, periodName?: string) => `Mostrando ${n} horas${periodName ? `: ${periodName}` : ''}`,
     chosen: (when: string, qualityLabel: string) =>
       `Horário escolhido: ${when}, ${qualityLabel}. Vale também para a aba Atividades.`,
-    rowHint: 'Usa este horário no app inteiro',
-    row: (clock: string, day: string, qualityLabel: string, score: number) =>
-      `${clock} de ${day}: ${qualityLabel}, nota ${score} de 100`,
-    rowScore: (score: number) => `nota ${score}`,
+    row: (clock: string, qualityLabel: string) => `${clock}, ${qualityLabel}`,
+    rowHint: 'Usa este horário no app inteiro e mostra o que esperar',
+    expect: 'O que esperar neste horário',
+    latencyName: 'Tempo de resposta',
+    lossName: 'Informação perdida',
+    metricLine: (name: string, value: string) => `${name} · ${value}`,
+    whatIsIt: 'O que é isso?',
+    whatIsItLabel: (name: string) => `O que é isso? ${name}`,
+    whatIsItHint: 'Mostra ou esconde a explicação',
+    score: (score: number) => `Nota ${score} de 100`,
+    confidence: (pct: number) => `Confiança ${pct}%`,
+    confidenceSpoken: (pct: number) => `Confiança ${pct} por cento`,
+    scoreName: 'Nota e confiança',
   },
   /** D27: aviso da fonte, em linguagem de usuário (sem API, mock ou servidor). */
   source: {
@@ -255,6 +260,7 @@ export function errorMessage(error: unknown, fallback: string): string {
 export const about = {
   title: 'Sobre o SinalCerto',
   intro: 'Esta tela mostra os bastidores da previsão, com os termos técnicos.',
+  estimateTitle: 'É uma estimativa',
   sourceTitle: 'De onde vêm os dados',
   source:
     'Medições históricas da rede RIPE Atlas foram usadas para treinar modelos de previsão (turma de Estrutura de Dados). A Internet Quality API 0.2.0 entrega as previsões já calculadas. O app não mede a sua conexão e não executa nenhum modelo.',

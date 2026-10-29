@@ -21,10 +21,12 @@ const FORBIDDEN = [
   /\bOK\b/,
   /\bRisco\b/,
   /\bFalha\b/,
+  /\(tabs\)/, // D36: nome interno de rota (apareceu no voltar da tela Sobre)
 ];
 
 function forbiddenOnScreen(): string[] {
-  const tree = JSON.stringify(screen.toJSON());
+  // O id interno da tela ("(tabs):0-0") não é visível nem lido; fica fora da varredura.
+  const tree = JSON.stringify(screen.toJSON()).replace(/"screenId":"[^"]*"/g, '');
   const spoken = announced.mock.calls.map(([s]) => String(s)).join(' ');
   return FORBIDDEN.filter((re) => re.test(tree) || re.test(spoken)).map(String);
 }
@@ -33,27 +35,31 @@ beforeEach(() => announced.mockClear());
 
 it('Início sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/' });
-  await screen.findByText('Previsão mais próxima', {}, { timeout: 5000 });
-  await screen.findByText(/^Nossa previsão vai só até/);
+  await screen.findByText('20 de agosto, 20:00', {}, { timeout: 5000 });
+  await screen.findByLabelText(/^Melhor: /); // espera a timeline (Melhor/Evite) carregar
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
 it('Escolher local sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/local' });
-  await screen.findByRole('button', { name: 'Região de São Paulo (SP)' }, { timeout: 5000 });
+  await screen.findByRole('button', { name: 'São Paulo (SP)' }, { timeout: 5000 });
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
-it('Atividades (com horário escolhido) sem termos de bastidor', async () => {
+it('Atividades (status e uma linha aberta) sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/atividades' });
-  await fireEvent.press(await screen.findByRole('button', { name: 'Tarde: 20 de agosto, 12:00' }, { timeout: 5000 }));
-  await screen.findByLabelText(/^Mandar mensagens, textos, áudios curtos: /);
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Chamada de vídeo, às 20:00: pode falhar' }, { timeout: 5000 }),
+  );
+  await screen.findByLabelText(/^Melhor: /, {}, { timeout: 5000 });
   expect(forbiddenOnScreen()).toEqual([]);
 });
 
-it('Detalhes (com a seção de números e a confiança) sem termos de bastidor', async () => {
+it('Detalhes (linha aberta, com as métricas e a confiança) sem termos de bastidor', async () => {
   await renderRouter('src/app', { initialUrl: '/detalhes' });
-  await screen.findByLabelText('80 por cento', {}, { timeout: 5000 });
+  // D35: as métricas e a confiança só aparecem com a linha da hora aberta.
+  await fireEvent.press(await screen.findByRole('button', { name: '20:00, Regular' }, { timeout: 5000 }));
+  await screen.findByLabelText('Nota 63 de 100. Confiança 80 por cento', {}, { timeout: 5000 });
   expect(forbiddenOnScreen()).toEqual([]);
 });
 

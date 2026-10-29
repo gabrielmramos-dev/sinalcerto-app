@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { Quality } from '@/api/types';
 import { quality, ui, type Tone } from '@/i18n/glossary';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, radius, spacing, useColors } from '@/theme';
 import { StatusIcon } from './StatusIcon';
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
 
 /** Texto + ícone + cor sempre juntos (RNF03). Lido como um único item. */
 export function StatusBadge({ tone, label, context }: Props) {
+  const styles = useStyles();
+  const c = useColors();
   return (
     // Texto estático, não é controle: uma dica ("toque para...") enganaria o leitor de tela.
     // eslint-disable-next-line react-native-a11y/has-accessibility-hint
@@ -21,10 +23,10 @@ export function StatusBadge({ tone, label, context }: Props) {
       accessible
       accessibilityRole="text"
       accessibilityLabel={context ? `${context}: ${label}` : label}
-      style={[styles.badge, { backgroundColor: colors[`${tone}Bg`] }]}
+      style={[styles.badge, { backgroundColor: c[`${tone}Bg`] }]}
     >
       <StatusIcon tone={tone} />
-      <Text style={[font.label, styles.text, { color: colors[tone] }]}>{label}</Text>
+      <Text style={[font.label, styles.text, { color: c[tone] }]}>{label}</Text>
     </View>
   );
 }
@@ -34,7 +36,7 @@ export function QualityBadge({ value }: { value: Quality }) {
   return <StatusBadge tone={q.tone} label={q.label} context={ui.common.qualityContext} />;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((c) => ({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -42,7 +44,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 999,
+    borderRadius: radius.pill,
   },
   text: { flexShrink: 1 },
-});
+}));

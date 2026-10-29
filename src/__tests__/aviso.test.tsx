@@ -34,14 +34,23 @@ it('sem conexão: aviso com "Tentar de novo"; ao voltar a conexão, muda para "P
 it('"Tentar de novo" recarrega a tela (a versão da fonte muda)', async () => {
   await act(() => sourceStatus.markOffline());
   await renderRouter('src/app', { initialUrl: '/detalhes' });
-  await screen.findByText(/^Mostrando 24 horas/, {}, { timeout: 5000 });
+  // D35: a lista das 24 horas carregou (a linha das 20:00 aparece).
+  await screen.findByRole('button', { name: '20:00, Regular' }, { timeout: 5000 });
   await fireEvent.press(screen.getByRole('button', { name: 'Tentar de novo: buscar a previsão atualizada' }));
   expect(screen.getByText('Carregando as horas…')).toBeOnTheScreen();
-  expect(await screen.findByText(/^Mostrando 24 horas/)).toBeOnTheScreen();
+  expect(await screen.findByRole('button', { name: '20:00, Regular' })).toBeOnTheScreen();
 });
 
-it.each(['/', '/atividades', '/detalhes', '/local', '/sobre'])('o aviso aparece na tela %s', async (url) => {
+it.each(['/', '/atividades', '/detalhes', '/sobre'])('o aviso aparece na tela %s', async (url) => {
   await act(() => sourceStatus.markOffline());
   await renderRouter('src/app', { initialUrl: url });
   expect(await screen.findByText('Sem conexão: mostrando a previsão guardada no app')).toBeOnTheScreen();
+});
+
+it('D36: o modal Escolher local não mostra o aviso de conexão', async () => {
+  await act(() => sourceStatus.markOnline());
+  await renderRouter('src/app', { initialUrl: '/local' });
+  await screen.findByRole('button', { name: 'São Paulo (SP)' }, { timeout: 5000 });
+  expect(screen.queryByText('Previsão atualizada')).toBeNull();
+  expect(screen.queryByText(/^Sem conexão/)).toBeNull();
 });

@@ -178,6 +178,12 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
   leva 6 a 7 s no Windows. Com 5 s ele falhava por tempo, não por erro de lógica, e derrubava os
   testes seguintes do arquivo.
 - **Limitações:** um teste que travar de verdade demora 20 s para falhar, em vez de 5 s.
+- **Atualização (2026-10-28, MD/E1):** limite elevado para 60 s. Com o SDK 58 (React Native 0.88,
+  D25), a primeira execução depois de limpar o cache do Jest leva cerca de 140 s no arquivo que
+  roda primeiro, porque ele compila o React Native e o router; com 20 s, o primeiro teste desse
+  arquivo falhava por tempo e derrubava os seguintes. Isso acontecia na primeira execução de
+  qualquer pessoa da equipe. Com o cache pronto, a suíte inteira roda em cerca de 30 s. Um teste
+  travado de verdade agora demora 60 s para falhar.
 
 ## D22 — Prévia "Próximas horas" no Início (2026-10-22)
 - **Decisão:** abaixo do cartão, a seção "Próximas horas" mostra até 3 horas da timeline depois da
@@ -313,6 +319,348 @@ Formato: decisão · alternativa descartada · motivo · limitações conhecidas
 - **Limitações:** o modo "sem conexão" só sai pelo botão (não detecta sozinho a volta da rede). A
   reserva só tem o model-a. Uma resposta 404 da reserva (região sem dados) não acontece com os dados
   atuais.
+
+## D28 — Marco de design, E1: tema claro e escuro, fontes e ícones (2026-10-28)
+- **Decisão:** tema seguindo o sistema (`userInterfaceStyle: automatic`, sem botão), com os mesmos
+  nomes de tokens desde o M1 e valores claros e escuros (`palettes.light` / `palettes.dark`).
+  Paleta nova a partir dos prints do Figma Make: fundo off-white, acento único verde-floresta,
+  cores de categoria recalibradas. Todos os pares passam no teste de contraste **nos dois modos**.
+  Títulos em DM Serif Display e texto em Manrope (`expo-font` + `@expo-google-fonts`), com a tela
+  de abertura segurada até as fontes carregarem. Ícones Lucide (`lucide-react-native`) nas abas,
+  com o texto embaixo. Cantos por papel (8/12/16/pílula) e elevação com sombra do iOS e
+  `elevation` do Android juntas. Proposta completa, com os riscos, em `docs/MOBILE-DESIGN.md`.
+- **Skills usadas:** `mobile-design-review` (revisão inicial: nota B, linha de base em
+  `design-baseline.json`; mudou a decisão ao apontar a falta do modo escuro e do fechar no modal);
+  `frontend-design` (crítica dos prints: tirou os rótulos em maiúsculas, o ponto no meio e o cartão
+  escuro da nota, e escolheu o relógio como único elemento de destaque); `mobile-design-system`
+  (proposta SAFE/RISK e tokens; mudou a decisão ao exigir os dois modos desde já e ao registrar o
+  fundo creme como risco de "cara de IA", compensado pelo acento verde).
+- **Descartada:** tema só claro; botão de modo escuro; fontes do sistema; ícones desenhados à mão;
+  `expo-linear-gradient` (o gradiente da E2 usa o `react-native-svg`, que já existe).
+- **Motivo:** fidelidade à referência visual aprovada, sem perder acessibilidade.
+- **Como:** `createThemedStyles` monta os estilos dos dois modos uma vez; `useColors` dá as cores
+  do modo atual. As 14 telas e componentes passaram de cores fixas para o tema.
+- **Ícones um a um:** importados por arquivo (`lucide-react-native/icons/house`). O Metro não
+  descarta código não usado: o índice da biblioteca levaria todos os ~1.900 ícones para o app e
+  deixava o primeiro teste de cada arquivo lento demais (passava do limite de 20 s).
+- **Limitações:** a DM Serif Display só tem um peso. O modo escuro ainda não foi visto no aparelho.
+  O cabeçalho nativo das 3 abas só é escondido nas etapas de cada tela (E2 a E4).
+
+## D29 — Marco de design, E2: novo Início (2026-10-28)
+- **Decisão:** cabeçalho nativo da aba Início escondido; no topo, "SinalCerto" em serifa, marcado
+  como cabeçalho, respeitando a área segura. Ordem da tela e da leitura: aviso de conexão, título,
+  região + "Trocar local", cartão de topo, "Melhor momento do dia", seção "Previsão de 19 e 20 de
+  agosto" com o relógio de 24 horas e o resumo, próximas horas (D22), aviso de estimativa e botões.
+  - **Cartão de topo:** o único gradiente do app (`react-native-svg`), na cor da categoria; categoria
+    em texto (serifa grande) + forma (`StatusIcon`) + cor + barras de sinal (4, 2 ou 1 cheias). Todo
+    texto do cartão usa `text`: ele passa 4,5:1 nos dois extremos de cada gradiente, nos dois modos.
+    O cinza secundário ficaria abaixo de 4,5:1 no extremo escuro e não é usado ali.
+  - **Melhor momento:** a hora de maior `qualityScore` da previsão (empate: a mais cedo) e "Evite"
+    com as horas Instáveis seguidas, calculadas dos dados (`data/forecastSummary.ts`). Hoje, em SP:
+    "19 de agosto, 23:00: Boa" e "Evite das 15h às 18h (Instável)". A janela diz o fim da última
+    hora ("às 18h" cobre a hora das 17h); o planejador da E3 usa a mesma regra.
+  - **Relógio de 24 horas** (elemento assinatura): uma fatia por hora no relógio de Brasília, 00h
+    no topo; liso = Boa, pontilhado = Regular, quadriculado = Instável, com legenda em texto; ponto e
+    centro na hora do cartão. Título com a data real ("Previsão de 19 e 20 de agosto", de `dayRange`),
+    em vez de "Próximas 24 horas". Resumo em texto com as contagens reais (8 boas, 13 regulares, 3
+    instáveis em SP).
+- **Leitor de tela:** cartão, melhor momento e relógio são grupos lidos como uma frase cada; o
+  relógio, as barras, os ícones e as amostras da legenda ficam escondidos (`accessible={false}`) e
+  a informação está no texto do grupo. Teste automatizado confere a ordem de leitura e que não há
+  imagem solta.
+- **Skills usadas:** `mobile-redesign-app` (etapa da tela Início do plano; manteve conteúdo e
+  navegação e só trocou o visual); `frontend-design` (sem rótulo em maiúsculas acima do título, sem
+  ponto no meio em "19 de agosto, 23:00: Boa", o relógio como única peça de destaque);
+  `mobile-design-system` (tokens do gradiente com os pares no teste de contraste, sombra do cartão
+  com `elevation`); `mobile-taste` (um gradiente só; sem seta no cartão do melhor momento, porque ele
+  não leva a outra tela).
+- **Descartada:** dados dos prints ("06:00", "9 horas boas", "Próximas 24 horas"); seta ">" no cartão
+  do melhor momento; texto da categoria e da hora dentro do relógio como texto escalável.
+- **Limitações:** o centro e os rótulos 00h/06h/12h/18h do relógio são desenho (não crescem com o
+  texto do sistema); a mesma informação está no resumo em texto, que cresce. O relógio tem no
+  máximo 300 pontos de largura.
+
+## D30 — Marco de design, E2: ajustes depois do teste no iPhone (2026-10-28)
+- **Relógio "deslocado em uma hora":** os dados estavam certos (a API e a reserva dão 23:00 do dia
+  19 = Boa, nota 92), mas cada fatia ficava **centrada** no ângulo da hora e ia de meia hora antes
+  a meia hora depois. O verde começava antes do "00h" e terminava depois do "06h", o que parece um
+  deslocamento. **Decisão:** como num relógio de verdade, a fatia da hora h **começa** no ângulo de
+  h:00 e termina em h+1 (`DayClock.slice`); o marcador fica no meio da fatia. Assim a fatia logo à
+  esquerda do "00h" é a das 23h, e o verde vai do "23h" ao "07h", a mesma regra de fim das janelas
+  ("das 23h às 7h", D29/E3).
+- **Teste novo** (`components/DayClock.test.tsx`): lê os caminhos SVG que o componente desenha (não
+  uma cópia da conta) e confere que cada uma das 24 fatias começa no ângulo da sua hora de Brasília
+  e tem a categoria dessa hora; que a fatia à esquerda do 00h (23h) é Boa e a das 22h é Regular; e
+  que o marcador de 3 horas diferentes cai dentro da fatia certa. Esse teste falharia no desenho
+  anterior.
+- **"Próximas horas" sai do Início** ("menos é mais"): o cartão diz a hora da previsão e o relógio
+  mostra o dia inteiro. Substitui a D22 no Início; a lista de todas as horas continua em Detalhes,
+  pelo botão "Ver todas as horas". Os 4 textos `nextHours*` saíram do glossário.
+- **Faixa na área segura do topo:** sem o cabeçalho nativo, o conteúdo rolava por baixo da barra de
+  status (o "Evite das 15h às 18h" aparecia em cima do relógio do iPhone). Uma faixa na cor
+  `background` do tema, com a altura da área segura, fica por cima da rolagem, nos dois modos. O
+  conteúdo continua começando abaixo dela.
+- **Skills usadas:** `mobile-redesign-app` (ajuste dentro da etapa, sem mexer em navegação);
+  `frontend-design` ("menos é mais": tirar a seção repetida em vez de reestilizá-la); `mobile-taste`
+  (área segura: nada de conteúdo sob a barra de status com o cabeçalho escondido).
+
+## D31 — Marco de design, E3: Atividades com o planejador (2026-10-28)
+- **Cabeçalho:** o nativo fica escondido; "Atividades" em serifa, marcado como cabeçalho, e a região
+  logo abaixo. A área segura e a faixa da D30 viraram um componente só (`TabScreen`), usado no
+  Início e em Atividades (e na E4, em Detalhes).
+- **Planejador (sem tela nova):** o relógio fica no topo da aba, com o título "Melhor horário para
+  cada atividade". Tocar num cartão de atividade escolhe essa atividade:
+  - **Destaque:** o relógio destaca só as horas em que ela deve funcionar (`suitable` da API). Elas
+    ficam com o padrão da categoria e um contorno. As outras ficam **apagadas**, com listras finas
+    neutras e opacidade de 55%, e a legenda ganha "Não deve funcionar". O destaque não depende só da
+    cor (RNF03).
+  - **Frase:** segue a regra de janelas do relógio (D30), "Chamada de vídeo: melhor das 23h às 7h".
+    Ela aparece embaixo do relógio, é o nome do grupo do relógio para o leitor de tela, aparece no
+    cartão escolhido e é anunciada quando as 24 horas chegam (RNF08). Casos sem janela têm frase
+    própria: todas as horas ("Mandar mensagens: deve funcionar em todas as horas da previsão") e
+    nenhuma hora.
+  - **Seleção:** o cartão escolhido mostra ✓ e borda no acento, e o VoiceOver lê "selecionado"
+    (`accessibilityState.selected`). Os cartões agora são botões com dica.
+  - **Sem horário escolhido:** os cartões aparecem sem status, só com o nome, e servem ao
+    planejador. O horário continua sendo escolhido logo abaixo ("Para quando?"), como antes.
+- **Custo, como no plano:** `usePlanner` faz 24 chamadas por atividade e região, no máximo 6 ao
+  mesmo tempo, só quando a pessoa toca na atividade, e usa o mesmo cache da D5. A hora já consultada
+  pelos cartões não sai de novo, e voltar a uma atividade já vista não consulta nada. Trocar de
+  atividade para a fila antiga, e as respostas atrasadas entram no cache sem mexer na tela. Se uma
+  hora falha, aparece o aviso com "Tentar de novo: horas de <atividade>", que consulta só o que
+  faltou.
+- **Carregamento:** um esboço do layout (anel do relógio e 3 cartões, em `primarySoft`, sem
+  animação) aparece no lugar do indicador giratório, junto do texto "Carregando os horários…".
+  O esboço é escondido do leitor de tela.
+- **Cartões:** novo visual, com ícone Lucide por atividade num quadradinho `primarySoft`,
+  superfície com sombra (`elevation.card`) e borda de 2 sempre presente, que muda só de cor ao
+  selecionar, para nada pular de lugar. O par `primary` × `primarySoft` (ícone, 3:1) entrou no teste
+  de contraste.
+- **Skills usadas:** `mobile-redesign-app` (etapa 3 do plano, sem tela nova e sem mexer na
+  navegação); `frontend-design` (o relógio continua sendo a única peça de destaque, e o destaque
+  vem do contorno e do apagado, não de mais cor; frase curta no padrão das janelas);
+  `mobile-design-system` (padrão novo `dim` e par de contraste do quadradinho do ícone);
+  `mobile-taste` (esboço do layout no carregamento em vez do indicador; seleção com ✓ e estado
+  acessível; borda fixa para evitar salto de layout; sem animação, porque o movimento é só de
+  resposta ao toque).
+- **Descartada:** uma lista separada de atividades só para o planejador (repetiria os 6 cartões) e a
+  rolagem automática até o relógio ao tocar num cartão. A frase aparece no próprio cartão e é
+  anunciada.
+
+## D32 — Marco de design, E4 (Detalhes): pausada (2026-10-28)
+A E4 foi interrompida antes do commit para a revisão da D33. O trabalho ficou guardado em
+`git stash` ("E4 pausada") e será retomado com a faixa do dia, depois do teste do Início e de
+Atividades.
+
+## D33 — Faixa do dia no lugar do relógio; uma pergunta por tela (2026-10-28)
+Bases: `docs/fundamentacao-design.md`, itens 1, 2 e 4.
+- **Troca:** o relógio de 24 horas (D29–D31) sai, e entra a **faixa do dia**, com 24 barras
+  verticais em ordem de tempo, uma por hora. É o mesmo componente (`DayStrip`) em Início,
+  Atividades e, depois, Detalhes.
+  - **Cleveland e McGill (1984):** posição numa escala comum e comprimento são lidos com mais
+    precisão que ângulo, e a cor sozinha é a codificação menos precisa.
+  - **Waldner et al. (2019):** com leigos e dados de 24 horas, o gráfico de barras linear foi o mais
+    preciso e o mais rápido em todas as tarefas, e o relógio não melhorou a compreensão do padrão
+    diário.
+- **Codificação:**
+  - **Altura:** a nota da previsão, com o eixo começando em 0.
+  - **Categoria:** cor e padrão (liso = Boa, pontilhado = Regular, quadriculado = Instável), como antes.
+  - **Rótulos:** a cada 3 horas, com a data na virada do dia.
+  - **Ordem:** a do tempo, de 19/08 21h a 20/08 20h, para a janela "das 23h às 7h" ficar inteira.
+- **Troca consciente (FINDING-003):** com a altura pela nota, a nota fica mais visível na faixa,
+  embora a D24 diga que a categoria é a informação principal. A categoria continua vindo da API, sem
+  reclassificação, e é a cor, o padrão e o texto do resumo. A nota aparece só como altura.
+- **Escolha da hora:** a hora escolhida tem contorno e o horário escrito acima da barra. A faixa
+  inteira é uma área de toque só, e o toque escolhe a barra mais próxima (cada barra tem uns 14 pt,
+  menos que os 48 dp do RNF09). Os botões "Hora anterior" e "Próxima hora" (48 dp) fazem o ajuste
+  fino. A escolha vale para o app inteiro, inclusive no Início.
+- **VoiceOver:** a faixa é ajustável (deslizar para cima ou para baixo muda a hora) e lê "20 de
+  agosto, 20:00: Regular". O resumo em texto fica logo abaixo.
+- **Planejador (D31):** continua com as horas acesas e as apagadas com listras e opacidade. A frase
+  fica logo abaixo da faixa, uma vez só.
+- **Uma pergunta por tela** (Nielsen Norman Group: hierarquia visual e revelação progressiva):
+  - **Início, "como está e quando é melhor?":**
+    - região curta ("Curitiba (PR)") com o botão compacto "Trocar";
+    - cartão de topo com a categoria, o ícone, as barras de sinal e uma frase, mais a linha
+      "Última previsão disponível: 20 de agosto, 20:00";
+    - saem "Previsão mais próxima", o conselho, a data longa e o aviso "Ainda não temos previsão
+      para agora…";
+    - o melhor momento fica só no cartão dele, e o resumo da faixa só tem a contagem.
+  - **Atividades, "quando posso fazer isto?":** chips de atividade no topo, a faixa com o
+    planejador, "Para quando?" e os cartões de status em grade de 2 colunas (1 coluna com
+    `fontScale` ≥ 1,3). Os cartões voltam a ser só informação.
+  - **Números:** concentrados em Detalhes.
+
+## D34 — Início e Atividades alinhados ao wireframe v2 (2026-10-28)
+Referência: `docs/design/wireframe-v2.md`. Substitui os pedidos de ajuste anteriores. Bases em
+`docs/fundamentacao-design.md`, mais as fontes indicadas pela equipe para esta revisão:
+- **Lei de Jakob:** seguir o padrão dos apps de previsão do tempo.
+- **NN/g, Horizontal Scrolling:** a faixa inteira visível, sem rolagem lateral.
+- **NN/g, accordions no mobile:** a linha tocada abre os detalhes, uma por vez.
+- **Sivle / yr.no:** mostrar ao leigo a consequência.
+- **Cleveland & McGill:** barras de altura igual.
+
+Skills: `mobile-taste` (hierarquia, alvos de toque, uma resposta por tela) e `mobile-design-review`
+(revisão dos prints e das trocas abaixo).
+
+**Início ("como está a internet?"):** só mudaram o layout e o texto; a lógica já tinha sido aprovada no
+iPhone.
+- **Topo:** sem o título grande "SinalCerto". "Previsão atualizada" já era uma linha pequena e
+  discreta e ficou como estava. A primeira linha é "São Paulo (SP)" com "Trocar".
+- **Ordem:** cartão, faixa, Melhor/Evite, botão e linha do aviso.
+- **Cartão:** a data e a hora em cima ("20 de agosto, 20:00"), depois o ícone e a categoria grande,
+  depois a frase. Segue sempre a hora selecionada na faixa.
+- **Faixa:** saíram o título "Previsão de 19 e 20 de agosto" e a frase de contagem, que vai para
+  Detalhes. Acima das barras, "19 e 20 de agosto" à esquerda (secundário) e "20:00 · Regular" à
+  direita (negrito, Text fora do SVG, que cresce com a fonte). "Hora anterior" e "Próxima hora"
+  continuam (RNF06), com a legenda compacta.
+- **Melhor/Evite:** cartão simples, sem sol e sem título, em duas linhas com divisória: "Melhor"
+  (verde) "das 23h às 7h · Boa" e "Evite" (vermelho) "das 15h às 18h · Instável". Os dois tons passam
+  4,5:1 sobre a superfície nos dois modos (pares novos no teste de contraste).
+- **Botão e aviso:** botão "O que dá para fazer?" e a linha "É uma estimativa e pode errar. Saiba
+  mais", que leva à seção "É uma estimativa" da tela Sobre.
+
+**Atividades ("o que você quer fazer?"):**
+- **Topo:** título "O que você quer fazer?" e a linha "Toque numa atividade para ver os melhores
+  horários.".
+- **O que saiu:** a faixa, os chips, "Para quando?", "Mudar horário", os períodos, a grade de cartões,
+  a "Dica para este horário" e o aviso longo. Os componentes `TimeChooser`, `ActivityCard` e
+  `ActivityChips` foram apagados.
+- **Linhas:** uma coluna, uma linha por atividade (alvo ≥ 48), com o ícone, o nome e, à direita, o
+  status na hora selecionada, com ícone e texto: "Funciona", "Pode falhar" ou "Não deve funcionar".
+  O nome falado é "Chamada de vídeo, às 20:00: pode falhar".
+- **Status, só com campos da API:** `suitable` → "Funciona". Não adequada numa hora Instável
+  (`forecast.quality`) → "Não deve funcionar". Nos outros casos → "Pode falhar".
+- **Linha aberta:** tocar abre a linha (uma por vez, borda verde, `accessibilityState.expanded`) com
+  "Melhor" e "Evite" no mesmo componente do Início (`BestAvoid`). Enquanto as 24 horas carregam,
+  aparece um indicador com o nome "Carregando horários", sem texto com reticências. O custo é o do
+  plano: 24 chamadas por atividade, no máximo 6 por vez, com cache.
+- **Frases de horário** (`src/lib/hourPhrases.ts`, com testes): horas seguidas viram faixas, em
+  ordem, sem nunca dar a volta do fim para o começo dos dados. Só a minoria é listada. A outra linha
+  resume:
+  - **Só uma exceção ruim:** o "Melhor" diz "quase o dia todo". Ele é lido antes do "Evite", então não
+    pode depender dele, e "o resto do dia" não fazia sentido ali (corrigido em 2026-10-29).
+  - **Só uma janela boa:** o "Evite" diz "o resto do dia".
+  - **Sem horário a evitar:** "o dia todo" e "nenhum horário".
+
+  Exemplos em SP:
+  - chamada de vídeo: "Melhor: das 23h às 7h / Evite: o resto do dia";
+  - enviar arquivos: "Melhor: quase o dia todo / Evite: das 15h às 18h";
+  - mandar mensagens: "Melhor: o dia todo / Evite: nenhum horário".
+- **Rodapé:** "Às 20:00 (20/08)" com o link "Trocar hora", que leva ao Início e põe o foco do leitor
+  de tela na faixa. A hora é a mesma do app inteiro.
+
+**Mantido da revisão anterior (prints do iPhone):**
+1. **Hora selecionada única no app.** O app abre na hora mais próxima de agora, que com os dados
+   atuais é a última (20/08 20:00), e o cartão mostra sempre a hora selecionada (`useChosenHour`).
+   - **Por quê:** no print, o cartão dizia "Regular, 20:00" e a faixa marcava "01:00", que é Boa.
+     Duas respostas na mesma tela fazem o leigo duvidar de ambas (NN/g: um único foco previsível).
+2. **Rótulo "01:00 · Boa" em texto.**
+   - **Por quê:** WCAG 2.2, critério 1.4.1 (não só a cor), e Kay et al. 2016 (resultado discreto
+     escrito). Cresce com a fonte (critério 1.4.4, NBR 17060).
+3. **Barras com altura igual.**
+   - **Por quê:** a categoria vem da pior métrica, e a nota é uma média. Uma barra Regular mais alta
+     que uma Boa seria lida como "melhor" (Cleveland & McGill 1984). Waldner et al. 2019: a vantagem
+     do formato linear vem da posição no tempo. Isso resolve a troca consciente da D33
+     (FINDING-003).
+4. **Melhor momento como faixa de horas Boas seguidas** (`src/lib/bestPeriod.ts`). A janela termina
+   no fim da última hora (regra da D30, a mesma do "Evite"), por isso "às 7h".
+5. **Aviso de estimativa em uma linha**, com o texto completo na tela Sobre (revelação progressiva).
+   Saíram "Ver todas as horas", que repetia a aba Detalhes, e o link "Sobre o SinalCerto" do Início,
+   que repetia o "Saiba mais".
+6. **"Hora anterior" e "Próxima hora" compactos**, com seta e texto. O alvo ficou em 48, o mínimo
+   do projeto (RNF09), que cumpre os 44pt pedidos.
+
+**Ajuste de alinhamento (bug de layout):**
+- **Início:** "É uma estimativa e pode errar." e "Saiba mais" ficam um embaixo do outro, centralizados
+  (pedido no iPhone; antes, à esquerda), sem space-between.
+- **Atividades:** "Às 20:00 (20/08)" e "Trocar hora" seguem o mesmo padrão.
+- **Links (`AppButton` link):** sem recuo lateral. O link se alinha à esquerda por padrão; nos dois
+  blocos, uma View em volta é que fica no centro. O alvo de 48
+  de altura continua. Também vale para "Sobre o SinalCerto" em Detalhes.
+
+**Efeitos e pendências:**
+- **"Jogos online" (RQ03):** não foi adicionado. A API (0.2.0, no ar e no `openapi.json`) só aceita
+  VIDEO_CALL, AUDIO_CALL, STREAMING, FILE_UPLOAD, WEB_BROWSING e MESSAGING, e um teste com
+  `ONLINE_GAMING` volta erro 422. Sem a atividade na API, não há de onde tirar o status. Está parado
+  até a equipe decidir.
+- **RQ04 (escolha de horário):** agora a escolha é feita pela faixa do Início e pela lista de
+  Detalhes. O seletor nativo de hora e os botões de período (D17, D18) saíram, junto com os testes
+  deles.
+- **Atividades:** consulta os 6 status da hora selecionada ao abrir a aba (antes, só depois de
+  escolher um horário; muda a D5).
+- **Leitor de tela:** com o título grande fora, o Início não tem mais um cabeçalho para navegar por
+  títulos. A tela é anunciada pelo nome da aba.
+
+## D35 — Detalhes no wireframe v2: "Hora a hora" (2026-10-29)
+Referência: `docs/design/wireframe-v2.md`, seção Detalhes. Bases em `docs/fundamentacao-design.md`.
+Skills: `mobile-taste` (alvos de toque, lista em vez de cartões, uma linha aberta por vez) e
+`mobile-design-review` (contraste, ordem de leitura, o que sai da tela). O stash "E4 pausada" não foi
+aplicado: o layout final é o do wireframe.
+
+- **Topo:** título "Hora a hora", no mesmo padrão de Início e Atividades (sem cabeçalho nativo), com a
+  linha "São Paulo (SP) · 8 boas, 13 regulares, 3 instáveis". Saíram os filtros de período e o
+  "Mostrando N horas". Com eles saiu `data/periods.ts` (D17), que só servia aos filtros.
+- **Lista vertical das 24 horas** (NN/g, Horizontal Scrolling: nada escondido numa rolagem lateral),
+  agrupada por dia com cabeçalhos pequenos ("19 de agosto", "20 de agosto") e divisórias finas.
+  - **Linha (≥ 48 dp):** hora, forma colorida + status em texto e seta.
+  - **Sem nota na linha.**
+  - **Hora selecionada no app:** vem com fundo suave e ✓, e a tela rola até ela ao abrir.
+- **Accordion no mobile (NN/g):** tocar abre a linha (uma aberta por vez), com
+  `accessibilityState.expanded` e o nome falado "20:00, Regular". Também escolhe a hora para o app
+  inteiro (D34). Tocar de novo fecha, e a hora continua escolhida.
+- **"O que esperar neste horário"** (dentro da linha aberta): uma linha por métrica, com o nome simples,
+  o valor e a frase de efeito das faixas da D23. Exemplos: "Tempo de resposta · 73 ms" / "As páginas
+  podem demorar um pouco para abrir."; "Informação perdida · 3,9%" / "Chamadas e vídeos devem travar
+  ou picotar.". As métricas são lidas em ordem.
+- **Explicações sob demanda (NN/g, Progressive Disclosure):** "O que é isso?" (≥ 48 dp, `expanded`)
+  abre o texto longo de cada métrica. São os textos atuais; a frase "cerca de 4 em cada 100 pedaços se
+  perdem" foi para dentro dessa explicação (`lossMeaning`).
+- **Nota secundária:** "Nota 63 de 100 · Confiança 80%" em texto menor, no fim, com "O que é isso?"
+  levando à explicação atual da nota. Fica secundária porque pode contradizer a categoria: a categoria
+  vem da pior métrica, e a nota é uma média (D24). A confiança só aparece na hora em que a API a manda.
+- **Correção depois do teste no iPhone:** "O que é isso?" fica na mesma linha do nome e do valor,
+  alinhado à direita ("Tempo de resposta · 73 ms ... O que é isso?"), e desce com texto grande. A área
+  de toque de 48 vem do `hitSlop`, sem somar vão vertical. A linha da nota segue o mesmo padrão.
+- **Fim da tela:** o link "Sobre o SinalCerto" fica centralizado, no mesmo padrão do Início.
+- **Contraste:** a linha selecionada usa o fundo suave (`primarySoft`). Os pares de texto, apoio,
+  link e as formas das categorias sobre esse fundo entraram no teste de contraste, nos dois modos. A
+  divisória fica por fora da seleção, sempre sobre a superfície.
+- **Removido:** `NumbersSection` e `TimelineRow`, substituídos por `HourRow`, e os textos sem uso do
+  glossário (`numbersSection` e `period`).
+
+## D36 — Marco de design, E5: Escolher local e Sobre no wireframe v2 (2026-10-29)
+Bases em `docs/fundamentacao-design.md`. Skills: `mobile-taste` (todo modal com saída visível,
+retorno ao toque), `mobile-design-review` (mesmo padrão de lista e de espaçamento das abas) e
+`mobile-redesign-app` (não mudar a navegação aprendida).
+
+- **Escolher local (modal):**
+  - **Cabeçalho próprio, no padrão das abas:** "Escolher local" em serifa, marcado como cabeçalho, e o
+    botão "Fechar" visível à direita (≥ 48 dp). Ao abrir, o foco do leitor de tela vai para "Fechar",
+    depois de 0,5 s, para deixar a animação do modal terminar. "Fechar" volta sem trocar a região.
+  - **Lista:** as regiões ficam numa lista com divisórias finas, como em Detalhes, com linhas de
+    ≥ 48 dp. A região atual tem fundo suave, ✓ e estado selecionado. Tocar escolhe e fecha, como antes.
+  - **Nome falado:** é só o nome da região ("São Paulo (SP)"), igual ao texto visível (WCAG 2.5.3). O
+    título "Escolher local" dá o contexto. O `regionLabel` ("Região de …") saiu.
+  - **Divisória:** fica por fora da seleção, sempre sobre a superfície (sobre o fundo suave, no modo
+    escuro, daria menos de 3:1).
+- **Sobre:**
+  - **Navegação:** o voltar nativo continua (navegação aprendida), com o cabeçalho sem título. O
+    título "Sobre o SinalCerto" vai para o conteúdo, em serifa e marcado como cabeçalho.
+  - **Visual:** seções separadas por divisória fina e com o mesmo espaçamento; a introdução fica em
+    texto de apoio. O conteúdo do M5.1 e do M6 não mudou. A tela não tem links nem textos
+    centralizados; se ganhar algum, segue o padrão do Início (contêiner centralizado).
+- **Retorno ao toque:** continua o escurecimento em todo o app, sem escala nem ondinha (decisão da
+  equipe). Ele entrou onde faltava: na faixa do dia e nas linhas novas da lista de regiões.
+- **`AppButton`:** passou a aceitar `ref`, usado para levar o foco a "Fechar".
+- **Correções depois do teste no iPhone:**
+  - **Voltar da tela Sobre:** mostrava "(tabs)", o nome interno da rota. Agora a tela das abas tem
+    título ("SinalCerto"), e o voltar da tela Sobre diz "Voltar". A guarda de vocabulário passou a
+    barrar "(tabs)"; ela ignora só o id interno da tela, que não aparece nem é lido. As outras telas
+    têm título próprio e não expõem nome de rota.
+  - **Aviso de conexão:** saiu do modal Escolher local e fica nas abas e na tela Sobre. No modal, também
+    não aparece o "Sem conexão".
+  - **Teste novo:** escolher Belo Horizonte e reabrir o modal mostra o ✓ em Belo Horizonte, só nela.
 
 ## Limitação de dados
 Os dados cobrem só 2026-08-20 00:00–23:00 UTC (19/08 21:00 a 20/08 20:00 em Brasília). O app

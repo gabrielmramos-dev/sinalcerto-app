@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { QUALITIES } from '@/api/types';
 import { SourceBanner } from '@/components/SourceBanner';
@@ -9,12 +9,13 @@ import { MOCK_SAVED_AT } from '@/data/MockSource';
 import { useSourceStatus } from '@/data/sourceStatus';
 import { formatBrasiliaLong } from '@/data/time';
 import { useLoad } from '@/hooks/useLoad';
-import { about, quality, redesBands } from '@/i18n/glossary';
+import { about, disclaimer, quality, redesBands, ui } from '@/i18n/glossary';
 import { useAppState } from '@/state/AppState';
-import { colors, font, spacing } from '@/theme';
+import { createThemedStyles, font, spacing } from '@/theme';
 
-/** D26: bastidores da previsão. Única tela com linguagem técnica. */
+/** D26: bastidores da previsão. Única tela com linguagem técnica. D36: estilo do wireframe v2. */
 export default function AboutScreen() {
+  const styles = useStyles();
   const { probeId } = useAppState();
   const status = useSourceStatus();
   // Modelo e período vêm da própria fonte de dados, para o texto nunca ficar desatualizado.
@@ -32,7 +33,14 @@ export default function AboutScreen() {
     // Cabeçalho do Stack transparente no iOS 26+ (SDK 58): o conteúdo não passa por baixo dele.
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <SourceBanner />
-      <Text style={[font.body, styles.text]}>{about.intro}</Text>
+      {/* D36: título em serifa no conteúdo, como nas abas; o cabeçalho nativo fica só com o voltar. */}
+      <Text style={[font.title, styles.text]} accessibilityRole="header">
+        {about.title}
+      </Text>
+      <Text style={[font.body, styles.muted]}>{about.intro}</Text>
+
+      {/* D34: o "Saiba mais" do Início traz para cá o texto completo do aviso. */}
+      <Section title={about.estimateTitle} texts={[disclaimer, ui.home.regionNote]} />
 
       <Section title={about.sourceTitle} texts={[about.source]} />
 
@@ -97,6 +105,7 @@ export default function AboutScreen() {
 }
 
 function Section({ title, texts, children }: { title: string; texts: string[]; children?: React.ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.section}>
       <Text style={[font.heading, styles.text]} accessibilityRole="header">
@@ -112,10 +121,12 @@ function Section({ title, texts, children }: { title: string; texts: string[]; c
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: spacing.lg },
-  section: { gap: spacing.sm },
+const useStyles = createThemedStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
+  content: { padding: spacing.md, gap: spacing.md },
+  // D36: seções separadas por divisória fina, com o mesmo espaço em cima e embaixo.
+  section: { gap: spacing.sm, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: c.border },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
-  text: { color: colors.text },
-});
+  text: { color: c.text },
+  muted: { color: c.textMuted },
+}));
