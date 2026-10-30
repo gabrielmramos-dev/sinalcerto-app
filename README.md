@@ -181,6 +181,19 @@ comportamento das telas.
 | Pedro Henrique Maia Jordão | Desenvolvedor (Time de Desenvolvimento) |
 | Leonardo Vitale dos Santos | Desenvolvedor (Time de Desenvolvimento) |
 
+## Integração com as disciplinas
+
+| Disciplina | Contribuição para o SinalCerto |
+|---|---|
+| Programação para Dispositivos Móveis | O aplicativo (React Native + Expo), alinhado aos ODS 9 e 10. |
+| Análise e Projeto de Sistemas II | Sprints em Scrum, documentos de visão e casos de uso, testes e cobertura. |
+| Estrutura de Dados | O modelo preditivo e os dados (medições do RIPE Atlas) entregues pela Internet Quality API. |
+| Redes de Computadores | Os conceitos que o app traduz: latência (RTT), perda de pacotes e as faixas OK, Risco e Falha. Para o vídeo da disciplina, montamos a rede de uma clínica municipal no Cisco Packet Tracer: 3 VLANs (Administrativo, Consultórios e Visitantes), servidores DHCP, DNS e Web, Wi-Fi para visitantes e um roteador interligando os setores. |
+
+<p align="center"><img src="docs/redes/rede-clinica.png" width="800" alt="Topologia da rede da clínica no Packet Tracer"></p>
+
+- **Arquivo da rede (Packet Tracer):** [`docs/redes/rede-clinica.pkt`](docs/redes/rede-clinica.pkt)
+
 ## Limitações
 
 - **Datas:** os dados da API cobrem só um dia, de 19/08/2026 21h a 20/08/2026 20h (horário de
